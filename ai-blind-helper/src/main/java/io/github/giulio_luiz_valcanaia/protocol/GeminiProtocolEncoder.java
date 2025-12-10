@@ -1,4 +1,4 @@
-package io.github.giulio_luiz_valcanaia;
+package io.github.giulio_luiz_valcanaia.protocol;
 
 import org.json.JSONObject;
 import java.util.Base64;

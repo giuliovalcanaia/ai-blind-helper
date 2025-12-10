@@ -2,7 +2,15 @@ package io.github.giulio_luiz_valcanaia;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
+
+import javax.swing.SwingUtilities;
+
+import io.github.giulio_luiz_valcanaia.client.GeminiLiveClient;
+import io.github.giulio_luiz_valcanaia.config.provider.ClientProvider;
+import io.github.giulio_luiz_valcanaia.config.provider.ControllerProvider;
+import io.github.giulio_luiz_valcanaia.input.KeyboardListener;
 
 public class Main {
     private static final String PROPERTIES_FILE = "config.properties";
@@ -10,7 +18,20 @@ public class Main {
     private static final String HOST = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent";
 
     public static void main(String[] args) {
+
         String apiKey = loadApiKey();
+        URI uri;
+        try { 
+            uri = new URI(HOST + "?key=" + apiKey); 
+        } catch (URISyntaxException e) {
+            System.err.println("FATAL ERROR: Invalid host or API key caused URI syntax error.");
+            e.printStackTrace();
+            System.exit(1);
+            return;
+        }
+
+        ClientProvider clientProvider = new ClientProvider(uri);
+        ControllerProvider controllerProvider = new ControllerProvider(clientProvider);
 
         // Check if API key was loaded successfully
         if (apiKey == null) {
@@ -19,15 +40,13 @@ public class Main {
             return;
         }
         
-        try {
-            // Append API key to the websocket URL
-            URI uri = new URI(HOST + "?key=" + apiKey);
-            GeminiLiveClient client = new GeminiLiveClient(uri);
-            System.out.println("[DEBUG: Main] Client created");
-            client.connect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        GeminiLiveClient client = clientProvider.getGeminiLiveClient();
+        System.out.println("[DEBUG: Main] Client created");
+        client.connect();
+
+        // After connect, the keyboard listener is instanciated
+        SwingUtilities.invokeLater(() -> new KeyboardListener(controllerProvider.getInputController()));
+
     }
 
     /**

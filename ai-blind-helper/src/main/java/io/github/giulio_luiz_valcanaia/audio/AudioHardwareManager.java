@@ -1,4 +1,4 @@
-package io.github.giulio_luiz_valcanaia;
+package io.github.giulio_luiz_valcanaia.audio;
 
 import javax.sound.sampled.*;
 import java.io.Closeable;

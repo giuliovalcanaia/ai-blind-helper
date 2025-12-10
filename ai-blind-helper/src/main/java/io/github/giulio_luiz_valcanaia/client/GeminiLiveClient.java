@@ -1,15 +1,17 @@
-package io.github.giulio_luiz_valcanaia;
+package io.github.giulio_luiz_valcanaia.client;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+
+import io.github.giulio_luiz_valcanaia.audio.AudioHardwareManager;
+import io.github.giulio_luiz_valcanaia.protocol.GeminiProtocolEncoder;
+import io.github.giulio_luiz_valcanaia.protocol.GeminiResponseProcessor;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Responsibility: Manage the WebSocket connection lifecycle and coordinate
@@ -21,10 +23,9 @@ public class GeminiLiveClient extends WebSocketClient {
     private final GeminiProtocolEncoder encoder;
     private final GeminiResponseProcessor processor;
 
-    // Executor for handling microphone audio sending loop
-    private final ScheduledExecutorService microphoneExecutor = Executors.newSingleThreadScheduledExecutor();
+    private Thread audioThread = null;
 
-    private volatile boolean isRunning = true;
+    private volatile boolean isRunning = true; // Flag that is just used on the loop for mic reading
     private static final int BUFFER_SIZE = 1024; // Increased for driver compatibility
 
     public GeminiLiveClient(URI serverUri) throws LineUnavailableException {
@@ -48,11 +49,6 @@ public class GeminiLiveClient extends WebSocketClient {
         System.out.println("[DEBUG: GeminiLiveClient] Sending initial SETUP message:");
         System.out.println("[DEBUG: GeminiLiveClient] SetupMessage: " + setupMessage);
         send(setupMessage);
-
-        // Start audio capture and microphone sending thread
-        audioManager.startCapture();
-
-        Executors.newSingleThreadExecutor().execute(this::microphoneSendLoopWithSleep);
     }
 
     /**
@@ -88,9 +84,7 @@ public class GeminiLiveClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         System.out.println("\n[DEBUG: GeminiLiveClient] CONNECTION CLOSED. Code: " + code + ", Reason: " + reason);
-        isRunning = false;
-        microphoneExecutor.shutdownNow();
-
+        
         try {
             audioManager.close();
         } catch (IOException e) {
@@ -149,4 +143,46 @@ public class GeminiLiveClient extends WebSocketClient {
             this.close();
         }
     }
+
+    public void startAudioCapture() {
+        // Previne a criação de múltiplas threads se já estiver rodando
+        if (isRunning || (audioThread != null && audioThread.isAlive())) {
+            System.out.println("[WARN: GeminiLiveClient] Audio capture already running.");
+            return;
+        }
+
+        // 1. Inicia a captura de hardware (recurso caro)
+        audioManager.startCapture();
+        
+        // 2. Define a flag e inicia a thread do loop
+        isRunning = true;
+        audioThread = new Thread(this::microphoneSendLoopWithSleep, "MicrophoneSendThread");
+        audioThread.start();
+        System.out.println("[DEBUG: GeminiLiveClient] Audio capture started.");
+    }
+
+    public void stopAudioCapture() {
+        if (!isRunning) {
+            return;
+        }
+        
+        System.out.println("[DEBUG: GeminiLiveClient] Attempting to stop audio capture and thread.");
+
+        // 1. Define a flag para sair do loop 'while'
+        isRunning = false;
+        
+        // 2. Para a captura de hardware (libera recurso caro)
+        audioManager.stopCapture(); 
+
+        // 3. Interrompe a thread caso ela esteja em Thread.sleep(200)
+        if (audioThread != null && audioThread.isAlive()) {
+            audioThread.interrupt();
+        }
+        
+        // Limpa a referência da thread
+        audioThread = null;
+        
+        System.out.println("[DEBUG: GeminiLiveClient] Audio capture stopped.");
+    }
+    
 }

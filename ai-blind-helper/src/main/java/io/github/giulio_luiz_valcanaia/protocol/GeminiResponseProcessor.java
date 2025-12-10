@@ -1,7 +1,9 @@
-package io.github.giulio_luiz_valcanaia;
+package io.github.giulio_luiz_valcanaia.protocol;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import io.github.giulio_luiz_valcanaia.audio.AudioHardwareManager;
 
 import java.util.Base64;
 
