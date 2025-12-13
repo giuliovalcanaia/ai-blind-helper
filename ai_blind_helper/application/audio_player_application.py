@@ -2,6 +2,7 @@ import asyncio
 from manager import InputAudioManager
 from reader import WavReader
 from config import Config
+import time
 
 class AudioPlayerApplication:
     def __init__(self):
@@ -11,18 +12,43 @@ class AudioPlayerApplication:
             target_channels=Config.CHANNELS
         )
 
-    async def task_capture_audio(self, out_queue: asyncio.Queue):
-        """Lê do Mic e joga na fila de saída (para o Gemini)"""
+    async def task_capture_audio(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
+        """
+        Lê do Mic e joga na fila de saída.
+        Pausa a leitura se control_event estiver false (clear), mas mantém mic aberto.
+        """
         self.audio_service.start_input_stream()
-        print(" -> [AudioApp] Microfone Iniciado.")
+        print(" -> [AudioApp] Microfone Iniciado (Hardware ON).")
+        print(f"DEBUG: Task Event ID: {id(control_event)}")
+        
         try:
             while True:
+
+                if not control_event.is_set():
+                    print("🔴 [Audio] Evento está FALSE. Vou parar e esperar...")
+                # --- PONTO DE CONTROLE ---
+                # Se o evento estiver .clear(), o código PARA aqui e aguarda.
+                # O loop não consome CPU e não lê dados do buffer enquanto espera.
+                await control_event.wait()
+                
+                # Se passar daqui, significa que o evento está True
+                # Vamos imprimir apenas 1 vez a cada ~20 chunks para não floodar o terminal
+                if int(time.time()) % 2 == 0: 
+                    print("🟢 [Audio] Processando... (Fluxo liberado)", end="\r")
+
                 # Executa operação bloqueante em thread separada
                 data = await asyncio.to_thread(self.audio_service.read_chunk)
+                
+                # Envia para o Gemini
                 await out_queue.put({"data": data, "mime_type": "audio/pcm"})
+
+        except asyncio.CancelledError:
+            print(" -> [AudioApp] Tarefa de captura cancelada.")
         finally:
-            # Opcional: pausar stream
-            pass
+            # Aqui sim, ao encerrar o app, fechamos o hardware
+            # (assumindo que você tenha um método stop_stream no seu service)
+            self.audio_service.close() 
+            pass 
 
     async def task_play_audio(self, input_queue: asyncio.Queue):
         """Lê da fila de entrada (do Gemini ou Relógio) e toca no Speaker"""

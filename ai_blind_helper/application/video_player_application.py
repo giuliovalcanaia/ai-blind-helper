@@ -13,42 +13,61 @@ class VideoPlayerApplication:
         else:
             print(f" -> [VideoApp] Modo desconhecido: {mode}")
 
-    async def task_capture_video(self, out_queue: asyncio.Queue):
-        """Captura frames e joga na fila de saída (para o Gemini)"""
+    
+    async def task_capture_video(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
+        """
+        Captura frames e joga na fila.
+        Pausa o envio se control_event estiver false, mas mantém câmera aberta.
+        """
         if not self.video_source: 
+            print(" -> [VideoApp] ERRO: Fonte de vídeo não detectada.")
             return
             
-        print(" -> [VideoApp] Captura de Vídeo Iniciada.")
+        print(" -> [VideoApp] Captura de Vídeo Iniciada (Hardware ON).")
         
         # CONFIGURAÇÃO DE FPS
-        TARGET_FPS = 2  # 2 frames por segundo é excelente para estabilidade
+        TARGET_FPS = 2  # 2 frames por segundo
         FRAME_DELAY = 1.0 / TARGET_FPS
 
-        while True:
-            start_time = time.time()
+        try:
+            while True:
+                # --- PONTO DE CONTROLE ---
+                # Se o evento estiver false, trava aqui.
+                # Como a câmera continua aberta, ao liberar (set), 
+                # a captura volta instantaneamente.
+                await control_event.wait()
 
-            # 1. Captura (Pesado - roda em Thread)
-            frame_data = await asyncio.to_thread(self.video_source.get_frame)
-            if frame_data is None: 
-                break
+                start_time = time.time()
 
-            # 2. Gerenciamento de Fila (Drop frame se estiver acumulando)
-            # Se a fila tiver mais de 1 item, limpa tudo para mandar o mais recente
-            while not out_queue.empty():
-                try:
-                    out_queue.get_nowait()
-                    out_queue.task_done()
-                except asyncio.QueueEmpty:
+                # 1. Captura (Pesado - roda em Thread)
+                # Nota: Dependendo da câmera, pode haver buffer antigo acumulado enquanto estava pausado.
+                # Se notar "efeito fantasma" ao despausar, pode ser necessário ler alguns frames vazios aqui.
+                frame_data = await asyncio.to_thread(self.video_source.get_frame)
+                
+                if frame_data is None: 
+                    print(" -> [VideoApp] Frame vazio recebido (Câmera desconectada?).")
                     break
 
-            await out_queue.put(frame_data)
+                # 2. Gerenciamento de Fila (Drop frame se estiver acumulando)
+                # Fundamental para manter o vídeo "Live" e não com delay acumulado
+                while not out_queue.empty():
+                    try:
+                        out_queue.get_nowait()
+                        out_queue.task_done()
+                    except asyncio.QueueEmpty:
+                        break
 
-            # 3. Controle de Taxa (Sleep inteligente)
-            elapsed = time.time() - start_time
-            sleep_time = max(0, FRAME_DELAY - elapsed)
-            
-            # Pausa real para liberar a rede para o Ping/Pong do websocket
-            await asyncio.sleep(sleep_time) 
+                await out_queue.put(frame_data)
+
+                # 3. Controle de Taxa (Sleep inteligente)
+                elapsed = time.time() - start_time
+                sleep_time = max(0, FRAME_DELAY - elapsed)
+                
+                # Pausa real para liberar a rede/CPU
+                await asyncio.sleep(sleep_time)
+                
+        except asyncio.CancelledError:
+            print(" -> [VideoApp] Tarefa de vídeo cancelada.")
 
     def release(self):
         if self.video_source:

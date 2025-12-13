@@ -79,24 +79,36 @@ class MainController:
         print(f"[Comando] Tecla T: Hora ({duration:.2f}s)")
         asyncio.run_coroutine_threadsafe(self.play_current_time(), self.loop)
 
-    # --- NOVOS MÉTODOS DE CONTROLE DE FLUXO ---
+    # --- MÉTODOS DE CONTROLE DE FLUXO (ATUALIZADOS) ---
 
     def start_sending_audio_only(self):
-        """Libera apenas a captura de áudio."""
+        """Libera o fluxo de áudio."""
         print(">>> ATIVANDO: Apenas Áudio")
-        # Ativa áudio, garante que vídeo esteja travado (opcional, depende da lógica de troca)
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
+        # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
+        # self.loop.call_soon_threadsafe(self.start_video_event.clear) 
 
     def start_sending_audio_video(self):
-        """Libera captura de áudio E vídeo."""
+        """Libera o fluxo de áudio E vídeo."""
         print(">>> ATIVANDO: Áudio + Vídeo")
-        # Ativa ambos
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
         self.loop.call_soon_threadsafe(self.start_video_event.set)
 
-    def stop_session(self):
-        if self.session_task and not self.session_task.done() and self.loop:
-            self.loop.call_soon_threadsafe(self.session_task.cancel)
+    def stop_sending_audio(self):
+        """Pausa o envio de áudio (Hardware continua ligado, mas loop trava)."""
+        print(">>> PAUSANDO: Áudio")
+        self.loop.call_soon_threadsafe(self.start_audio_event.clear)
+
+    def stop_sending_video(self):
+        """Pausa o envio de vídeo (Hardware continua ligado, mas loop trava)."""
+        print(">>> PAUSANDO: Vídeo")
+        self.loop.call_soon_threadsafe(self.start_video_event.clear)
+
+    def stop_all_sending(self):
+        """Pausa tudo (modo mute/privacidade)."""
+        print(">>> PAUSANDO: Tudo")
+        self.stop_sending_audio()
+        self.stop_sending_video()
 
     # --- Gerenciamento da Sessão (Modificado) ---
 
@@ -128,19 +140,29 @@ class MainController:
                 try: self.out_queue.get_nowait()
                 except: pass
 
-    # --- WRAPPERS (O segredo está aqui) ---
+
+
+
+
+    # --- WRAPPERS (MODIFICADOS) ---
+    
+    # A MUDANÇA CRUCIAL ESTÁ AQUI: 
+    # Passamos o evento para dentro da task, em vez de esperar por ele fora.
 
     async def _audio_capture_wrapper(self):
-        """Aguarda o sinal antes de rodar a captura real de áudio."""
-        await self.start_audio_event.wait() # <--- TRAVA AQUI até start_sending_audio... ser chamado
-        print(">>> Iniciando loop de captura de ÁUDIO.")
-        await self.audio_app.task_capture_audio(self.out_queue)
+        print(">>> Inicializando loop de áudio (Aguardando flag...).")
+        print(f"DEBUG: Controller Event ID: {id(self.start_audio_event)}")
+        # Passamos o próprio evento (self.start_audio_event) para a função de captura
+        await self.audio_app.task_capture_audio(self.out_queue, self.start_audio_event)
 
     async def _video_capture_wrapper(self):
-        """Aguarda o sinal antes de rodar a captura real de vídeo."""
-        await self.start_video_event.wait() # <--- TRAVA AQUI até start_sending_audio_video ser chamado
-        print(">>> Iniciando loop de captura de VÍDEO.")
-        await self.video_app.task_capture_video(self.out_queue)
+        print(">>> Inicializando loop de vídeo (Aguardando flag...).")
+        # Passamos o próprio evento (self.start_video_event) para a função de captura
+        await self.video_app.task_capture_video(self.out_queue, self.start_video_event)
+        
+        
+        
+        
 
     # --- Funcionalidades Extras (Mantidas) ---
     async def play_current_time(self):
