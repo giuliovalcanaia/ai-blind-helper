@@ -1,6 +1,6 @@
 import evdev
 from manager import KeyboardManager
-import config
+from config import Config
 
 class KeyboardApplication:
     """
@@ -35,8 +35,8 @@ class KeyboardApplication:
     def _setup_bindings(self):
         """Registra as teclas no manager apontando para funções locais."""
         
-        # Exemplo 1: Tecla V (Ação imediata ao pressionar)
-        self.manager.register_key(evdev.ecodes.KEY_I, self.on_key_i)
+        # Exemplo 1: Tecla W (Ação imediata ao pressionar)
+        self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_w)
         
         # Exemplo 2: Tecla Q (Sair)
         self.manager.register_key(evdev.ecodes.KEY_Q, self.on_key_q)
@@ -52,7 +52,7 @@ class KeyboardApplication:
 
     # --- Tratamento dos Eventos ---
 
-    def on_key_i(self, event_type, duration):
+    def on_key_w(self, event_type, duration):
         # Lógica: Quero que aconteça assim que eu aperto (PRESS)
         if event_type == 'PRESS':
             print(">> [App] 'I' Pressionado. Iniciando toggle_connect...")
@@ -81,7 +81,7 @@ class KeyboardApplication:
                 # TODO: implementar função para parar envio de áudio
                 print("Audio finalizado com tecla A UNLOCK")
                 self.audio_pressed = False
-            elif duration < config.LOCK_THRESHOLD_MS_AUDIO:
+            elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
                 print("Modo Lock ativado")
                 self.audio_is_locked = True
             else:
@@ -100,7 +100,7 @@ class KeyboardApplication:
                 # TODO: implementar função para parar envio de video
                 print("Video finalizado com tecla A UNLOCK")
                 self.video_pressed = False
-            elif duration < config.LOCK_THRESHOLD_MS_VIDEO:
+            elif duration < Config.LOCK_THRESHOLD_MS_VIDEO:
                 print("Modo Lock ativado")
                 self.video_is_locked = True
             else:

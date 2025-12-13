@@ -82,7 +82,7 @@ class KeyboardManager:
             start_time = self.active_keys.pop(event.code, None)
             duration = 0.0
             if start_time:
-                duration = time.time() - start_time
+                duration = (time.time() - start_time) * 1000
             
             # Notifica a App que foi solto com a duração calculada
             callback(event_type='RELEASE', duration=duration)
