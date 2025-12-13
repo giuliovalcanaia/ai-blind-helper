@@ -180,7 +180,7 @@ class MainController:
         )
 
         print("=== Aplicação Pronta ===")
-        print(" [I] Conectar WebSocket (Idle)")
+        print(" [W] Conectar WebSocket (Idle)")
         print(" [A] Iniciar captura de áudio")
         print(" [V] Iniciar captura de áudio e vídeo") 
         print(" [T] Falar horas")

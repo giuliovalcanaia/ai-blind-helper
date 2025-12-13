@@ -14,41 +14,59 @@ class AudioPlayerApplication:
 
     async def task_capture_audio(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
         """
-        Lê do Mic e joga na fila de saída.
-        Pausa a leitura se control_event estiver false (clear), mas mantém mic aberto.
+        Lê do Mic e joga na fila. 
+        Pausa lógica sem fechar hardware, com limpeza de buffer ao retomar.
         """
         self.audio_service.start_input_stream()
+        print(f"DEBUG: Task Event ID: {id(control_event)}") 
         print(" -> [AudioApp] Microfone Iniciado (Hardware ON).")
-        print(f"DEBUG: Task Event ID: {id(control_event)}")
+        
+        chunk_size = 1024 # Ou o valor que você usa no config
         
         try:
             while True:
-
+                # 1. VERIFICAÇÃO DE PAUSA
                 if not control_event.is_set():
-                    print("🔴 [Audio] Evento está FALSE. Vou parar e esperar...")
-                # --- PONTO DE CONTROLE ---
-                # Se o evento estiver .clear(), o código PARA aqui e aguarda.
-                # O loop não consome CPU e não lê dados do buffer enquanto espera.
-                await control_event.wait()
-                
-                # Se passar daqui, significa que o evento está True
-                # Vamos imprimir apenas 1 vez a cada ~20 chunks para não floodar o terminal
-                if int(time.time()) % 2 == 0: 
-                    print("🟢 [Audio] Processando... (Fluxo liberado)", end="\r")
+                    print("🔴 [Audio] Pausado (Aguardando)...")
+                    await control_event.wait()
+                    print("🟢 [Audio] Retomando capturas...")
 
-                # Executa operação bloqueante em thread separada
+                    # --- 2. LIMPEZA DE BUFFER (O SEGREDO) ---
+                    # Ao acordar, o buffer do OS está cheio de áudio "velho" (do tempo que ficou pausado).
+                    # Precisamos ler tudo e jogar fora para ficar "Live" novamente.
+                    try:
+                        # Tenta rodar em thread para não travar o loop principal enquanto limpa
+                        await asyncio.to_thread(self._flush_input_buffer)
+                    except Exception as e:
+                        print(f"⚠️ [Audio] Aviso ao limpar buffer: {e}")
+
+                # 3. LEITURA REAL
                 data = await asyncio.to_thread(self.audio_service.read_chunk)
                 
-                # Envia para o Gemini
+                # Envia
                 await out_queue.put({"data": data, "mime_type": "audio/pcm"})
 
         except asyncio.CancelledError:
-            print(" -> [AudioApp] Tarefa de captura cancelada.")
-        finally:
-            # Aqui sim, ao encerrar o app, fechamos o hardware
-            # (assumindo que você tenha um método stop_stream no seu service)
-            self.audio_service.close() 
-            pass 
+            print(" -> [AudioApp] Tarefa cancelada.")
+
+    def _flush_input_buffer(self):
+        """Lê todos os dados disponíveis no buffer e descarta."""
+        # Esta implementação depende da biblioteca que você usa (PyAudio vs SoundDevice).
+        # Exemplo genérico para PyAudio:
+        try:
+            # Verifica quantos frames tem parados no buffer
+            available = self.audio_service.input_stream.get_read_available()
+            if available > 0:
+                # Lê e joga no lixo
+                self.audio_service.input_stream.read(available, exception_on_overflow=False)
+                print(f"🧹 [Audio] Buffer limpo: {available} frames descartados.")
+        except AttributeError:
+            # Se sua classe audio_service não expõe o stream diretamente, 
+            # você pode apenas ler alguns chunks num loop rápido:
+            for _ in range(5): 
+                self.audio_service.read_chunk()
+        except Exception as e:
+            pass
 
     async def task_play_audio(self, input_queue: asyncio.Queue):
         """Lê da fila de entrada (do Gemini ou Relógio) e toca no Speaker"""

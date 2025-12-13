@@ -36,7 +36,7 @@ class KeyboardApplication:
         """Registra as teclas no manager apontando para funções locais."""
         
         # Exemplo 1: Tecla W (Ação imediata ao pressionar)
-        self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_i)
+        self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_w)
         
         # Exemplo 2: Tecla Q (Sair)
         self.manager.register_key(evdev.ecodes.KEY_Q, self.on_key_q)
@@ -52,10 +52,10 @@ class KeyboardApplication:
 
     # --- Tratamento dos Eventos ---
 
-    def on_key_i(self, event_type, duration):
+    def on_key_w(self, event_type, duration):
         # Lógica: Quero que aconteça assim que eu aperto (PRESS)
         if event_type == 'PRESS':
-            print(">> [App] 'I' Pressionado. Iniciando toggle_connect...")
+            print(">> [App] 'W' Pressionado. Iniciando toggle_connect...")
             self.controller.handle_toggle_connect()
 
     def on_key_t(self, event_type, duration):
@@ -91,7 +91,7 @@ class KeyboardApplication:
     def on_key_v(self, event_type, duration):
         if event_type == 'PRESS':
             if not self.video_pressed:
-                print("Video iniciado com tecla A, considerando a princípio como HOLD")
+                print("Video iniciado com tecla V, considerando a princípio como HOLD")
                 self.video_pressed = True
                 self.video_is_locked = False
                 self.controller.start_sending_audio_video()
@@ -101,7 +101,7 @@ class KeyboardApplication:
                     self.controller.stop_sending_video()
                 else:
                     self.controller.stop_all_sending()
-                print("Video finalizado com tecla A UNLOCK")
+                print("Video finalizado com tecla V UNLOCK")
                 self.video_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_VIDEO:
                 print("Modo Lock ativado")
