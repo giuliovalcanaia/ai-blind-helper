@@ -1,0 +1,2 @@
+class DescriptionApplication:
+    pass

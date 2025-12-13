@@ -27,12 +27,17 @@ class CameraSource(IVideoSource):
         if not ret:
             return None
 
+        # Reduzir resolução (640px é suficiente para a IA entender o contexto)
+        # O thumbnail anterior de 1024 era muito pesado
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = PIL.Image.fromarray(frame_rgb)
-        img.thumbnail([1024, 1024])
+        img.thumbnail([640, 640]) 
 
         image_io = io.BytesIO()
-        img.save(image_io, format="jpeg")
+        
+        # OTIMIZAÇÃO CRÍTICA: quality=50 (padrão é 75-95)
+        # optimize=True remove metadados inúteis
+        img.save(image_io, format="jpeg", quality=50, optimize=True)
         image_io.seek(0)
 
         return {

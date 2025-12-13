@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 
-class ClockService:
+class ClockApplication:
     def __init__(self, language="pt", base_dir="audio"):
         """
         Inicializa o serviço de relógio.

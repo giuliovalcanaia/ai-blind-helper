@@ -17,7 +17,12 @@ class Config:
     SEND_SAMPLE_RATE = 16000
     RECEIVE_SAMPLE_RATE = 24000
     CHUNK_SIZE = 1024
+    LOCK_THRESHOLD_MS_AUDIO = 500
+    LOCK_THRESHOLD_MS_VIDEO = 500
 
+    # Keyboard Settings
+    KEYBOARD_PATH = '/dev/input/event6'
+    
     # Gemini Config
     LIVE_CONFIG = types.LiveConnectConfig(
         response_modalities=["AUDIO"],

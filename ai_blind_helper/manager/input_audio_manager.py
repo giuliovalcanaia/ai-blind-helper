@@ -2,7 +2,7 @@ import pyaudio
 from config import Config
 
 
-class AudioService:
+class InputAudioManager:
     def __init__(self):
         self.pya = pyaudio.PyAudio()
         self.input_stream = None
