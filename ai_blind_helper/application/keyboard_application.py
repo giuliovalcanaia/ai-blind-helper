@@ -1,6 +1,6 @@
 import evdev
 from manager import KeyboardManager
-import config
+from config import Config
 
 class KeyboardApplication:
     """
@@ -35,8 +35,8 @@ class KeyboardApplication:
     def _setup_bindings(self):
         """Registra as teclas no manager apontando para funções locais."""
         
-        # Exemplo 1: Tecla V (Ação imediata ao pressionar)
-        self.manager.register_key(evdev.ecodes.KEY_I, self.on_key_i)
+        # Exemplo 1: Tecla W (Ação imediata ao pressionar)
+        self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_w)
         
         # Exemplo 2: Tecla Q (Sair)
         self.manager.register_key(evdev.ecodes.KEY_Q, self.on_key_q)
@@ -52,7 +52,7 @@ class KeyboardApplication:
 
     # --- Tratamento dos Eventos ---
 
-    def on_key_i(self, event_type, duration):
+    def on_key_w(self, event_type, duration):
         # Lógica: Quero que aconteça assim que eu aperto (PRESS)
         if event_type == 'PRESS':
             print(">> [App] 'I' Pressionado. Iniciando toggle_connect...")
@@ -78,31 +78,34 @@ class KeyboardApplication:
                 self.controller.start_sending_audio_only()
         elif event_type == 'RELEASE':
             if (self.audio_is_locked):
-                # TODO: implementar função para parar envio de áudio
+                self.controller.stop_sending_audio_only()
                 print("Audio finalizado com tecla A UNLOCK")
                 self.audio_pressed = False
-            elif duration < config.LOCK_THRESHOLD_MS_AUDIO:
+            elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
                 print("Modo Lock ativado")
                 self.audio_is_locked = True
             else:
                 print("Modo hold funcionou e foi enviado")
-                # TODO: implementar função para parar envio de áudio
+                self.controller.stop_sending_audio_only()
+                self.audio_pressed = False
+                
         
     def on_key_v(self, event_type, duration):
         if event_type == 'PRESS':
             if not self.video_pressed:
-                print("Video iniciado com tecla A, considerando a princípio como HOLD")
+                print("Video iniciado com tecla V, considerando a princípio como HOLD")
                 self.video_pressed = True
                 self.video_is_locked = False
-                self.controller.start_sending_audio_only()
+                self.controller.start_sending_audio_video()
         elif event_type == 'RELEASE':
             if (self.video_is_locked):
-                # TODO: implementar função para parar envio de video
-                print("Video finalizado com tecla A UNLOCK")
+                self.controller.stop_sending_audio_video()
+                print("Video finalizado com tecla V UNLOCK")
                 self.video_pressed = False
-            elif duration < config.LOCK_THRESHOLD_MS_VIDEO:
+            elif duration < Config.LOCK_THRESHOLD_MS_VIDEO:
                 print("Modo Lock ativado")
                 self.video_is_locked = True
             else:
                 print("Modo hold funcionou e foi enviado")
-                # TODO: implementar função para parar envio de video
+                self.controller.stop_sending_audio_video()
+                self.video_pressed = False 

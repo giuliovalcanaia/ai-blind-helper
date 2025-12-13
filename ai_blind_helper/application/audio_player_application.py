@@ -21,8 +21,8 @@ class AudioPlayerApplication:
                 data = await asyncio.to_thread(self.audio_service.read_chunk)
                 await out_queue.put({"data": data, "mime_type": "audio/pcm"})
         finally:
-            # Opcional: pausar stream
-            pass
+            # ISSO É CRUCIAL:
+            self.audio_service.closeInputs()
 
     async def task_play_audio(self, input_queue: asyncio.Queue):
         """Lê da fila de entrada (do Gemini ou Relógio) e toca no Speaker"""

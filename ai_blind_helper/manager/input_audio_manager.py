@@ -42,3 +42,8 @@ class InputAudioManager:
             self.output_stream.stop_stream()
             self.output_stream.close()
         self.pya.terminate()
+
+    def closeInputs(self):
+        if self.input_stream:
+            self.input_stream.stop_stream()
+            self.input_stream.close()
