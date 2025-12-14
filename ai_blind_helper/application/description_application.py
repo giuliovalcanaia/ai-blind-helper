@@ -6,10 +6,7 @@ from typing import Optional
 from manager import CameraSource 
 
 class DescriptionApplication:
-    def __init__(self, camera_index=0):
-        # Instancia o manager da câmera
-        self.camera_manager = CameraSource(camera_index=camera_index)
-        
+    def __init__(self):
         # Prompt que instrui a IA sobre o que fazer com a imagem
         self.prompt = "Analise a imagem capturada agora e descreva detalhadamente o ambiente, objetos e contexto."
 

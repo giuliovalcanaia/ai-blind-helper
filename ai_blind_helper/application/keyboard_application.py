@@ -52,6 +52,9 @@ class KeyboardApplication:
         
         # Exemplo 6: Tecla D (Ação baseada em press)
         self.manager.register_key(evdev.ecodes.KEY_D, self.on_key_d)
+        
+        # Exemplo 7: Tecla R (Ação baseada em press)
+        self.manager.register_key(evdev.ecodes.KEY_R, self.on_key_r)
 
     # --- Tratamento dos Eventos ---
 
@@ -65,10 +68,10 @@ class KeyboardApplication:
         # Lógica: Quero que aconteça quando solto (RELEASE) e preciso do tempo
         if event_type == 'RELEASE':
             if (duration > Config.LOCK_THRESHOLD_MS_DATE):
-                print(f">> [App] 'T' Solto após {duration:.2f}s. Dizendo data...")
+                print(f">> [App] 'T' Solto após {duration:.2f}ms. Dizendo data...")
                 self.controller.handle_date_request()
             else:
-                print(f">> [App] 'T' Solto após {duration:.2f}s. Dizendo horas...")
+                print(f">> [App] 'T' Solto após {duration:.2f}ms. Dizendo horas...")
                 self.controller.handle_time_request()
 
     def on_key_q(self, event_type, duration):
@@ -125,3 +128,7 @@ class KeyboardApplication:
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':
             self.controller.handle_description_request()
+
+    def on_key_r(self, event_type, duration):
+        if event_type == 'PRESS':
+            self.controller.handle_transcription_request()

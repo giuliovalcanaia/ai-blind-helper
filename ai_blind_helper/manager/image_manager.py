@@ -31,7 +31,7 @@ class CameraSource(IVideoSource):
         # O thumbnail anterior de 1024 era muito pesado
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = PIL.Image.fromarray(frame_rgb)
-        img.thumbnail([640, 640]) 
+        # img.thumbnail([640, 640])  É USADO PARA DEIFINIR O TAMANHO DA CAPTURA, DO FRAME
 
         image_io = io.BytesIO()
         
