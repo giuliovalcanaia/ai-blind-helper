@@ -97,7 +97,8 @@ class KeyboardApplication:
                 self.controller.start_sending_audio_video()
         elif event_type == 'RELEASE':
             if (self.video_is_locked):
-                if (self.audio_is_locked() or self.audio_pressed):
+                if (self.audio_is_locked or self.audio_pressed):
+                    print("Parando de enviar apenas vídeo, pois audio está ativo")
                     self.controller.stop_sending_video()
                 else:
                     self.controller.stop_all_sending()
@@ -111,4 +112,5 @@ class KeyboardApplication:
                 if (self.audio_is_locked or self.audio_pressed):
                     self.controller.stop_sending_video()
                 else:
+                    print("Parande enviar apenas vídeo, pois audio está ativo")
                     self.controller.stop_all_sending()
