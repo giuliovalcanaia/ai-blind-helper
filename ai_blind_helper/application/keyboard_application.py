@@ -8,23 +8,63 @@ class KeyboardApplication:
     - Conectar com o Controller
     - Definir QUAIS teclas fazem O QUE
     - Tratar a lógica (se deve agir no press ou no release)
+    - Gerenciar o Menu Rolável
     """
+    
+    # --- Configuração das Teclas de Navegação do Menu ---
+    # Altere aqui para os códigos do seu hardware se necessário
+    KEY_MENU_BACK = evdev.ecodes.KEY_LEFT
+    KEY_MENU_FORWARD = evdev.ecodes.KEY_RIGHT
+    KEY_MENU_CONFIRM = evdev.ecodes.KEY_ENTER
+
     def __init__(self, controller, device_path):
         self.controller = controller
         
-        # Instancia o manager
+        # Instancia o manager (sem modificações)
         self.manager = KeyboardManager(device_path)
         
-        # --- AQUI VOCÊ INICIA AS KEYS QUE SERÃO UTILIZADAS ---
-        self._setup_bindings()
+        # Estado do Menu
+        self.menu_index = 0
+        self.menu_active = True # Se quiser que o menu comece ativo
         
-        
+        # --- Configuração do Dicionário do Menu (W, D, R, Q) ---
+        self._setup_menu_structure()
+
         # Variáveis para controle do hold e lock de audio e video
         self.audio_is_locked = False
         self.audio_pressed = False
         self.video_is_locked = False
         self.video_pressed = False
 
+        # --- Inicia binds de teclas físicas ---
+        self._setup_bindings()
+
+    def _setup_menu_structure(self):
+        """
+        Define o dicionário e a ordem do menu rolável.
+        As chaves 'w', 'd', 'r', 'q' mapeiam para descrições e os callbacks existentes.
+        """
+        self.menu_actions = {
+            'w': {
+                'description': "Conectar / Desconectar",
+                'callback': self.on_key_w
+            },
+            'd': {
+                'description': "Descrever Ambiente",
+                'callback': self.on_key_d
+            },
+            'r': {
+                'description': "Ler / Transcrever",
+                'callback': self.on_key_r
+            },
+            'q': {
+                'description': "Sair do Sistema",
+                'callback': self.on_key_q
+            }
+        }
+        
+        # Lista ordenada para garantir a navegação: w -> d -> r -> q
+        self.menu_order = ['w', 'd', 'r', 'q']
 
     def start(self):
         self.manager.start()
@@ -33,39 +73,67 @@ class KeyboardApplication:
         self.manager.stop()
 
     def _setup_bindings(self):
-        """Registra as teclas no manager apontando para funções locais."""
+        """Registra as teclas no manager."""
         
-        # Exemplo 1: Tecla W (Ação imediata ao pressionar)
-        self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_w)
-        
-        # Exemplo 2: Tecla Q (Sair)
-        self.manager.register_key(evdev.ecodes.KEY_Q, self.on_key_q)
-        
-        # Exemplo 3: Tecla T (Ação baseada no tempo ao soltar)
-        self.manager.register_key(evdev.ecodes.KEY_T, self.on_key_t)
-        
-        # Exemplo 4: Tecla A (Ação baseada em hold / lock)
-        self.manager.register_key(evdev.ecodes.KEY_A, self.on_key_a)
+        # --- Teclas de Navegação do Menu ---
+        self.manager.register_key(self.KEY_MENU_BACK, self.on_menu_back)
+        self.manager.register_key(self.KEY_MENU_FORWARD, self.on_menu_forward)
+        self.manager.register_key(self.KEY_MENU_CONFIRM, self.on_menu_confirm)
 
-        # Exemplo 5: Tecla V (Ação baseada em hold / lock)
+        # --- Teclas de Acesso Direto (Mantidas conforme original) ---
+        self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_w)
+        self.manager.register_key(evdev.ecodes.KEY_Q, self.on_key_q)
+        self.manager.register_key(evdev.ecodes.KEY_T, self.on_key_t)
+        self.manager.register_key(evdev.ecodes.KEY_A, self.on_key_a)
         self.manager.register_key(evdev.ecodes.KEY_V, self.on_key_v)
-        
-        # Exemplo 6: Tecla D (Ação baseada em press)
         self.manager.register_key(evdev.ecodes.KEY_D, self.on_key_d)
-        
-        # Exemplo 7: Tecla R (Ação baseada em press)
         self.manager.register_key(evdev.ecodes.KEY_R, self.on_key_r)
 
-    # --- Tratamento dos Eventos ---
+    # --- Lógica do Menu Rolável ---
+
+    def _get_current_menu_item(self):
+        key_char = self.menu_order[self.menu_index]
+        return self.menu_actions[key_char]
+
+    def _announce_current_selection(self):
+        """
+        Feedback visual/auditivo ao navegar.
+        IMPORTANTE: Adicione aqui a chamada para o seu TTS (self.controller.falar(...))
+        """
+        item = self._get_current_menu_item()
+        msg = f">> [MENU] Selecionado: {item['description']} (Tecla virtual: {self.menu_order[self.menu_index].upper()})"
+        print(msg)
+        # Exemplo: self.controller.speak(item['description']) 
+
+    def on_menu_forward(self, event_type, duration):
+        if event_type == 'PRESS':
+            # Incrementa o índice com loop (volta ao 0 se passar do fim)
+            self.menu_index = (self.menu_index + 1) % len(self.menu_order)
+            self._announce_current_selection()
+
+    def on_menu_back(self, event_type, duration):
+        if event_type == 'PRESS':
+            # Decrementa o índice com loop (vai para o último se for < 0)
+            self.menu_index = (self.menu_index - 1) % len(self.menu_order)
+            self._announce_current_selection()
+
+    def on_menu_confirm(self, event_type, duration):
+        if event_type == 'PRESS':
+            item = self._get_current_menu_item()
+            print(f">> [MENU] Confirmando ação: {item['description']}")
+            
+            # Chama a função mapeada simulando um evento 'PRESS' com duração 0
+            # Isso reutiliza exatamente a lógica que você já programou abaixo.
+            item['callback'](event_type='PRESS', duration=0.0)
+
+    # --- Callbacks Originais (Lógica de Aplicação) ---
 
     def on_key_w(self, event_type, duration):
-        # Lógica: Quero que aconteça assim que eu aperto (PRESS)
         if event_type == 'PRESS':
-            print(">> [App] 'W' Pressionado. Iniciando toggle_connect...")
+            print(">> [App] 'W' Action Triggered. Toggle connect...")
             self.controller.handle_toggle_connect()
 
     def on_key_t(self, event_type, duration):
-        # Lógica: Quero que aconteça quando solto (RELEASE) e preciso do tempo
         if event_type == 'RELEASE':
             if (duration > Config.LOCK_THRESHOLD_MS_DATE):
                 print(f">> [App] 'T' Solto após {duration:.2f}ms. Dizendo data...")
@@ -75,60 +143,61 @@ class KeyboardApplication:
                 self.controller.handle_time_request()
 
     def on_key_q(self, event_type, duration):
-        # Lógica: Quero que aconteça assim que eu aperto (PRESS)
         if event_type == 'PRESS':
+            print(">> [App] 'Q' Action Triggered. Quitting...")
             self.controller.handle_quit()
             
     def on_key_a(self, event_type, duration):
         if event_type == 'PRESS':
             if not self.audio_pressed:
-                print("Audio iniciado com tecla A, considerando a princípio como HOLD")
+                print("Audio iniciado (A)")
                 self.audio_pressed = True
                 self.audio_is_locked = False
                 self.controller.start_sending_audio_only()
         elif event_type == 'RELEASE':
             if (self.audio_is_locked):
                 self.controller.stop_sending_audio()
-                print("Audio finalizado com tecla A UNLOCK")
+                print("Audio finalizado (A - UNLOCK)")
                 self.audio_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
-                print("Modo Lock ativado")
+                print("Audio Lock ativado")
                 self.audio_is_locked = True
             else:
-                print("Modo hold funcionou e foi enviado")
+                print("Audio Hold finalizado")
                 self.controller.stop_sending_audio() 
         
     def on_key_v(self, event_type, duration):
         if event_type == 'PRESS':
             if not self.video_pressed:
-                print("Video iniciado com tecla V, considerando a princípio como HOLD")
+                print("Video iniciado (V)")
                 self.video_pressed = True
                 self.video_is_locked = False
                 self.controller.start_sending_audio_video()
         elif event_type == 'RELEASE':
             if (self.video_is_locked):
                 if (self.audio_is_locked or self.audio_pressed):
-                    print("Parando de enviar apenas vídeo, pois audio está ativo")
+                    print("Parando vídeo, mantendo audio")
                     self.controller.stop_sending_video()
                 else:
                     self.controller.stop_all_sending()
-                print("Video finalizado com tecla V UNLOCK")
+                print("Video finalizado (V - UNLOCK)")
                 self.video_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_VIDEO:
-                print("Modo Lock ativado")
+                print("Video Lock ativado")
                 self.video_is_locked = True
             else:
-                print("Modo hold funcionou e foi enviado")
+                print("Video Hold finalizado")
                 if (self.audio_is_locked or self.audio_pressed):
                     self.controller.stop_sending_video()
                 else:
-                    print("Parande enviar apenas vídeo, pois audio está ativo")
                     self.controller.stop_all_sending()
                     
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':
+            print(">> [App] 'D' Action Triggered.")
             self.controller.handle_description_request()
 
     def on_key_r(self, event_type, duration):
         if event_type == 'PRESS':
+            print(">> [App] 'R' Action Triggered.")
             self.controller.handle_transcription_request()

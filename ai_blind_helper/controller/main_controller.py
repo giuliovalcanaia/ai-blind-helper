@@ -364,14 +364,19 @@ class MainController:
             self.audio_app.task_play_audio(self.audio_in_queue)
         )
 
-        print("=== Aplicação Pronta ===")
-        print(" [W] Conectar WebSocket (Idle)")
-        print(" [A] Iniciar captura de áudio")
-        print(" [V] Iniciar captura de áudio + vídeo") 
-        print(" [D] Descrever ambiente")
-        print(" [R] Reconhecer e transcrever texto")
-        print(" [T] Falar horas")
-        print(" [Q] Sair")
+        # --- MENU VISUAL ATUALIZADO ---
+        print("\n" + "="*45)
+        print("      SISTEMA AI-BLIND-HELPER ONLINE      ")
+        print("="*45)
+        print(" [NAVEGAÇÃO MENU ROLÁVEL]")
+        print("  < Esq >    : Navegar Anterior/Próximo")
+        print("  [ENTER]    : Confirmar Opção Selecionada")
+        print("-" * 45)
+        print(" [ATALHOS GLOBAIS]")
+        print("  [T]        : Data / Hora")
+        print("  [A]        : Hold Áudio (Trava com duplo toque)")
+        print("  [V]        : Hold Vídeo (Trava com duplo toque)")
+        print("="*45 + "\n") 
         
         while self.app_running:
             await asyncio.sleep(0.5)
