@@ -19,6 +19,7 @@ class Config:
     CHUNK_SIZE = 4096 
     LOCK_THRESHOLD_MS_AUDIO = 500
     LOCK_THRESHOLD_MS_VIDEO = 500
+    LOCK_THRESHOLD_MS_DATE = 500
 
     # Keyboard Settings
     KEYBOARD_PATH = '/dev/input/event6'

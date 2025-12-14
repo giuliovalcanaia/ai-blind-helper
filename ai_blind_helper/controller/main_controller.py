@@ -8,13 +8,15 @@ from application import (
     LiveClientApplication, 
     AudioPlayerApplication, 
     VideoPlayerApplication,
-    KeyboardApplication
+    KeyboardApplication,
+    DateApplication
 )
 
 class MainController:
     def __init__(self, video_mode):
         # 1. Instanciação dos Sub-Sistemas
-        self.clock_service = ClockApplication(language="pt")
+        self.clock_app = ClockApplication(language="pt")
+        self.date_app = DateApplication(language="pt")
         self.gemini_client = LiveClientApplication()
         
         # Audio e Video
@@ -74,10 +76,13 @@ class MainController:
         self.app_running = False
         self.stop_session()
 
-    def handle_time_request(self, duration=0):
+    def handle_time_request(self):
         if self.loop is None: return
-        print(f"[Comando] Tecla T: Hora ({duration:.2f}s)")
         asyncio.run_coroutine_threadsafe(self.play_current_time(), self.loop)
+
+    def handle_date_request(self):
+        if self.loop is None: return
+        asyncio.run_coroutine_threadsafe(self.play_current_date(), self.loop)
 
     # --- MÉTODOS DE CONTROLE DE FLUXO (START) ---
 
@@ -166,7 +171,12 @@ class MainController:
 
     # --- Funcionalidades Extras ---
     async def play_current_time(self):
-        path = await asyncio.to_thread(self.clock_service.get_current_time_audio_path)
+        path = await asyncio.to_thread(self.clock_app.get_current_time_audio_path)
+        if path:
+            asyncio.create_task(self.audio_app.play_file(path, self.audio_in_queue, self.loop))
+
+    async def play_current_date(self):
+        path = await asyncio.to_thread(self.date_app.get_current_date_audio_path)
         if path:
             asyncio.create_task(self.audio_app.play_file(path, self.audio_in_queue, self.loop))
 

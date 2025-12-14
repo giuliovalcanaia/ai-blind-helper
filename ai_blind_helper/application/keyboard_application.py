@@ -61,8 +61,12 @@ class KeyboardApplication:
     def on_key_t(self, event_type, duration):
         # Lógica: Quero que aconteça quando solto (RELEASE) e preciso do tempo
         if event_type == 'RELEASE':
-            print(f">> [App] 'T' Solto após {duration:.2f}s. Enviando tempo...")
-            self.controller.handle_time_request(duration)
+            if (duration > Config.LOCK_THRESHOLD_MS_DATE):
+                print(f">> [App] 'T' Solto após {duration:.2f}s. Dizendo data...")
+                self.controller.handle_date_request()
+            else:
+                print(f">> [App] 'T' Solto após {duration:.2f}s. Dizendo horas...")
+                self.controller.handle_time_request()
 
     def on_key_q(self, event_type, duration):
         # Lógica: Quero que aconteça assim que eu aperto (PRESS)
