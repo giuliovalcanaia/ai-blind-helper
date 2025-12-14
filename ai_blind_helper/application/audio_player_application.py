@@ -1,125 +1,136 @@
 import asyncio
-import wave
-import os
-import time
-from datetime import datetime
-from manager import InputAudioManager, OutputAudioManager
-from reader import WavReader
+import pyaudio
 from config import Config
-
 
 class AudioPlayerApplication:
     def __init__(self):
-        self.audio_input_manager = InputAudioManager()
-        self.audio_output_manager = OutputAudioManager()
-        self.wav_reader = WavReader(
-            target_rate=Config.RECEIVE_SAMPLE_RATE,
-            target_channels=Config.CHANNELS
+        self.pya = pyaudio.PyAudio()
+        self.output_stream = None
+        self._init_stream()
+        
+        # --- Lógica de Controle de Playback ---
+        self.audio_buffer = bytearray() # Armazena todo o áudio da resposta atual
+        self.cursor = 0                 # Onde estamos tocando agora (em bytes)
+        self.is_paused = False
+        
+        # Constantes para navegação (Calculadas baseadas no Config)
+        # Ex: 24000Hz * 1 canal * 2 bytes (16bit) = 48000 bytes/seg
+        self.BYTES_PER_SECOND = Config.RECEIVE_SAMPLE_RATE * Config.CHANNELS * 2 
+
+    def _init_stream(self):
+        """Inicializa o stream do PyAudio"""
+        if self.output_stream:
+            self.output_stream.close()
+            
+        self.output_stream = self.pya.open(
+            format=Config.AUDIO_FORMAT,
+            channels=Config.CHANNELS,
+            rate=Config.RECEIVE_SAMPLE_RATE,
+            output=True,
         )
-        # Configuração base
-        self.base_debug_folder = "gravacoes_debug"
-
-    async def task_capture_audio(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
-        """
-        Lê do Mic e realiza três ações simultâneas:
-        1. Salva no arquivo 'completo'.
-        2. Salva cada pedaço em um arquivo individual na pasta 'chunks'.
-        3. Envia para a fila da IA.
-        """
-        self.audio_input_manager.start_input_stream()
-        print(" -> [AudioApp] Microfone Iniciado.")
-
-        # --- PREPARAÇÃO DAS PASTAS DESTA SESSÃO ---
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        session_dir = os.path.join(
-            self.base_debug_folder, f"sessao_{timestamp}")
-        chunks_dir = os.path.join(session_dir, "chunks")
-
-        os.makedirs(chunks_dir, exist_ok=True)
-        print(f"🎙️ [Audio] Salvando debug completo e chunks em: {session_dir}")
-
-        full_filename = os.path.join(session_dir, "full_recording.wav")
-        chunk_counter = 0
-
-        try:
-            # Abre o arquivo "PAI" (Gravação contínua)
-            with wave.open(full_filename, 'wb') as wf_full:
-                self._setup_wav_header(wf_full)
-
-                while True:
-                    # 1. PAUSA / RESUME
-                    if not control_event.is_set():
-                        print("🔴 [Audio] Pausado...")
-                        await control_event.wait()
-                        print("🟢 [Audio] Retomando...")
-                        try:
-                            await asyncio.to_thread(self._flush_input_buffer)
-                        except Exception:
-                            pass
-
-                    # 2. LEITURA DO HARDWARE
-                    data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
-
-                    if data:
-                        # --- A: Salva no arquivo contínuo ---
-                        wf_full.writeframes(data)
-
-                        # --- B: Salva o Chunk isolado (EXATAMENTE como a IA recebe) ---
-                        chunk_filename = os.path.join(
-                            chunks_dir, f"chunk_{chunk_counter:05d}.wav")
-                        # Atenção: Abrir e fechar arquivos em loop é custoso (IO),
-                        # mas necessário para isolar os arquivos.
-                        with wave.open(chunk_filename, 'wb') as wf_chunk:
-                            self._setup_wav_header(wf_chunk)
-                            wf_chunk.writeframes(data)
-
-                        chunk_counter += 1
-
-                        # --- C: Envia para a IA ---
-                        await out_queue.put({"data": data, "mime_type": "audio/pcm"})
-
-        except asyncio.CancelledError:
-            print(" -> [AudioApp] Cancelado. Arquivos fechados com sucesso.")
-        except Exception as e:
-            print(f" -> [AudioApp] Erro fatal: {e}")
-
-    def _setup_wav_header(self, wav_file):
-        """Configura o cabeçalho WAV padrão para evitar repetição de código"""
-        wav_file.setnchannels(Config.CHANNELS)
-        wav_file.setsampwidth(2)  # 16-bit PCM
-        wav_file.setframerate(Config.RECEIVE_SAMPLE_RATE)
-
-    def _flush_input_buffer(self):
-        """Limpeza de buffer ao retomar pause"""
-        try:
-            available = self.audio_input_manager.input_stream.get_read_available()
-            if available > 0:
-                self.audio_input_manager.input_stream.read(
-                    available, exception_on_overflow=False)
-        except:
-            pass
-
-    # ... (Restante dos métodos task_play_audio e play_file permanecem iguais)
 
     async def task_play_audio(self, input_queue: asyncio.Queue):
-        self.audio_output_manager.start_output_stream()
-        try:
-            while True:
-                bytestream = await input_queue.get()
-                await asyncio.to_thread(self.audio_output_manager.write_chunk, bytestream)
-                input_queue.task_done()
-        except asyncio.CancelledError:
-            pass
+        """
+        Tarefa principal: Consome a fila (ingestão) E toca o buffer (playback).
+        Roda dois loops simultâneos via asyncio.gather ou tarefas background.
+        """
+        # Limpa o buffer ao iniciar uma nova sessão de escuta
+        self.reset_buffer()
+        
+        # Cria duas tarefas: uma para encher o buffer, outra para tocar
+        ingest_task = asyncio.create_task(self._buffer_ingestion_loop(input_queue))
+        playback_task = asyncio.create_task(self._playback_loop())
+        
+        await asyncio.gather(ingest_task, playback_task)
 
-    async def play_file(self, file_path: str, target_queue: asyncio.Queue, loop):
-        """Lê um arquivo WAV e injeta os chunks na fila de áudio para ser tocado"""
-        def process_file():
-            # Lê o arquivo e joga na fila usando threadsafe pois roda em thread
-            for chunk in self.wav_reader.read_chunks(file_path):
-                loop.call_soon_threadsafe(
-                    target_queue.put_nowait, chunk)
-        await asyncio.to_thread(process_file)
+    async def _buffer_ingestion_loop(self, input_queue: asyncio.Queue):
+        """Lê da fila do Gemini e anexa ao buffer interno."""
+        while True:
+            try:
+                chunk = await input_queue.get()
+                if chunk:
+                    self.audio_buffer.extend(chunk)
+                input_queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                print(f"[Audio Error] Ingestão falhou: {e}")
+                break
+
+    async def _playback_loop(self):
+        """Lê do buffer interno baseando-se no cursor e envia para o falante."""
+        chunk_size = Config.CHUNK_SIZE
+        
+        while True:
+            # 1. Se estiver pausado, apenas espera
+            if self.is_paused:
+                await asyncio.sleep(0.1)
+                continue
+
+            # 2. Verifica se temos dados para tocar a partir do cursor
+            buffer_len = len(self.audio_buffer)
+            
+            if self.cursor < buffer_len:
+                # Calcula o pedaço a tocar
+                end_pos = min(self.cursor + chunk_size, buffer_len)
+                data_chunk = self.audio_buffer[self.cursor : end_pos]
+                
+                # Envia para o hardware (bloqueante mas rápido o suficiente)
+                # Rodamos em thread separada para não travar o loop async se o buffer do SO encher
+                await asyncio.to_thread(self._write_to_stream, data_chunk)
+                
+                # Avança o cursor
+                self.cursor = end_pos
+            else:
+                # Se chegamos ao fim do buffer (e a stream ainda está ativa), esperamos mais dados
+                await asyncio.sleep(0.01)
+
+    def _write_to_stream(self, data):
+        if self.output_stream:
+            self.output_stream.write(bytes(data))
+
+    # --- Métodos de Controle (Chamados pelo MainController) ---
+
+    def toggle_pause(self):
+        self.is_paused = not self.is_paused
+        status = "PAUSADO" if self.is_paused else "TOCANDO"
+        print(f">>> [Audio] {status}")
+
+    def rewind(self, seconds=5):
+        """Volta X segundos no áudio"""
+        bytes_to_rewind = int(seconds * self.BYTES_PER_SECOND)
+        old_cursor = self.cursor
+        self.cursor = max(0, self.cursor - bytes_to_rewind)
+        print(f">>> [Audio] Retroceder {seconds}s (Pos: {self.cursor}/{len(self.audio_buffer)})")
+
+    def forward(self, seconds=5):
+        """Avança X segundos no áudio"""
+        bytes_to_forward = int(seconds * self.BYTES_PER_SECOND)
+        self.cursor = min(len(self.audio_buffer), self.cursor + bytes_to_forward)
+        print(f">>> [Audio] Avançar {seconds}s")
+
+    def reset_buffer(self):
+        """Chame isso quando o usuário começar a falar para limpar a resposta anterior"""
+        self.audio_buffer = bytearray()
+        self.cursor = 0
+        self.is_paused = False
 
     def close(self):
-        self.audio_input_manager.close()
-        self.audio_output_manager.close()
+        if self.output_stream:
+            self.output_stream.stop_stream()
+            self.output_stream.close()
+        self.pya.terminate()
+        
+    # Método legado para manter compatibilidade com sons de sistema (clock/date)
+    async def play_file(self, file_path, queue, loop):
+        # Implementação simplificada: lê arquivo e joga na queue
+        # Nota: Isso vai entrar no buffer do fluxo principal. 
+        # Idealmente sons de sistema usariam um canal separado, mas para simplificar:
+        import wave
+        def _read_wave():
+            with wave.open(file_path, 'rb') as wf:
+                data = wf.readframes(1024)
+                while data:
+                    asyncio.run_coroutine_threadsafe(queue.put(data), loop)
+                    data = wf.readframes(1024)
+        await asyncio.to_thread(_read_wave)

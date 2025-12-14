@@ -160,6 +160,8 @@ class MainController:
     def start_sending_audio_only(self):
         """Libera o fluxo de áudio."""
         print(">>> ATIVANDO: Apenas Áudio")
+        if hasattr(self.audio_app, 'reset_buffer'):
+            self.audio_app.reset_buffer()
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
         # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
         # self.loop.call_soon_threadsafe(self.start_video_event.clear)
@@ -415,3 +417,22 @@ class MainController:
 
     def getWebSocketState(self):
         return self.gemini_client.is_connected()
+
+
+
+    # --- CONTROLES DE PLAYBACK DE ÁUDIO ---
+
+    def handle_audio_pause_toggle(self):
+        """Tecla (Ex: Espaço ou P): Pausa/Continua a resposta da IA"""
+        if hasattr(self.audio_app, 'toggle_pause'):
+            self.audio_app.toggle_pause()
+
+    def handle_audio_rewind(self):
+        """Tecla (Ex: Seta Esquerda): Volta 5 segundos"""
+        if hasattr(self.audio_app, 'rewind'):
+            self.audio_app.rewind(seconds=5)
+
+    def handle_audio_forward(self):
+        """Tecla (Ex: Seta Direita): Avança 5 segundos"""
+        if hasattr(self.audio_app, 'forward'):
+            self.audio_app.forward(seconds=5)

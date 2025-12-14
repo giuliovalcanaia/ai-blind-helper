@@ -31,7 +31,7 @@ class Config:
     # Adicionar entradas e saidas ao usuário comum: sudo usermod -a -G input,audio,video giulio
     # KEYBOARD_PATH = '/dev/input/event4'
     # Keyboard Settings (ls -l /dev/input/by-path/)
-    KEYBOARD_PATH = '/dev/input/by-path/platform-i8042-serio-0-event-kbd'
+    KEYBOARD_PATH = '/dev/input/by-path/pci-0000:00:14.0-usbv2-0:1:1.0-event-kbd'
 
     # Gemini Config
     LIVE_CONFIG = types.LiveConnectConfig(
