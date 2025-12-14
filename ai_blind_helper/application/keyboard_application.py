@@ -55,7 +55,7 @@ class KeyboardApplication:
     def on_key_w(self, event_type, duration):
         # Lógica: Quero que aconteça assim que eu aperto (PRESS)
         if event_type == 'PRESS':
-            print(">> [App] 'I' Pressionado. Iniciando toggle_connect...")
+            print(">> [App] 'W' Pressionado. Iniciando toggle_connect...")
             self.controller.handle_toggle_connect()
 
     def on_key_t(self, event_type, duration):
@@ -78,7 +78,7 @@ class KeyboardApplication:
                 self.controller.start_sending_audio_only()
         elif event_type == 'RELEASE':
             if (self.audio_is_locked):
-                self.controller.stop_sending_audio_only()
+                self.controller.stop_sending_audio()
                 print("Audio finalizado com tecla A UNLOCK")
                 self.audio_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
@@ -86,9 +86,7 @@ class KeyboardApplication:
                 self.audio_is_locked = True
             else:
                 print("Modo hold funcionou e foi enviado")
-                self.controller.stop_sending_audio_only()
-                self.audio_pressed = False
-                
+                self.controller.stop_sending_audio() 
         
     def on_key_v(self, event_type, duration):
         if event_type == 'PRESS':
@@ -99,7 +97,10 @@ class KeyboardApplication:
                 self.controller.start_sending_audio_video()
         elif event_type == 'RELEASE':
             if (self.video_is_locked):
-                self.controller.stop_sending_audio_video()
+                if (self.audio_is_locked() or self.audio_pressed):
+                    self.controller.stop_sending_video()
+                else:
+                    self.controller.stop_all_sending()
                 print("Video finalizado com tecla V UNLOCK")
                 self.video_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_VIDEO:
@@ -107,5 +108,7 @@ class KeyboardApplication:
                 self.video_is_locked = True
             else:
                 print("Modo hold funcionou e foi enviado")
-                self.controller.stop_sending_audio_video()
-                self.video_pressed = False 
+                if (self.audio_is_locked or self.audio_pressed):
+                    self.controller.stop_sending_video()
+                else:
+                    self.controller.stop_all_sending()

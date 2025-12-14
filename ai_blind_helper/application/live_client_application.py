@@ -52,10 +52,24 @@ class LiveClientApplication:
 
     async def _receiver(self, session, output_queue: asyncio.Queue):
         """Recebe do Gemini e manda para a fila de saída"""
-        turn = session.receive()
-        async for response in turn:
-            if data := response.data:
-                # Coloca áudio na fila para o Main App tocar
-                output_queue.put_nowait(data)
-            if text := response.text:
-                print(text, end="", flush=True)
+        while True: # <--- 1. Mantém o receiver vivo para sempre
+            try:
+                # 2. Aguarda/Inicia o próximo turno de recepção
+                turn = session.receive() 
+                
+                # 3. Consome a resposta atual até o fim
+                async for response in turn:
+                    if data := response.data:
+                        output_queue.put_nowait(data)
+                    if text := response.text:
+                        print(text, end="", flush=True)
+                
+                # 4. (Opcional) Debug para saber que o turno acabou
+                # print("\n[Client] Turno finalizado, aguardando próximo...")
+
+            except Exception as e:
+                print(f"\n!!! [Receiver] Erro: {e}")
+                # Importante: não deixe o loop quebrar totalmente se for um erro recuperável
+                # Se for erro de conexão, talvez queira dar um 'break' ou reconectar
+                traceback.print_exc()
+                break 

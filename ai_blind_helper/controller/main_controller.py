@@ -82,48 +82,33 @@ class MainController:
     # --- MÉTODOS DE CONTROLE DE FLUXO (START) ---
 
     def start_sending_audio_only(self):
-        """Libera apenas a captura de áudio."""
+        """Libera o fluxo de áudio."""
         print(">>> ATIVANDO: Apenas Áudio")
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
+        # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
+        # self.loop.call_soon_threadsafe(self.start_video_event.clear) 
 
     def start_sending_audio_video(self):
-        """Libera captura de áudio E vídeo."""
+        """Libera o fluxo de áudio E vídeo."""
         print(">>> ATIVANDO: Áudio + Vídeo")
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
         self.loop.call_soon_threadsafe(self.start_video_event.set)
 
-    # --- MÉTODOS DE CONTROLE DE FLUXO (STOP) ---
-
-    def stop_sending_audio_only(self):
-        """Para o envio de áudio (mantém vídeo se estiver ligado)."""
-        print(">>> PARANDO: Áudio")
-        # 1. Bloqueia o evento para não reiniciar
+    def stop_sending_audio(self):
+        """Pausa o envio de áudio (Hardware continua ligado, mas loop trava)."""
+        print(">>> PAUSANDO: Áudio")
         self.loop.call_soon_threadsafe(self.start_audio_event.clear)
-        
-        # 2. Cancela a tarefa de captura atual
-        if self.current_audio_capture_task and not self.current_audio_capture_task.done():
-            self.loop.call_soon_threadsafe(self.current_audio_capture_task.cancel)
 
-    def stop_sending_audio_video(self):
-        """Para envio de Áudio e Vídeo, mas mantém WebSocket conectado."""
-        print(">>> PARANDO: Tudo (Mute/Blackout)")
-        
-        # 1. Bloqueia eventos
-        self.loop.call_soon_threadsafe(self.start_audio_event.clear)
+    def stop_sending_video(self):
+        """Pausa o envio de vídeo (Hardware continua ligado, mas loop trava)."""
+        print(">>> PAUSANDO: Vídeo")
         self.loop.call_soon_threadsafe(self.start_video_event.clear)
 
-        # 2. Cancela áudio
-        if self.current_audio_capture_task and not self.current_audio_capture_task.done():
-            self.loop.call_soon_threadsafe(self.current_audio_capture_task.cancel)
-
-        # 3. Cancela vídeo
-        if self.current_video_capture_task and not self.current_video_capture_task.done():
-            self.loop.call_soon_threadsafe(self.current_video_capture_task.cancel)
-
-    def stop_session(self):
-        """Encerra a conexão WebSocket inteira."""
-        if self.session_task and not self.session_task.done() and self.loop:
-            self.loop.call_soon_threadsafe(self.session_task.cancel)
+    def stop_all_sending(self):
+        """Pausa tudo (modo mute/privacidade)."""
+        print(">>> PAUSANDO: Tudo")
+        self.stop_sending_audio()
+        self.stop_sending_video()
 
     # --- Gerenciamento da Sessão ---
 
@@ -155,58 +140,29 @@ class MainController:
                 try: self.out_queue.get_nowait()
                 except: pass
 
-    # --- WRAPPERS REFATORADOS (Loops de Monitoramento) ---
+
+
+
+
+    # --- WRAPPERS (MODIFICADOS) ---
+    
+    # A MUDANÇA CRUCIAL ESTÁ AQUI: 
+    # Passamos o evento para dentro da task, em vez de esperar por ele fora.
 
     async def _audio_capture_wrapper(self):
-        """
-        Loop persistente: Aguarda sinal -> Inicia Captura -> Se cancelado, volta a aguardar.
-        """
-        while True:
-            # Espera o sinal de start (trava aqui se stop_sending foi chamado)
-            await self.start_audio_event.wait()
-            
-            print(">>> Iniciando tarefa de captura de ÁUDIO.")
-            try:
-                # Cria a tarefa filha e guarda a referência
-                self.current_audio_capture_task = asyncio.create_task(
-                    self.audio_app.task_capture_audio(self.out_queue)
-                )
-                # Aguarda ela rodar até terminar ou ser cancelada
-                await self.current_audio_capture_task
-                
-            except asyncio.CancelledError:
-                print(">>> Captura de ÁUDIO pausada pelo usuário.")
-                # O loop continua, voltando para o wait()
-            except Exception as e:
-                print(f"Erro no loop de áudio: {e}")
-                self.start_audio_event.clear() # Trava em caso de erro
-            
-            # Reset de segurança
-            if not self.start_audio_event.is_set():
-                print(">>> Áudio em Standby.")
+        print(">>> Inicializando loop de áudio (Aguardando flag...).")
+        print(f"DEBUG: Controller Event ID: {id(self.start_audio_event)}")
+        # Passamos o próprio evento (self.start_audio_event) para a função de captura
+        await self.audio_app.task_capture_audio(self.out_queue, self.start_audio_event)
 
     async def _video_capture_wrapper(self):
-        """
-        Loop persistente para vídeo.
-        """
-        while True:
-            await self.start_video_event.wait()
-            
-            print(">>> Iniciando tarefa de captura de VÍDEO.")
-            try:
-                self.current_video_capture_task = asyncio.create_task(
-                    self.video_app.task_capture_video(self.out_queue)
-                )
-                await self.current_video_capture_task
-                
-            except asyncio.CancelledError:
-                print(">>> Captura de VÍDEO pausada pelo usuário.")
-            except Exception as e:
-                print(f"Erro no loop de vídeo: {e}")
-                self.start_video_event.clear()
-            
-            if not self.start_video_event.is_set():
-                print(">>> Vídeo em Standby.")
+        print(">>> Inicializando loop de vídeo (Aguardando flag...).")
+        # Passamos o próprio evento (self.start_video_event) para a função de captura
+        await self.video_app.task_capture_video(self.out_queue, self.start_video_event)
+        
+        
+        
+        
 
     # --- Funcionalidades Extras ---
     async def play_current_time(self):
@@ -224,7 +180,7 @@ class MainController:
         )
 
         print("=== Aplicação Pronta ===")
-        print(" [I] Conectar WebSocket (Standby)")
+        print(" [W] Conectar WebSocket (Idle)")
         print(" [A] Iniciar captura de áudio")
         print(" [V] Iniciar captura de áudio + vídeo") 
         print(" [T] Falar horas")
