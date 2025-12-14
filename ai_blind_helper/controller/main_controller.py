@@ -34,11 +34,14 @@ class MainController:
         self.loop: Optional[asyncio.AbstractEventLoop] = None
         self.audio_playback_task: Optional[asyncio.Task] = None
 
-        # --- NOVOS EVENTOS DE CONTROLE ---
-        # Funcionam como "portões". Enquanto não forem ativados (.set()), 
-        # a captura não envia dados.
+        # --- CONTROLE DE CAPTURA ---
+        # Eventos (Portões)
         self.start_audio_event = asyncio.Event()
         self.start_video_event = asyncio.Event()
+
+        # Tarefas atuais (para poder cancelar/parar especificamente a captura)
+        self.current_audio_capture_task: Optional[asyncio.Task] = None
+        self.current_video_capture_task: Optional[asyncio.Task] = None
 
     # --- PONTO DE ENTRADA ---
     def run(self):
@@ -52,18 +55,15 @@ class MainController:
     # --- Callbacks do Teclado ---
 
     def handle_toggle_connect(self):
-        """
-        1. Conecta no WebSocket.
-        2. NÃO inicia o envio de áudio/vídeo ainda (ficam aguardando).
-        """
+        """Tecla 'I': Conecta/Desconecta o WebSocket."""
         if self.loop is None: return
 
         if self.session_task and not self.session_task.done():
             print("\n[Comando] Tecla 'I': Encerrando conexão...")
             self.stop_session()
         else:
-            print("\n[Comando] Tecla 'I': Conectando WebSocket (Aguardando comando de mídia)...")
-            # Reseta os eventos para garantir que comecem travados
+            print("\n[Comando] Tecla 'I': Conectando WebSocket...")
+            # Garante que começa travado
             self.start_audio_event.clear()
             self.start_video_event.clear()
             
@@ -79,7 +79,7 @@ class MainController:
         print(f"[Comando] Tecla T: Hora ({duration:.2f}s)")
         asyncio.run_coroutine_threadsafe(self.play_current_time(), self.loop)
 
-    # --- MÉTODOS DE CONTROLE DE FLUXO (ATUALIZADOS) ---
+    # --- MÉTODOS DE CONTROLE DE FLUXO (START) ---
 
     def start_sending_audio_only(self):
         """Libera o fluxo de áudio."""
@@ -110,7 +110,7 @@ class MainController:
         self.stop_sending_audio()
         self.stop_sending_video()
 
-    # --- Gerenciamento da Sessão (Modificado) ---
+    # --- Gerenciamento da Sessão ---
 
     async def _start_connection_manager(self):
         self.session_task = asyncio.create_task(self._run_session_lifecycle())
@@ -120,13 +120,13 @@ class MainController:
             print(">>> WebSocket Conectado. Aguardando ativação de stream...")
             
             async with asyncio.TaskGroup() as tg:
-                # 1. Inicia o WebSocket Client imediatamente (ele fica conectado esperando dados)
+                # 1. WebSocket Client
                 tg.create_task(self.gemini_client.start_session(
                     input_queue=self.out_queue,
                     output_queue=self.audio_in_queue
                 ))
 
-                # 2. Inicia os wrappers de captura (que vão esperar os eventos)
+                # 2. Wrappers de captura (Loops de monitoramento)
                 tg.create_task(self._audio_capture_wrapper())
                 tg.create_task(self._video_capture_wrapper())
 
@@ -135,7 +135,7 @@ class MainController:
         except Exception as e:
             print(f"Erro na sessão: {e}")
         finally:
-            # Limpeza
+            # Limpeza da fila de saída
             while not self.out_queue.empty():
                 try: self.out_queue.get_nowait()
                 except: pass
@@ -164,7 +164,7 @@ class MainController:
         
         
 
-    # --- Funcionalidades Extras (Mantidas) ---
+    # --- Funcionalidades Extras ---
     async def play_current_time(self):
         path = await asyncio.to_thread(self.clock_service.get_current_time_audio_path)
         if path:
@@ -182,9 +182,9 @@ class MainController:
         print("=== Aplicação Pronta ===")
         print(" [W] Conectar WebSocket (Idle)")
         print(" [A] Iniciar captura de áudio")
-        print(" [V] Iniciar captura de áudio e vídeo") 
+        print(" [V] Iniciar captura de áudio + vídeo") 
         print(" [T] Falar horas")
-        print(" [Q] Sair (hardware off)")
+        print(" [Q] Sair")
         
         while self.app_running:
             await asyncio.sleep(0.5)
