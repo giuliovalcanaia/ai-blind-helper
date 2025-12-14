@@ -243,16 +243,25 @@ class MainController:
                 print(f"[Erro] Falha ao salvar imagem: {e}")
             # -------------------------------------
 
-            print("[System] Frame capturado. Enviando pacote (Texto + Imagem) para IA...")
+            print("[System] Frame capturado. Enviando payload formatado para IA...")
 
             prompt_text = self.description_app.get_prompt()
             
-            # --- CORREÇÃO AQUI ---
-            # Agrupamos o Texto e a Imagem em uma LISTA única.
-            # O SDK do google-genai entende lista como "parts" de uma mesma mensagem.
-            message_payload = [prompt_text, frame_data]
+            # --- ATUALIZAÇÃO AQUI ---
+            # Criação do objeto JSON (dict) seguindo o exemplo solicitado
+            message_payload = {
+                # O conteúdo de 'image' vem diretamente de frame_data, que deve ser:
+                # {"data": base64_da_imagem, "mimeType": "image/jpeg"}
+                "image": frame_data,  
+                
+                # O conteúdo de 'text' deve ser um dicionário com chave/valor
+                "text": prompt_text
+            } 
             
-            # Colocamos apenas 1 item na fila, contendo as duas informações
+            # Debug para verificar se o formato está correto
+            # print(json.dumps(message_payload, indent=2)) 
+            
+            # Envia o dicionário estruturado para a fila
             await self.out_queue.put(message_payload)
             # ---------------------
         
