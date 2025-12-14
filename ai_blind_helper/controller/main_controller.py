@@ -1,4 +1,7 @@
 import asyncio
+import os
+import time
+import base64
 from typing import Optional
 from config import Config
 
@@ -9,7 +12,9 @@ from application import (
     AudioPlayerApplication, 
     VideoPlayerApplication,
     KeyboardApplication,
-    DateApplication
+    DateApplication,
+    DescriptionApplication,
+    TranscriptionApplication
 )
 
 class MainController:
@@ -22,6 +27,10 @@ class MainController:
         # Audio e Video
         self.audio_app = AudioPlayerApplication()
         self.video_app = VideoPlayerApplication(mode=video_mode)
+        
+        # Descrição e Transcrição
+        self.description_app = DescriptionApplication()
+        self.transcription_app = TranscriptionApplication()
 
         # Teclado
         self.keyboard_app = KeyboardApplication(controller=self, device_path=Config.KEYBOARD_PATH)
@@ -75,6 +84,57 @@ class MainController:
         print("\n[Comando] Tecla Q: Saindo...")
         self.app_running = False
         self.stop_session()
+
+    def stop_session(self):
+        """
+        Método síncrono chamado pelo Teclado (handle_toggle_connect) ou shutdown.
+        Agenda a parada graciosa no Event Loop principal.
+        """
+        if self.loop is None: return
+
+        print(">>> [Stop] Solicitando encerramento da sessão...")
+
+        # 1. Trava capturas imediatamente (Thread-safe)
+        self.loop.call_soon_threadsafe(self.start_audio_event.clear)
+        self.loop.call_soon_threadsafe(self.start_video_event.clear)
+
+        # 2. Agenda a corrotina de limpeza
+        if self.session_task and not self.session_task.done():
+            asyncio.run_coroutine_threadsafe(self._stop_session_task(), self.loop)
+
+    async def _stop_session_task(self):
+        """
+        Lógica assíncrona real de parada.
+        Cancela a TaskGroup e limpa resíduos de áudio.
+        """
+        if self.session_task:
+            print(">>> [Stop] Cancelando TaskGroup da sessão...")
+            self.session_task.cancel()
+            try:
+                # Aguarda o cancelamento propagar (vai disparar CancelledError no _run_session_lifecycle)
+                await self.session_task
+            except asyncio.CancelledError:
+                # O erro é esperado aqui, pois acabamos de cancelar
+                pass
+            except Exception as e:
+                print(f"[Erro] Falha ao aguardar cancelamento: {e}")
+            finally:
+                self.session_task = None
+        
+        # 3. Limpeza de filas (Opcional, mas recomendado)
+        # Evita que áudio antigo toque quando você conectar novamente
+        purged_count = 0
+        while not self.audio_in_queue.empty():
+            try:
+                self.audio_in_queue.get_nowait()
+                purged_count += 1
+            except asyncio.QueueEmpty:
+                break
+        
+        if purged_count > 0:
+            print(f">>> [Limpeza] {purged_count} itens de áudio removidos da fila.")
+
+        print(">>> [Stop] Sessão encerrada e limpa.")
 
     def handle_time_request(self):
         if self.loop is None: return
@@ -147,6 +207,57 @@ class MainController:
 
 
 
+    # --- NOVO HANDLER ---
+    def handle_description_request(self):
+        """Tecla 'D': Pede descrição usando a câmera já aberta."""
+        if self.loop is None: return
+        
+        if not self.gemini_client.is_connected:
+            print("\n[Aviso] Conecte-se ao Gemini (Tecla W) antes.")
+            return
+
+        print("\n[Comando] Tecla 'D': Solicitando descrição...")
+        
+        # Dispara a tarefa assíncrona
+        asyncio.run_coroutine_threadsafe(self._send_description_task(), self.loop)
+
+
+
+    async def _send_description_task(self):
+        """Lógica de envio do prompt + snapshot"""
+        
+        # 1. Pega o frame da VideoApp existente
+        frame_data = await self.video_app.get_snapshot()
+
+        if frame_data:
+            # ... (seu código de salvar arquivo continua igual aqui) ...
+            try:
+                os.makedirs("capturas", exist_ok=True)
+                filename = f"capturas/snapshot_{int(time.time())}.jpg"
+                b64_string = frame_data["data"]
+                image_bytes = base64.b64decode(b64_string)
+                with open(filename, "wb") as f:
+                    f.write(image_bytes)
+                print(f"[System] Imagem salva localmente em: {filename}")
+            except Exception as e:
+                print(f"[Erro] Falha ao salvar imagem: {e}")
+            # -------------------------------------
+
+            print("[System] Frame capturado. Enviando pacote (Texto + Imagem) para IA...")
+
+            prompt_text = self.description_app.get_prompt()
+            
+            # --- CORREÇÃO AQUI ---
+            # Agrupamos o Texto e a Imagem em uma LISTA única.
+            # O SDK do google-genai entende lista como "parts" de uma mesma mensagem.
+            message_payload = [prompt_text, frame_data]
+            
+            # Colocamos apenas 1 item na fila, contendo as duas informações
+            await self.out_queue.put(message_payload)
+            # ---------------------
+        
+        else:
+            print("[Erro] Não foi possível capturar o frame (Câmera ocupada ou fechada).") 
 
 
     # --- WRAPPERS (MODIFICADOS) ---
@@ -193,6 +304,7 @@ class MainController:
         print(" [W] Conectar WebSocket (Idle)")
         print(" [A] Iniciar captura de áudio")
         print(" [V] Iniciar captura de áudio + vídeo") 
+        print(" [D] Descrever ambiente")
         print(" [T] Falar horas")
         print(" [Q] Sair")
         

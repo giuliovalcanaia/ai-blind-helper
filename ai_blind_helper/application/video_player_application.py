@@ -57,6 +57,7 @@ class VideoPlayerApplication:
                     except asyncio.QueueEmpty:
                         break
 
+                print(frame_data)
                 await out_queue.put(frame_data)
 
                 # 3. Controle de Taxa (Sleep inteligente)
@@ -68,6 +69,19 @@ class VideoPlayerApplication:
                 
         except asyncio.CancelledError:
             print(" -> [VideoApp] Tarefa de vídeo cancelada.")
+
+    async def get_snapshot(self) -> Optional[dict]:
+        """
+        Retorna um único frame usando a conexão de câmera JÁ ABERTA.
+        Útil para descrever o ambiente sem precisar parar/reiniciar a câmera.
+        """
+        if not self.video_source:
+            print(" -> [VideoApp] Erro: Nenhuma fonte de vídeo configurada.")
+            return None
+
+        # Reutiliza o método get_frame da interface IVideoSource
+        # Executa em thread para não bloquear o loop principal
+        return await asyncio.to_thread(self.video_source.get_frame)
 
     def release(self):
         if self.video_source:

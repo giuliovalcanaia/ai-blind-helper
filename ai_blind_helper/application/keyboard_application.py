@@ -49,6 +49,9 @@ class KeyboardApplication:
 
         # Exemplo 5: Tecla V (Ação baseada em hold / lock)
         self.manager.register_key(evdev.ecodes.KEY_V, self.on_key_v)
+        
+        # Exemplo 6: Tecla D (Ação baseada em press)
+        self.manager.register_key(evdev.ecodes.KEY_D, self.on_key_d)
 
     # --- Tratamento dos Eventos ---
 
@@ -118,3 +121,7 @@ class KeyboardApplication:
                 else:
                     print("Parande enviar apenas vídeo, pois audio está ativo")
                     self.controller.stop_all_sending()
+                    
+    def on_key_d(self, event_type, duration):
+        if event_type == 'PRESS':
+            self.controller.handle_description_request()
