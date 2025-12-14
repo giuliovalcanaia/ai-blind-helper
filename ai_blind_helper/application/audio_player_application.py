@@ -3,13 +3,14 @@ import wave
 import os
 import time
 from datetime import datetime
-from manager import InputAudioManager
+from manager import InputAudioManager, OutputAudioManager
 from reader import WavReader
 from config import Config
 
 class AudioPlayerApplication:
     def __init__(self):
-        self.audio_service = InputAudioManager()
+        self.audio_input_manager = InputAudioManager()
+        self.audio_output_manager = OutputAudioManager()
         self.wav_reader = WavReader(
             target_rate=Config.RECEIVE_SAMPLE_RATE,
             target_channels=Config.CHANNELS
@@ -24,7 +25,7 @@ class AudioPlayerApplication:
         2. Salva cada pedaço em um arquivo individual na pasta 'chunks'.
         3. Envia para a fila da IA.
         """
-        self.audio_service.start_input_stream()
+        self.audio_input_manager.start_input_stream()
         print(" -> [AudioApp] Microfone Iniciado.")
         
         # --- PREPARAÇÃO DAS PASTAS DESTA SESSÃO ---
@@ -55,7 +56,7 @@ class AudioPlayerApplication:
                             pass
 
                     # 2. LEITURA DO HARDWARE
-                    data = await asyncio.to_thread(self.audio_service.read_chunk)
+                    data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
                     
                     if data:
                         # --- A: Salva no arquivo contínuo ---
@@ -88,23 +89,24 @@ class AudioPlayerApplication:
     def _flush_input_buffer(self):
         """Limpeza de buffer ao retomar pause"""
         try:
-            available = self.audio_service.input_stream.get_read_available()
+            available = self.audio_input_manager.input_stream.get_read_available()
             if available > 0:
-                self.audio_service.input_stream.read(available, exception_on_overflow=False)
+                self.audio_input_manager.input_stream.read(available, exception_on_overflow=False)
         except:
             pass
 
     # ... (Restante dos métodos task_play_audio e play_file permanecem iguais)
     
     async def task_play_audio(self, input_queue: asyncio.Queue):
-        self.audio_service.start_output_stream()
+        self.audio_output_manager.start_output_stream()
         try:
             while True:
                 bytestream = await input_queue.get()
-                await asyncio.to_thread(self.audio_service.write_chunk, bytestream)
+                await asyncio.to_thread(self.audio_output_manager.write_chunk, bytestream)
                 input_queue.task_done()
         except asyncio.CancelledError:
             pass
 
     def close(self):
-        self.audio_service.close()
+        self.audio_input_manager.close()
+        self.audio_output_manager.close()
