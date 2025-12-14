@@ -8,8 +8,13 @@ class Config:
     # Defina sua API KEY aqui ou garanta que está nas variáveis de ambiente
     API_KEY = os.getenv(
         "GOOGLE_API_KEY", "AIzaSyCgcpCz46tJvT0RneuhTZvlOAXGGqAGDiI")
+    
+    API_VERSION_TEXT_API_GEMINI_3 = 'v1alpha'
 
     MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025"
+    MODEL_TEXT = "models"
+
+    MODEL_TEXT_GENERATOR = "gemini-3-pro-preview"
 
     # Audio Settings
     AUDIO_FORMAT = pyaudio.paInt16
@@ -21,8 +26,8 @@ class Config:
     LOCK_THRESHOLD_MS_VIDEO = 500
     LOCK_THRESHOLD_MS_DATE = 500
 
-    # Keyboard Settings
-    KEYBOARD_PATH = '/dev/input/event6'
+    # Keyboard Settings (ls -l /dev/input/by-id/)
+    KEYBOARD_PATH = '/dev/input/event5'
     
     # Gemini Config
     LIVE_CONFIG = types.LiveConnectConfig(

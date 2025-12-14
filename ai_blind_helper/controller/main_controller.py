@@ -4,6 +4,7 @@ import time
 import base64
 from typing import Optional
 from config import Config
+import traceback
 
 # Seus imports de aplicação
 from application import (
@@ -14,7 +15,8 @@ from application import (
     KeyboardApplication,
     DateApplication,
     DescriptionApplication,
-    TranscriptionApplication
+    TranscriptionApplication,
+    TextClientApplication
 )
 
 class MainController:
@@ -226,11 +228,12 @@ class MainController:
     async def _send_description_task(self):
         """Lógica de envio do prompt + snapshot"""
         
-        # 1. Pega o frame da VideoApp existente
-        frame_data = await self.video_app.get_snapshot()
+        # 1. Pega o frame da VideoApp existente, já retorna em BLOB/Dict
+        # ASSUMIMOS que `frame_data` é um dicionário: 
+        # {"data": "base64_blob_aqui", "mime_type": "image/jpeg"}
+        frame_data = await self.video_app.get_snapshot() 
 
         if frame_data:
-            # ... (seu código de salvar arquivo continua igual aqui) ...
             try:
                 os.makedirs("capturas", exist_ok=True)
                 filename = f"capturas/snapshot_{int(time.time())}.jpg"
@@ -247,24 +250,21 @@ class MainController:
 
             prompt_text = self.description_app.get_prompt()
             
-            # --- ATUALIZAÇÃO AQUI ---
-            # Criação do objeto JSON (dict) seguindo o exemplo solicitado
-            message_payload = {
-                # O conteúdo de 'image' vem diretamente de frame_data, que deve ser:
-                # {"data": base64_da_imagem, "mimeType": "image/jpeg"}
-                "image": frame_data,  
-                
-                # O conteúdo de 'text' deve ser um dicionário com chave/valor
-                "text": prompt_text
-            } 
-            
-            # Debug para verificar se o formato está correto
-            # print(json.dumps(message_payload, indent=2)) 
-            
-            # Envia o dicionário estruturado para a fila
-            await self.out_queue.put(message_payload)
-            # ---------------------
-        
+            # --- CORREÇÃO AQUI ---
+            # Passando o dicionário completo `frame_data` (que tem 'data' e 'mime_type')
+            try:
+                response_text = TextClientApplication.generate_text_by_imagem_text(
+                    prompt = prompt_text, 
+                    image_part_data = frame_data # Usando o nome do parâmetro da classe
+                )
+                print("\n\n>>> [Gemini Response] <<<")
+                print(response_text)
+                print(">>> ------------------- <<<")
+                # Você pode adicionar a resposta para a fila de áudio se for um TTS, por exemplo
+            except Exception as e:
+                print(f"\n!!! [Gemini Error] Falha ao gerar texto: {e}")
+                traceback.print_exc()
+
         else:
             print("[Erro] Não foi possível capturar o frame (Câmera ocupada ou fechada).") 
 
