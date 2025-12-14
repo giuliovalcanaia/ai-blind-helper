@@ -7,6 +7,7 @@ from manager import InputAudioManager, OutputAudioManager
 from reader import WavReader
 from config import Config
 
+
 class AudioPlayerApplication:
     def __init__(self):
         self.audio_input_manager = InputAudioManager()
@@ -27,12 +28,13 @@ class AudioPlayerApplication:
         """
         self.audio_input_manager.start_input_stream()
         print(" -> [AudioApp] Microfone Iniciado.")
-        
+
         # --- PREPARAÇÃO DAS PASTAS DESTA SESSÃO ---
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        session_dir = os.path.join(self.base_debug_folder, f"sessao_{timestamp}")
+        session_dir = os.path.join(
+            self.base_debug_folder, f"sessao_{timestamp}")
         chunks_dir = os.path.join(session_dir, "chunks")
-        
+
         os.makedirs(chunks_dir, exist_ok=True)
         print(f"🎙️ [Audio] Salvando debug completo e chunks em: {session_dir}")
 
@@ -57,19 +59,20 @@ class AudioPlayerApplication:
 
                     # 2. LEITURA DO HARDWARE
                     data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
-                    
+
                     if data:
                         # --- A: Salva no arquivo contínuo ---
                         wf_full.writeframes(data)
 
                         # --- B: Salva o Chunk isolado (EXATAMENTE como a IA recebe) ---
-                        chunk_filename = os.path.join(chunks_dir, f"chunk_{chunk_counter:05d}.wav")
-                        # Atenção: Abrir e fechar arquivos em loop é custoso (IO), 
+                        chunk_filename = os.path.join(
+                            chunks_dir, f"chunk_{chunk_counter:05d}.wav")
+                        # Atenção: Abrir e fechar arquivos em loop é custoso (IO),
                         # mas necessário para isolar os arquivos.
                         with wave.open(chunk_filename, 'wb') as wf_chunk:
                             self._setup_wav_header(wf_chunk)
                             wf_chunk.writeframes(data)
-                        
+
                         chunk_counter += 1
 
                         # --- C: Envia para a IA ---
@@ -83,7 +86,7 @@ class AudioPlayerApplication:
     def _setup_wav_header(self, wav_file):
         """Configura o cabeçalho WAV padrão para evitar repetição de código"""
         wav_file.setnchannels(Config.CHANNELS)
-        wav_file.setsampwidth(2) # 16-bit PCM
+        wav_file.setsampwidth(2)  # 16-bit PCM
         wav_file.setframerate(Config.RECEIVE_SAMPLE_RATE)
 
     def _flush_input_buffer(self):
@@ -91,12 +94,13 @@ class AudioPlayerApplication:
         try:
             available = self.audio_input_manager.input_stream.get_read_available()
             if available > 0:
-                self.audio_input_manager.input_stream.read(available, exception_on_overflow=False)
+                self.audio_input_manager.input_stream.read(
+                    available, exception_on_overflow=False)
         except:
             pass
 
     # ... (Restante dos métodos task_play_audio e play_file permanecem iguais)
-    
+
     async def task_play_audio(self, input_queue: asyncio.Queue):
         self.audio_output_manager.start_output_stream()
         try:
@@ -107,7 +111,6 @@ class AudioPlayerApplication:
         except asyncio.CancelledError:
             pass
 
-        
     async def play_file(self, file_path: str, target_queue: asyncio.Queue, loop):
         """Lê um arquivo WAV e injeta os chunks na fila de áudio para ser tocado"""
         def process_file():

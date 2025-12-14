@@ -8,7 +8,7 @@ class Config:
     # Defina sua API KEY aqui ou garanta que está nas variáveis de ambiente
     API_KEY = os.getenv(
         "GOOGLE_API_KEY", "AIzaSyCgcpCz46tJvT0RneuhTZvlOAXGGqAGDiI")
-    
+
     API_VERSION_TEXT_API_GEMINI_3 = 'v1alpha'
 
     MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025"
@@ -21,14 +21,18 @@ class Config:
     CHANNELS = 1
     SEND_SAMPLE_RATE = 16000
     RECEIVE_SAMPLE_RATE = 24000
-    CHUNK_SIZE = 4096 
+    CHUNK_SIZE = 4096
     LOCK_THRESHOLD_MS_AUDIO = 500
     LOCK_THRESHOLD_MS_VIDEO = 500
     LOCK_THRESHOLD_MS_DATE = 500
 
     # Keyboard Settings (ls -l /dev/input/by-id/)
-    KEYBOARD_PATH = '/dev/input/event5'
-    
+    # For arch: sudo evtest
+    # Adicionar entradas e saidas ao usuário comum: sudo usermod -a -G input,audio,video giulio
+    # KEYBOARD_PATH = '/dev/input/event4'
+    # Keyboard Settings (ls -l /dev/input/by-path/)
+    KEYBOARD_PATH = '/dev/input/by-path/platform-i8042-serio-0-event-kbd'
+
     # Gemini Config
     LIVE_CONFIG = types.LiveConnectConfig(
         response_modalities=["AUDIO"],

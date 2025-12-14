@@ -8,9 +8,9 @@ import traceback
 
 # Seus imports de aplicação
 from application import (
-    ClockApplication, 
-    LiveClientApplication, 
-    AudioPlayerApplication, 
+    ClockApplication,
+    LiveClientApplication,
+    AudioPlayerApplication,
     VideoPlayerApplication,
     KeyboardApplication,
     DateApplication,
@@ -19,27 +19,29 @@ from application import (
     TextClientApplication
 )
 
+
 class MainController:
     def __init__(self, video_mode):
         # 1. Instanciação dos Sub-Sistemas
         self.clock_app = ClockApplication(language="pt")
         self.date_app = DateApplication(language="pt")
         self.gemini_client = LiveClientApplication()
-        
+
         # Audio e Video
         self.audio_app = AudioPlayerApplication()
         self.video_app = VideoPlayerApplication(mode=video_mode)
-        
+
         # Descrição e Transcrição
         self.description_app = DescriptionApplication()
         self.transcription_app = TranscriptionApplication()
 
         # Teclado
-        self.keyboard_app = KeyboardApplication(controller=self, device_path=Config.KEYBOARD_PATH)
+        self.keyboard_app = KeyboardApplication(
+            controller=self, device_path=Config.KEYBOARD_PATH)
 
         # 2. Filas de comunicação
         self.audio_in_queue = asyncio.Queue()     # Recebe do Gemini
-        self.out_queue = asyncio.Queue(maxsize=5) # Envia para o Gemini
+        self.out_queue = asyncio.Queue(maxsize=5)  # Envia para o Gemini
 
         # 3. Estado e Controle
         self.app_running = True
@@ -69,7 +71,8 @@ class MainController:
 
     def handle_toggle_connect(self):
         """Tecla 'I': Conecta/Desconecta o WebSocket."""
-        if self.loop is None: return
+        if self.loop is None:
+            return
 
         if self.session_task and not self.session_task.done():
             print("\n[Comando] Tecla 'I': Encerrando conexão...")
@@ -79,8 +82,9 @@ class MainController:
             # Garante que começa travado
             self.start_audio_event.clear()
             self.start_video_event.clear()
-            
-            asyncio.run_coroutine_threadsafe(self._start_connection_manager(), self.loop)
+
+            asyncio.run_coroutine_threadsafe(
+                self._start_connection_manager(), self.loop)
 
     def handle_quit(self):
         print("\n[Comando] Tecla Q: Saindo...")
@@ -92,7 +96,8 @@ class MainController:
         Método síncrono chamado pelo Teclado (handle_toggle_connect) ou shutdown.
         Agenda a parada graciosa no Event Loop principal.
         """
-        if self.loop is None: return
+        if self.loop is None:
+            return
 
         print(">>> [Stop] Solicitando encerramento da sessão...")
 
@@ -102,7 +107,8 @@ class MainController:
 
         # 2. Agenda a corrotina de limpeza
         if self.session_task and not self.session_task.done():
-            asyncio.run_coroutine_threadsafe(self._stop_session_task(), self.loop)
+            asyncio.run_coroutine_threadsafe(
+                self._stop_session_task(), self.loop)
 
     async def _stop_session_task(self):
         """
@@ -122,7 +128,7 @@ class MainController:
                 print(f"[Erro] Falha ao aguardar cancelamento: {e}")
             finally:
                 self.session_task = None
-        
+
         # 3. Limpeza de filas (Opcional, mas recomendado)
         # Evita que áudio antigo toque quando você conectar novamente
         purged_count = 0
@@ -132,18 +138,21 @@ class MainController:
                 purged_count += 1
             except asyncio.QueueEmpty:
                 break
-        
+
         if purged_count > 0:
-            print(f">>> [Limpeza] {purged_count} itens de áudio removidos da fila.")
+            print(f">>> [Limpeza] {
+                  purged_count} itens de áudio removidos da fila.")
 
         print(">>> [Stop] Sessão encerrada e limpa.")
 
     def handle_time_request(self):
-        if self.loop is None: return
+        if self.loop is None:
+            return
         asyncio.run_coroutine_threadsafe(self.play_current_time(), self.loop)
 
     def handle_date_request(self):
-        if self.loop is None: return
+        if self.loop is None:
+            return
         asyncio.run_coroutine_threadsafe(self.play_current_date(), self.loop)
 
     # --- MÉTODOS DE CONTROLE DE FLUXO (START) ---
@@ -153,7 +162,7 @@ class MainController:
         print(">>> ATIVANDO: Apenas Áudio")
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
         # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
-        # self.loop.call_soon_threadsafe(self.start_video_event.clear) 
+        # self.loop.call_soon_threadsafe(self.start_video_event.clear)
 
     def start_sending_audio_video(self):
         """Libera o fluxo de áudio E vídeo."""
@@ -185,7 +194,7 @@ class MainController:
     async def _run_session_lifecycle(self):
         try:
             print(">>> WebSocket Conectado. Aguardando ativação de stream...")
-            
+
             async with asyncio.TaskGroup() as tg:
                 # 1. WebSocket Client
                 tg.create_task(self.gemini_client.start_session(
@@ -204,34 +213,35 @@ class MainController:
         finally:
             # Limpeza da fila de saída
             while not self.out_queue.empty():
-                try: self.out_queue.get_nowait()
-                except: pass
-
-
+                try:
+                    self.out_queue.get_nowait()
+                except:
+                    pass
 
     # --- NOVO HANDLER ---
+
     def handle_description_request(self):
         """Tecla 'D': Pede descrição usando a câmera já aberta."""
-        if self.loop is None: return
-        
+        if self.loop is None:
+            return
+
         if not self.gemini_client.is_connected:
             print("\n[Aviso] Conecte-se ao Gemini (Tecla W) antes.")
             return
 
         print("\n[Comando] Tecla 'D': Solicitando descrição...")
-        
+
         # Dispara a tarefa assíncrona
-        asyncio.run_coroutine_threadsafe(self._send_description_task(), self.loop)
-
-
+        asyncio.run_coroutine_threadsafe(
+            self._send_description_task(), self.loop)
 
     async def _send_description_task(self):
         """Lógica de envio do prompt + snapshot"""
-        
+
         # 1. Pega o frame da VideoApp existente, já retorna em BLOB/Dict
-        # ASSUMIMOS que `frame_data` é um dicionário: 
+        # ASSUMIMOS que `frame_data` é um dicionário:
         # {"data": "base64_blob_aqui", "mime_type": "image/jpeg"}
-        frame_data = await self.video_app.get_snapshot() 
+        frame_data = await self.video_app.get_snapshot()
 
         if frame_data:
             try:
@@ -249,13 +259,13 @@ class MainController:
             print("[System] Frame capturado. Enviando payload formatado para IA...")
 
             prompt_text = self.description_app.get_prompt()
-            
+
             # --- CORREÇÃO AQUI ---
             # Passando o dicionário completo `frame_data` (que tem 'data' e 'mime_type')
             try:
                 response_text = TextClientApplication.generate_text_by_imagem_text(
-                    prompt = prompt_text, 
-                    image_part_data = frame_data # Usando o nome do parâmetro da classe
+                    prompt=prompt_text,
+                    image_part_data=frame_data  # Usando o nome do parâmetro da classe
                 )
                 print("\n\n>>> [Gemini Response] <<<")
                 print(response_text)
@@ -266,28 +276,31 @@ class MainController:
                 traceback.print_exc()
 
         else:
-            print("[Erro] Não foi possível capturar o frame (Câmera ocupada ou fechada).") 
+            print(
+                "[Erro] Não foi possível capturar o frame (Câmera ocupada ou fechada).")
 
     def handle_transcription_request(self):
         """Tecla 'R': Reconhece texto e transcreve"""
-        if self.loop is None: return
-        
+        if self.loop is None:
+            return
+
         if not self.gemini_client.is_connected:
             print("\n[Aviso] Conecte-se ao Gemini (Tecla W) antes.")
             return
 
         print("\n[Comando] Tecla 'R': Solicitando descrição...")
-        
+
         # Dispara a tarefa assíncrona
-        asyncio.run_coroutine_threadsafe(self._send_transcription_task(), self.loop)
+        asyncio.run_coroutine_threadsafe(
+            self._send_transcription_task(), self.loop)
 
     async def _send_transcription_task(self):
         """Lógica de envio do prompt + snapshot"""
-        
+
         # 1. Pega o frame da VideoApp existente, já retorna em BLOB/Dict
-        # ASSUMIMOS que `frame_data` é um dicionário: 
+        # ASSUMIMOS que `frame_data` é um dicionário:
         # {"data": "base64_blob_aqui", "mime_type": "image/jpeg"}
-        frame_data = await self.video_app.get_snapshot() 
+        frame_data = await self.video_app.get_snapshot()
 
         if frame_data:
             try:
@@ -305,13 +318,13 @@ class MainController:
             print("[System] Frame capturado. Enviando payload formatado para IA...")
 
             prompt_text = self.transcription_app.get_prompt()
-            
+
             # --- CORREÇÃO AQUI ---
             # Passando o dicionário completo `frame_data` (que tem 'data' e 'mime_type')
             try:
                 response_text = TextClientApplication.generate_text_by_imagem_text(
-                    prompt = prompt_text, 
-                    image_part_data = frame_data # Usando o nome do parâmetro da classe
+                    prompt=prompt_text,
+                    image_part_data=frame_data  # Usando o nome do parâmetro da classe
                 )
                 print("\n\n>>> [Gemini Response] <<<")
                 print(response_text)
@@ -322,11 +335,12 @@ class MainController:
                 traceback.print_exc()
 
         else:
-            print("[Erro] Não foi possível capturar o frame (Câmera ocupada ou fechada).") 
+            print(
+                "[Erro] Não foi possível capturar o frame (Câmera ocupada ou fechada).")
 
     # --- WRAPPERS (MODIFICADOS) ---
-    
-    # A MUDANÇA CRUCIAL ESTÁ AQUI: 
+
+    # A MUDANÇA CRUCIAL ESTÁ AQUI:
     # Passamos o evento para dentro da task, em vez de esperar por ele fora.
 
     async def _audio_capture_wrapper(self):
@@ -339,21 +353,30 @@ class MainController:
         print(">>> Inicializando loop de vídeo (Aguardando flag...).")
         # Passamos o próprio evento (self.start_video_event) para a função de captura
         await self.video_app.task_capture_video(self.out_queue, self.start_video_event)
-        
-        
-        
-        
 
     # --- Funcionalidades Extras ---
+
     async def play_current_time(self):
         path = await asyncio.to_thread(self.clock_app.get_current_time_audio_path)
         if path:
-            asyncio.create_task(self.audio_app.play_file(path, self.audio_in_queue, self.loop))
+            asyncio.create_task(self.audio_app.play_file(
+                path, self.audio_in_queue, self.loop))
 
     async def play_current_date(self):
-        path = await asyncio.to_thread(self.date_app.get_current_date_audio_path)
-        if path:
-            asyncio.create_task(self.audio_app.play_file(path, self.audio_in_queue, self.loop))
+        # Agora chamamos o método novo (que retorna lista) e rodamos na thread
+        paths = await asyncio.to_thread(self.date_app.get_current_date_audio_paths)
+
+        if paths:
+            print(f"[Sistema] Reproduzindo data: {len(paths)} arquivos.")
+            for path in paths:
+                # O 'await' aqui é crucial para garantir a ordem de inserção na fila
+                # ou o início da task de reprodução na ordem correta
+                await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
+
+                # Opcional: Um pequeno delay entre os áudios para não ficar encavalado
+                # await asyncio.sleep(0.1)
+        else:
+            print("[Sistema] Nenhum áudio de data encontrado.")
 
     async def start_main_loop(self):
         self.loop = asyncio.get_running_loop()
@@ -376,16 +399,19 @@ class MainController:
         print("  [T]        : Data / Hora")
         print("  [A]        : Hold Áudio (Trava com duplo toque)")
         print("  [V]        : Hold Vídeo (Trava com duplo toque)")
-        print("="*45 + "\n") 
-        
+        print("="*45 + "\n")
+
         while self.app_running:
             await asyncio.sleep(0.5)
         print("[Sistema] Loop encerrado.")
 
     def cleanup(self):
-        if hasattr(self, 'keyboard_app'): self.keyboard_app.stop()
-        if hasattr(self, 'audio_app'): self.audio_app.close()
-        if hasattr(self, 'video_app'): self.video_app.release()
-    
+        if hasattr(self, 'keyboard_app'):
+            self.keyboard_app.stop()
+        if hasattr(self, 'audio_app'):
+            self.audio_app.close()
+        if hasattr(self, 'video_app'):
+            self.video_app.release()
+
     def getWebSocketState(self):
         return self.gemini_client.is_connected()
