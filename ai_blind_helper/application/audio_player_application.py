@@ -107,6 +107,16 @@ class AudioPlayerApplication:
         except asyncio.CancelledError:
             pass
 
+        
+    async def play_file(self, file_path: str, target_queue: asyncio.Queue, loop):
+        """Lê um arquivo WAV e injeta os chunks na fila de áudio para ser tocado"""
+        def process_file():
+            # Lê o arquivo e joga na fila usando threadsafe pois roda em thread
+            for chunk in self.wav_reader.read_chunks(file_path):
+                loop.call_soon_threadsafe(
+                    target_queue.put_nowait, chunk)
+        await asyncio.to_thread(process_file)
+
     def close(self):
         self.audio_input_manager.close()
         self.audio_output_manager.close()
