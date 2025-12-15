@@ -88,6 +88,11 @@ class KeyboardApplication:
         self.manager.register_key(evdev.ecodes.KEY_V, self.on_key_v)
         self.manager.register_key(evdev.ecodes.KEY_D, self.on_key_d)
         self.manager.register_key(evdev.ecodes.KEY_R, self.on_key_r)
+        
+        # Funções de audio control
+        self.manager.register_key(evdev.ecodes.KEY_J, self.on_key_j)
+        self.manager.register_key(evdev.ecodes.KEY_K, self.on_key_k)
+        self.manager.register_key(evdev.ecodes.KEY_L, self.on_key_l)
 
     # --- Lógica do Menu Rolável ---
 
@@ -201,3 +206,15 @@ class KeyboardApplication:
         if event_type == 'PRESS':
             print(">> [App] 'R' Action Triggered.")
             self.controller.handle_transcription_request()
+            
+    def on_key_j(self, event_type, duration):
+        if event_type == 'PRESS':
+            self.controller.handle_audio_rewind()
+            
+    def on_key_k(self, event_type, duration):
+        if event_type == 'PRESS':
+            self.controller.handle_audio_pause_toggle()
+            
+    def on_key_l(self, event_type, duration):
+        if event_type == 'PRESS':
+            self.controller.handle_audio_forward()
