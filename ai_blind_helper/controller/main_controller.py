@@ -16,15 +16,16 @@ from application import (
     DateApplication,
     DescriptionApplication,
     TranscriptionApplication,
-    TextClientApplication
+    TextClientApplication,
+    SystemMessageApplication
 )
-
 
 class MainController:
     def __init__(self, video_mode):
         # 1. Instanciação dos Sub-Sistemas
         self.clock_app = ClockApplication(language="pt")
         self.date_app = DateApplication(language="pt")
+        self.msg_app = SystemMessageApplication(language="pt")
         self.gemini_client = LiveClientApplication()
 
         # Audio e Video
@@ -361,6 +362,7 @@ class MainController:
     async def play_current_time(self):
         path = await asyncio.to_thread(self.clock_app.get_current_time_audio_path)
         if path:
+            print(path)
             asyncio.create_task(self.audio_app.play_file(
                 path, self.audio_in_queue, self.loop))
 
@@ -379,7 +381,20 @@ class MainController:
                 # await asyncio.sleep(0.1)
         else:
             print("[Sistema] Nenhum áudio de data encontrado.")
-
+            
+    async def play_current_power_on_message(self):
+        # O método get_current_welcome_message_path é rápido (só strings),
+        # pode chamar direto sem thread ou await.
+        path = self.msg_app.get_current_welcome_message_path()
+        if path: 
+            print(f"[Sistema] Reproduzindo Power On: {path}")
+            # Toca o arquivo diretamente. NÃO use 'for', pois path é uma string única.
+            await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
+        else:
+            print("[Sistema] Nenhum áudio de power on encontrado.") 
+    
+    
+    
     async def start_main_loop(self):
         self.loop = asyncio.get_running_loop()
         print("[Sistema] Iniciando monitor de teclado...")
@@ -388,6 +403,8 @@ class MainController:
         self.audio_playback_task = asyncio.create_task(
             self.audio_app.task_play_audio(self.audio_in_queue)
         )
+
+        await asyncio.create_task(self.play_current_power_on_message())
 
         # --- MENU VISUAL ATUALIZADO ---
         print("\n" + "="*45)
