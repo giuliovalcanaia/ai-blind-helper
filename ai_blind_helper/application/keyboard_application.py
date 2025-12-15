@@ -60,11 +60,15 @@ class KeyboardApplication:
             'q': {
                 'description': "Sair do Sistema",
                 'callback': self.on_key_q
+            },
+            'p': {
+                'description': "Mudar idioma",
+                'callback': self.on_key_p
             }
         }
         
         # Lista ordenada para garantir a navegação: w -> d -> r -> q
-        self.menu_order = ['w', 'd', 'r', 'q']
+        self.menu_order = ['w', 'd', 'r', 'q', 'p']
 
     def start(self):
         self.manager.start()
@@ -93,6 +97,7 @@ class KeyboardApplication:
         self.manager.register_key(evdev.ecodes.KEY_J, self.on_key_j)
         self.manager.register_key(evdev.ecodes.KEY_K, self.on_key_k)
         self.manager.register_key(evdev.ecodes.KEY_L, self.on_key_l)
+        
 
     # --- Lógica do Menu Rolável ---
 
@@ -218,3 +223,7 @@ class KeyboardApplication:
     def on_key_l(self, event_type, duration):
         if event_type == 'PRESS':
             self.controller.handle_audio_forward()
+            
+    def on_key_p(self, event_type, duration):
+        if event_type == 'PRESS':
+            self.controller.handle_cycle_language()
