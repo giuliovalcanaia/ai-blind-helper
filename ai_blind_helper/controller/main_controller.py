@@ -161,7 +161,7 @@ class MainController:
         """Libera o fluxo de áudio."""
         print(">>> ATIVANDO: Apenas Áudio")
         if hasattr(self.audio_app, 'reset_buffer'):
-            self.audio_app.reset_buffer()
+            self.audio_app.reset_playback_state() 
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
         # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
         # self.loop.call_soon_threadsafe(self.start_video_event.clear)

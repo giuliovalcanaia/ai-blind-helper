@@ -91,8 +91,8 @@ class KeyboardApplication:
         
         # Funções de audio control
         self.manager.register_key(evdev.ecodes.KEY_J, self.on_key_j)
-        self.manager.register_key(evdev.ecodes.KEY_J, self.on_key_k)
-        self.manager.register_key(evdev.ecodes.KEY_J, self.on_key_l)
+        self.manager.register_key(evdev.ecodes.KEY_K, self.on_key_k)
+        self.manager.register_key(evdev.ecodes.KEY_L, self.on_key_l)
 
     # --- Lógica do Menu Rolável ---
 
