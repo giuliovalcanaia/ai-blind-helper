@@ -49,18 +49,21 @@ class LiveClientApplication:
         while True:
             # Pega dados gerados pela Câmera/Microfone na Main App
             msg = await input_queue.get()
-            
-            # --- SEU PRINT SOLICITADO ---
-            # Verifica o tipo para ficar um log mais bonito
-            tipo = "DADOS"
-            if isinstance(msg, dict) and "mime_type" in msg:
-                if "audio" in msg["mime_type"]:
-                    tipo = "AUDIO"
-                elif "image" in msg["mime_type"]:
-                    tipo = "VIDEO"
-            
-            print(f" -> [Network] Enviando JSON ({tipo})...")
+
+            # # --- SEU PRINT SOLICITADO ---
+            # # Verifica o tipo para ficar um log mais bonito
+            # tipo = "DADOS"
+            # if isinstance(msg, dict) and "mime_type" in msg:
+            #     if "audio" in msg["mime_type"]:
+            #         tipo = "AUDIO"
+            #     elif "image" in msg["mime_type"]:
+            #         tipo = "VIDEO"
+            #
+            # print(f" -> [Network] Enviando JSON ({tipo})...")
             # -----------------------------
+
+            # Imprime a fila de espera de chunks que estão para serem enviados
+            # print("Tamanho da fila de audio", input_queue.qsize())
 
             await session.send(input=msg)
             input_queue.task_done()

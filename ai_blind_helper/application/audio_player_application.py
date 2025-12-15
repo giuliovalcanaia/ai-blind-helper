@@ -30,62 +30,38 @@ class AudioPlayerApplication:
 
     async def task_capture_audio(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
         """
-        Lê do Mic e realiza três ações simultâneas:
-        1. Salva no arquivo 'completo'.
-        2. Salva cada pedaço em um arquivo individual na pasta 'chunks'.
-        3. Envia para a fila da IA.
+        Lê do Mic continuamente.
+        Se o botão A estiver ATIVO: Envia o som real.
+        Se o botão A estiver INATIVO: Substitui por silêncio (0x00), mas continua enviando.
         """
         self.audio_input_manager.start_input_stream()
-        print(" -> [AudioApp] Microfone Iniciado.")
-
-        # --- PREPARAÇÃO DAS PASTAS DESTA SESSÃO ---
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        session_dir = os.path.join(
-            self.base_debug_folder, f"sessao_{timestamp}")
-        chunks_dir = os.path.join(session_dir, "chunks")
-
-        os.makedirs(chunks_dir, exist_ok=True)
-        print(f"🎙️ [Audio] Salvando debug completo e chunks em: {session_dir}")
-
-        full_filename = os.path.join(session_dir, "full_recording.wav")
-        chunk_counter = 0
+        print(" -> [AudioApp] Microfone Iniciado (Modo Always-On).")
 
         try:
-            # Abre o arquivo "PAI" (Gravação contínua)
-            with wave.open(full_filename, 'wb') as wf_full:
-                self._setup_wav_header(wf_full)
+            while True:
+                # 1. LEITURA DO HARDWARE (Sempre executada)
+                # É crucial ler mesmo quando "pausado" para manter o clock do hardware
+                # e esvaziar o buffer do sistema operacional.
+                data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
 
-                while True:
-                    # 1. PAUSA / RESUME
+                if data:
+                    # 2. LÓGICA DO BOTÃO "A"
+                    # Se o evento NÃO estiver setado (Botão desligado), forçamos silêncio.
                     if not control_event.is_set():
-                        print("🔴 [Audio] Pausado...")
-                        await control_event.wait()
-                        print("🟢 [Audio] Retomando...")
-                        try:
-                            await asyncio.to_thread(self._flush_input_buffer)
-                        except Exception:
-                            pass
+                        # Cria um bloco de bytes nulos do mesmo tamanho do chunk lido
+                        data = b'\x00' * len(data)
 
-                    # 2. LEITURA DO HARDWARE
-                    data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
+                        # Opcional: Se quiser um debug visual para saber que está em "Mute Ativo"
+                        # print(".", end="", flush=True)
 
-                    if data:
-                        # --- A: Salva no arquivo contínuo ---
-                        wf_full.writeframes(data)
+                    # 3. ENVIO (Voz Real ou Silêncio Fabricado)
+                    # O Gemini receberá o fluxo contínuo, mantendo a sessão estável.
+                    await out_queue.put({"data": data, "mime_type": "audio/pcm"})
 
-                        # --- B: Salva o Chunk isolado (EXATAMENTE como a IA recebe) ---
-                        chunk_filename = os.path.join(
-                            chunks_dir, f"chunk_{chunk_counter:05d}.wav")
-                        # Atenção: Abrir e fechar arquivos em loop é custoso (IO),
-                        # mas necessário para isolar os arquivos.
-                        with wave.open(chunk_filename, 'wb') as wf_chunk:
-                            self._setup_wav_header(wf_chunk)
-                            wf_chunk.writeframes(data)
-
-                        chunk_counter += 1
-
-                        # --- C: Envia para a IA ---
-                        await out_queue.put({"data": data, "mime_type": "audio/pcm"})
+        except asyncio.CancelledError:
+            print(" -> [AudioApp] Cancelado.")
+        except Exception as e:
+            print(f" -> [AudioApp] Erro fatal: {e}")
 
         except asyncio.CancelledError:
             print(" -> [AudioApp] Cancelado. Arquivos fechados com sucesso.")

@@ -420,9 +420,19 @@ class MainController:
         print("  [V]        : Hold Vídeo (Trava com duplo toque)")
         print("="*45 + "\n")
 
-        while self.app_running:
-            await asyncio.sleep(0.5)
-        print("[Sistema] Loop encerrado.")
+        try:
+            while self.app_running:
+                await asyncio.sleep(0.5)
+            print("[Sistema] Loop encerrado.")
+
+        except asyncio.CancelledError:
+            print("\n[Sistema] Loop interrompido pelo Sistema (Ctrl+C).")
+
+        finally:
+            print("\n[Sistema] Iniciando protocolo de desconexão...")
+            await self._stop_session_task()
+            if self.audio_playback_task:
+                self.audio_playback_task.cancel()
 
     def cleanup(self):
         if hasattr(self, 'keyboard_app'):
