@@ -20,6 +20,7 @@ from application import (
     SystemMessageApplication
 )
 
+
 class MainController:
     def __init__(self, video_mode):
         # 1. Instanciação dos Sub-Sistemas
@@ -42,7 +43,7 @@ class MainController:
 
         # 2. Filas de comunicação
         self.audio_in_queue = asyncio.Queue()     # Recebe do Gemini
-        self.out_queue = asyncio.Queue(maxsize=5)  # Envia para o Gemini
+        self.out_queue = asyncio.Queue(maxsize=200)  # Envia para o Gemini
 
         # 3. Estado e Controle
         self.app_running = True
@@ -76,10 +77,10 @@ class MainController:
             return
 
         if self.session_task and not self.session_task.done():
-            print("\n[Comando] Tecla 'I': Encerrando conexão...")
+            print("\n[Comando] Tecla 'W': Encerrando conexão...")
             self.stop_session()
         else:
-            print("\n[Comando] Tecla 'I': Conectando WebSocket...")
+            print("\n[Comando] Tecla 'W': Conectando WebSocket...")
             # Garante que começa travado
             self.start_audio_event.clear()
             self.start_video_event.clear()
@@ -162,7 +163,7 @@ class MainController:
         """Libera o fluxo de áudio."""
         print(">>> ATIVANDO: Apenas Áudio")
         if hasattr(self.audio_app, 'reset_buffer'):
-            self.audio_app.reset_playback_state() 
+            self.audio_app.reset_playback_state()
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
         # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
         # self.loop.call_soon_threadsafe(self.start_video_event.clear)
@@ -182,12 +183,13 @@ class MainController:
         """Pausa o envio de vídeo (Hardware continua ligado, mas loop trava)."""
         print(">>> PAUSANDO: Vídeo")
         self.loop.call_soon_threadsafe(self.start_video_event.clear)
+        self.loop.call_soon_threadsafe(self.start_audio_event.clear)
 
-    def stop_all_sending(self):
-        """Pausa tudo (modo mute/privacidade)."""
-        print(">>> PAUSANDO: Tudo")
-        self.stop_sending_audio()
-        self.stop_sending_video()
+    # def stop_all_sending(self):
+    #     """Pausa tudo (modo mute/privacidade)."""
+    #     print(">>> PAUSANDO: Tudo")
+    #     self.stop_sending_audio()
+    #     self.stop_sending_video()
 
     # --- Gerenciamento da Sessão ---
 
@@ -381,20 +383,18 @@ class MainController:
                 # await asyncio.sleep(0.1)
         else:
             print("[Sistema] Nenhum áudio de data encontrado.")
-            
+
     async def play_current_power_on_message(self):
         # O método get_current_welcome_message_path é rápido (só strings),
         # pode chamar direto sem thread ou await.
         path = self.msg_app.get_current_welcome_message_path()
-        if path: 
+        if path:
             print(f"[Sistema] Reproduzindo Power On: {path}")
             # Toca o arquivo diretamente. NÃO use 'for', pois path é uma string única.
             await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
         else:
-            print("[Sistema] Nenhum áudio de power on encontrado.") 
-    
-    
-    
+            print("[Sistema] Nenhum áudio de power on encontrado.")
+
     async def start_main_loop(self):
         self.loop = asyncio.get_running_loop()
         print("[Sistema] Iniciando monitor de teclado...")
@@ -434,8 +434,6 @@ class MainController:
 
     def getWebSocketState(self):
         return self.gemini_client.is_connected()
-
-
 
     # --- CONTROLES DE PLAYBACK DE ÁUDIO ---
 

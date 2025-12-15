@@ -96,7 +96,7 @@ class AudioPlayerApplication:
         """Configura o cabeçalho WAV padrão para evitar repetição de código"""
         wav_file.setnchannels(Config.CHANNELS)
         wav_file.setsampwidth(2)  # 16-bit PCM
-        wav_file.setframerate(Config.RECEIVE_SAMPLE_RATE)
+        wav_file.setframerate(Config.SEND_SAMPLE_RATE)
 
     def _flush_input_buffer(self):
         """Limpeza de buffer ao retomar pause"""
@@ -119,8 +119,6 @@ class AudioPlayerApplication:
                 input_queue.task_done()
         except asyncio.CancelledError:
             pass
-
-    
 
     def close(self):
         self.audio_input_manager.close()
