@@ -41,34 +41,39 @@ class KeyboardApplication:
 
     def _setup_menu_structure(self):
         """
-        Define o dicionário e a ordem do menu rolável.
-        As chaves 'w', 'd', 'r', 'q' mapeiam para descrições e os callbacks existentes.
+        Define o dicionário, a ordem e AGORA o feedback de áudio (runnable).
         """
         self.menu_actions = {
             'w': {
                 'description': "Conectar / Desconectar",
-                'callback': self.on_key_w
+                'callback': self.on_key_w,
+                # Exemplo 1: Usando TTS (Texto para fala)
+                'on_select': lambda: self.controller.play_menu_websocket()
             },
             'd': {
                 'description': "Descrever Ambiente",
-                'callback': self.on_key_d
+                'callback': self.on_key_d,
+                # Exemplo 2: Tocando um arquivo de áudio específico (WAV/MP3)
+                'on_select': lambda: self.controller.play_menu_describe()
             },
             'r': {
                 'description': "Ler / Transcrever",
-                'callback': self.on_key_r
+                'callback': self.on_key_r,
+                'on_select': lambda: self.controller.play_menu_transcribe()
             },
             'q': {
                 'description': "Sair do Sistema",
-                'callback': self.on_key_q
+                'callback': self.on_key_q,
+                'on_select': lambda: self.controller.play_menu_exit()
             },
             'p': {
                 'description': "Mudar idioma",
-                'callback': self.on_key_p
+                'callback': self.on_key_p,
+                'on_select': lambda: self.controller.play_menu_change_language()
             }
         }
         
-        # Lista ordenada para garantir a navegação: w -> d -> r -> q
-        self.menu_order = ['w', 'd', 'r', 'q', 'p']
+        self.menu_order = ['w', 'd', 'r', 'p', 'q'] 
 
     def start(self):
         self.manager.start()
@@ -135,6 +140,27 @@ class KeyboardApplication:
             # Chama a função mapeada simulando um evento 'PRESS' com duração 0
             # Isso reutiliza exatamente a lógica que você já programou abaixo.
             item['callback'](event_type='PRESS', duration=0.0)
+
+
+    def _announce_current_selection(self):
+        """
+        Feedback visual/auditivo ao navegar.
+        Puxa o runnable de audio do dicionário e executa.
+        """
+        # 1. Pega o item atual baseando-se no index
+        item = self._get_current_menu_item()
+        
+        # 2. Feedback Visual (Log)
+        msg = f">> [MENU] Selecionado: {item['description']} (Tecla virtual: {self.menu_order[self.menu_index].upper()})"
+        print(msg)
+
+        # 3. Feedback Auditivo (Executa o runnable configurado)
+        if 'on_select' in item and callable(item['on_select']):
+            try:
+                # Aqui ele "puxa o runnable e roda"
+                item['on_select']() 
+            except Exception as e:
+                print(f"Erro ao executar audio do menu: {e}")
 
     # --- Callbacks Originais (Lógica de Aplicação) ---
 

@@ -17,7 +17,8 @@ from application import (
     DescriptionApplication,
     TranscriptionApplication,
     TextClientApplication,
-    SystemMessageApplication
+    SystemMessageApplication,
+    MenuApplication
 )
 
 class MainController:
@@ -26,6 +27,7 @@ class MainController:
         self.clock_app = ClockApplication(language=Config.LANGUAGE)
         self.date_app = DateApplication(language=Config.LANGUAGE)
         self.msg_app = SystemMessageApplication(language=Config.LANGUAGE)
+        self.menu_app = MenuApplication(language=Config.LANGUAGE)
         
         self.gemini_client = LiveClientApplication()
 
@@ -454,7 +456,53 @@ class MainController:
         """Tecla (Ex: Seta Direita): Avança 5 segundos"""
         if hasattr(self.audio_app, 'forward'):
             self.audio_app.forward(seconds=5)
+        
+    async def _play_menu_path(self, path):
+        """Helper interno para tocar sons do menu"""
+        if path:
+            # Opcional: Se quiser que o som do menu corte o anterior imediatamente:
+            # if hasattr(self.audio_app, 'stop'):
+            #     await self.audio_app.stop()
             
+            print(f"[Menu] Reproduzindo ícone sonoro: {path}")
+            await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
+
+    def play_menu_change_language(self):
+        """Toca o áudio: change-language.wav"""
+        if self.loop is None: return
+        path = self.menu_app.get_change_language_audio_path()
+        print(f"Play menu change language: {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+
+    def play_menu_describe(self):
+        """Toca o áudio: describe.wav (Ao focar na opção de descrever)"""
+        path = self.menu_app.get_describe_audio_path()
+        if self.loop is None: return
+        print(f"Play menu describe: {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+
+    def play_menu_exit(self):
+        """Toca o áudio: exit.wav (Ao focar na opção de sair)"""
+        if self.loop is None: return
+        path = self.menu_app.get_exit_audio_path()
+        print(f"Play menu exit: {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+
+    def play_menu_transcribe(self):
+        """Toca o áudio: transcribe.wav (Ao focar na opção de ler texto)"""
+        if self.loop is None: return
+        path = self.menu_app.get_transcribe_audio_path()
+        print(f"Play menu transcribe: {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+
+    def play_menu_websocket(self):
+        """Toca o áudio: websocket.wav (Ao focar na opção de conexão)"""
+        if self.loop is None: return
+        path = self.menu_app.get_websocket_audio_path()
+        print(f"Play menu Websocket")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+
+        
     # --- FUNCOES PARA TROCAR O IDIOMA ---
     def set_system_language(self, new_lang: str):
         """
@@ -468,10 +516,10 @@ class MainController:
         # 1. Atualiza e Persiste (Guarda no JSON)
         Config.set_language(new_lang)
 
-        # 2. Recria as instâncias que dependem do idioma (Hot-Swap)
-        self.clock_app = ClockApplication(language=new_lang)
-        self.date_app = DateApplication(language=new_lang)
-        self.msg_app = SystemMessageApplication(language=new_lang)
+        self.clock_app.set_language(language=new_lang)
+        self.date_app.set_language(language=new_lang)
+        self.msg_app.set_language(language=new_lang)
+        self.menu_app.set_language(language=new_lang)
         
         # Se estas apps também tiverem suporte a multi-idioma, recrie-as também:
         # self.description_app = DescriptionApplication(language=new_lang)
