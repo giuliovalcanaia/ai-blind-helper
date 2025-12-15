@@ -1,6 +1,33 @@
 import os
 import pyaudio
+import json
 from google.genai import types
+
+# Define o nome do ficheiro de persistência
+SETTINGS_FILE = "settings.json"
+
+def load_persistent_settings():
+    """Carrega as definições do ficheiro JSON."""
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[Config] Erro ao ler settings: {e}")
+    return {}
+
+def save_persistent_setting(key, value):
+    """Guarda uma definição específica no JSON."""
+    settings = load_persistent_settings()
+    settings[key] = value
+    try:
+        with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, indent=4)
+    except Exception as e:
+        print(f"[Config] Erro ao guardar settings: {e}")
+
+# Carrega as definições antes de criar a classe
+_initial_settings = load_persistent_settings()
 
 
 class Config:
@@ -15,6 +42,23 @@ class Config:
     MODEL_TEXT = "models"
 
     MODEL_TEXT_GENERATOR = "gemini-3-pro-preview"
+
+
+
+    # LINGUAGEM
+
+    # Define o nome do ficheiro de persistência
+    SETTINGS_FILE = "settings.json" 
+    
+    LANGUAGES = ['pt', 'en']
+    LANGUAGE = _initial_settings.get("language", "pt")
+    
+    
+    @staticmethod
+    def set_language(new_lang):
+        """Atualiza a variável em memória e persiste no ficheiro."""
+        Config.LANGUAGE = new_lang
+        save_persistent_setting("language", new_lang)
 
     # Audio Settings
     AUDIO_FORMAT = pyaudio.paInt16
