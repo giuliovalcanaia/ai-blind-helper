@@ -17,7 +17,8 @@ from application import (
     DescriptionApplication,
     TranscriptionApplication,
     TextClientApplication,
-    SystemMessageApplication
+    SystemMessageApplication,
+    AudioSFXApplication
 )
 
 class MainController:
@@ -26,6 +27,7 @@ class MainController:
         self.clock_app = ClockApplication(language="pt")
         self.date_app = DateApplication(language="pt")
         self.msg_app = SystemMessageApplication(language="pt")
+        self.sfx_app = AudioSFXApplication()
         self.gemini_client = LiveClientApplication()
 
         # Audio e Video
@@ -71,21 +73,30 @@ class MainController:
     # --- Callbacks do Teclado ---
 
     def handle_toggle_connect(self):
-        """Tecla 'I': Conecta/Desconecta o WebSocket."""
+        """Tecla 'W': Conecta/Desconecta o WebSocket."""
         if self.loop is None:
             return
 
         if self.session_task and not self.session_task.done():
-            print("\n[Comando] Tecla 'I': Encerrando conexão...")
+            print("\n[Comando] Tecla 'W': Encerrando conexão...")
+            
+            # --- CORREÇÃO 1: Usar run_coroutine_threadsafe ---
+            asyncio.run_coroutine_threadsafe(
+                self.closing_gemini_audio(), self.loop)
+            
             self.stop_session()
         else:
-            print("\n[Comando] Tecla 'I': Conectando WebSocket...")
+            print("\n[Comando] Tecla 'W': Conectando WebSocket...")
             # Garante que começa travado
             self.start_audio_event.clear()
             self.start_video_event.clear()
+            
+            # --- CORREÇÃO 2: Usar run_coroutine_threadsafe ---
+            asyncio.run_coroutine_threadsafe(
+                self.initiating_gemini_audio(), self.loop)
 
             asyncio.run_coroutine_threadsafe(
-                self._start_connection_manager(), self.loop)
+                self._start_connection_manager(), self.loop) 
 
     def handle_quit(self):
         print("\n[Comando] Tecla Q: Saindo...")
@@ -453,3 +464,53 @@ class MainController:
         """Tecla (Ex: Seta Direita): Avança 5 segundos"""
         if hasattr(self.audio_app, 'forward'):
             self.audio_app.forward(seconds=5)
+            
+            
+    # --- FUNCOES DE REPRODUCAO DE AUDIO DO SISTEMA ---
+    
+    async def play_file_by_path(self, path):
+        if path: 
+            print(f"[Sistema] Reproduzindo: {path}")
+            # Toca o arquivo diretamente. NÃO use 'for', pois path é uma string única.
+            await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
+        else:
+            print(f"[Sistema] Nenhum áudio encontrado: {path}") 
+    
+    # --- CORREÇÃO FINAL PARA SONS DO TECLADO ---
+    
+    # --- MÉTODOS DE ÁUDIO DE SISTEMA (Async) ---
+    # Estes são chamados via run_coroutine_threadsafe dentro do handle_toggle_connect
+
+    async def initiating_gemini_audio(self):
+        """Toca o som de 'iniciando conexão'."""
+        path = self.msg_app.get_initiating_gemini()
+        await self.play_file_by_path(path)
+        
+    async def closing_gemini_audio(self):
+        """Toca o som de 'encerrando conexão'."""
+        path = self.msg_app.get_closing_gemini()  
+        await self.play_file_by_path(path)
+
+    # 1. MÉTODOS PÚBLICOS (Síncronos - Para o KeyboardApp chamar)
+    def audio_button_press(self):
+        """Chamado pelo teclado. Agenda a tarefa no loop principal."""
+        if self.loop and self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(
+                self._task_audio_button_press(), self.loop
+            )
+
+    def audio_button_release(self):
+        """Chamado pelo teclado. Agenda a tarefa no loop principal."""
+        if self.loop and self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(
+                self._task_audio_button_release(), self.loop
+            )
+
+    # 2. TAREFAS INTERNAS (Assíncronas - Onde o 'await' acontece)
+    async def _task_audio_button_press(self):
+        path = self.sfx_app.get_audio_button_press()
+        await self.play_file_by_path(path)
+
+    async def _task_audio_button_release(self):
+        path = self.sfx_app.get_audio_button_release()
+        await self.play_file_by_path(path) 

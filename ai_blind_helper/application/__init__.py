@@ -10,3 +10,4 @@ from .video_player_application import VideoPlayerApplication
 from .volume_control_application import VolumeControlApplication
 from .text_client_application import TextClientApplication
 from .system_message_application import SystemMessageApplication
+from .audio_sfx_application import AudioSFXApplication

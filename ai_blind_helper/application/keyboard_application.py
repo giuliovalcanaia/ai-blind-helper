@@ -1,4 +1,5 @@
 import evdev
+import asyncio
 from manager import KeyboardManager
 from config import Config
 
@@ -156,6 +157,7 @@ class KeyboardApplication:
         if event_type == 'PRESS':
             if not self.audio_pressed:
                 print("Audio iniciado (A)")
+                self.controller.audio_button_press()
                 self.audio_pressed = True
                 self.audio_is_locked = False
                 self.controller.start_sending_audio_only()
@@ -163,12 +165,15 @@ class KeyboardApplication:
             if (self.audio_is_locked):
                 self.controller.stop_sending_audio()
                 print("Audio finalizado (A - UNLOCK)")
+                self.controller.audio_button_release()                
                 self.audio_pressed = False
+
             elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
                 print("Audio Lock ativado")
                 self.audio_is_locked = True
             else:
                 print("Audio Hold finalizado")
+                self.controller.audio_button_release()
                 self.controller.stop_sending_audio() 
         
     def on_key_v(self, event_type, duration):

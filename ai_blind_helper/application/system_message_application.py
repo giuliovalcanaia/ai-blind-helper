@@ -47,3 +47,26 @@ class SystemMessageApplication:
     def set_language(self, language):
         """Permite trocar o idioma dinamicamente"""
         self.language = language
+
+        
+    def get_closing_gemini(self):
+        return self.get_full_path("closing-gemini.wav")
+
+    def get_initiating_gemini(self):
+        return self.get_full_path("initiating-gemini.wav")
+        
+    def get_full_path(self, path):
+        full_path = os.path.join(
+            self.base_dir,
+            self.language,
+            "system",
+            path
+        )
+
+        # Verifica se o arquivo realmente existe antes de retornar
+        if os.path.exists(full_path):
+            print(full_path)
+            return full_path
+        else:
+            print(f"[SystemMessageApp] Arquivo não encontrado: {full_path}")
+            return None
