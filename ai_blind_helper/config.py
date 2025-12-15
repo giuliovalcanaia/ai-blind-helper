@@ -11,7 +11,7 @@ class Config:
 
     API_VERSION_TEXT_API_GEMINI_3 = 'v1alpha'
 
-    MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025"
+    MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025"
     MODEL_TEXT = "models"
 
     MODEL_TEXT_GENERATOR = "gemini-3-pro-preview"
