@@ -20,13 +20,13 @@ from application import (
     SystemMessageApplication
 )
 
+
 class MainController:
     def __init__(self, video_mode):
         # 1. Instanciação dos Sub-Sistemas
-        self.clock_app = ClockApplication(language=Config.LANGUAGE)
-        self.date_app = DateApplication(language=Config.LANGUAGE)
-        self.msg_app = SystemMessageApplication(language=Config.LANGUAGE)
-        
+        self.clock_app = ClockApplication(language="pt")
+        self.date_app = DateApplication(language="pt")
+        self.msg_app = SystemMessageApplication(language="pt")
         self.gemini_client = LiveClientApplication()
 
         # Audio e Video
@@ -43,7 +43,7 @@ class MainController:
 
         # 2. Filas de comunicação
         self.audio_in_queue = asyncio.Queue()     # Recebe do Gemini
-        self.out_queue = asyncio.Queue(maxsize=5)  # Envia para o Gemini
+        self.out_queue = asyncio.Queue(maxsize=200)  # Envia para o Gemini
 
         # 3. Estado e Controle
         self.app_running = True
@@ -77,10 +77,10 @@ class MainController:
             return
 
         if self.session_task and not self.session_task.done():
-            print("\n[Comando] Tecla 'I': Encerrando conexão...")
+            print("\n[Comando] Tecla 'W': Encerrando conexão...")
             self.stop_session()
         else:
-            print("\n[Comando] Tecla 'I': Conectando WebSocket...")
+            print("\n[Comando] Tecla 'W': Conectando WebSocket...")
             # Garante que começa travado
             self.start_audio_event.clear()
             self.start_video_event.clear()
@@ -163,7 +163,7 @@ class MainController:
         """Libera o fluxo de áudio."""
         print(">>> ATIVANDO: Apenas Áudio")
         if hasattr(self.audio_app, 'reset_buffer'):
-            self.audio_app.reset_playback_state() 
+            self.audio_app.reset_playback_state()
         self.loop.call_soon_threadsafe(self.start_audio_event.set)
         # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
         # self.loop.call_soon_threadsafe(self.start_video_event.clear)
@@ -183,12 +183,13 @@ class MainController:
         """Pausa o envio de vídeo (Hardware continua ligado, mas loop trava)."""
         print(">>> PAUSANDO: Vídeo")
         self.loop.call_soon_threadsafe(self.start_video_event.clear)
+        self.loop.call_soon_threadsafe(self.start_audio_event.clear)
 
-    def stop_all_sending(self):
-        """Pausa tudo (modo mute/privacidade)."""
-        print(">>> PAUSANDO: Tudo")
-        self.stop_sending_audio()
-        self.stop_sending_video()
+    # def stop_all_sending(self):
+    #     """Pausa tudo (modo mute/privacidade)."""
+    #     print(">>> PAUSANDO: Tudo")
+    #     self.stop_sending_audio()
+    #     self.stop_sending_video()
 
     # --- Gerenciamento da Sessão ---
 
@@ -382,20 +383,18 @@ class MainController:
                 # await asyncio.sleep(0.1)
         else:
             print("[Sistema] Nenhum áudio de data encontrado.")
-            
+
     async def play_current_power_on_message(self):
         # O método get_current_welcome_message_path é rápido (só strings),
         # pode chamar direto sem thread ou await.
         path = self.msg_app.get_current_welcome_message_path()
-        if path: 
+        if path:
             print(f"[Sistema] Reproduzindo Power On: {path}")
             # Toca o arquivo diretamente. NÃO use 'for', pois path é uma string única.
             await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
         else:
-            print("[Sistema] Nenhum áudio de power on encontrado.") 
-    
-    
-    
+            print("[Sistema] Nenhum áudio de power on encontrado.")
+
     async def start_main_loop(self):
         self.loop = asyncio.get_running_loop()
         print("[Sistema] Iniciando monitor de teclado...")
@@ -421,9 +420,19 @@ class MainController:
         print("  [V]        : Hold Vídeo (Trava com duplo toque)")
         print("="*45 + "\n")
 
-        while self.app_running:
-            await asyncio.sleep(0.5)
-        print("[Sistema] Loop encerrado.")
+        try:
+            while self.app_running:
+                await asyncio.sleep(0.5)
+            print("[Sistema] Loop encerrado.")
+
+        except asyncio.CancelledError:
+            print("\n[Sistema] Loop interrompido pelo Sistema (Ctrl+C).")
+
+        finally:
+            print("\n[Sistema] Iniciando protocolo de desconexão...")
+            await self._stop_session_task()
+            if self.audio_playback_task:
+                self.audio_playback_task.cancel()
 
     def cleanup(self):
         if hasattr(self, 'keyboard_app'):
@@ -435,8 +444,6 @@ class MainController:
 
     def getWebSocketState(self):
         return self.gemini_client.is_connected()
-
-
 
     # --- CONTROLES DE PLAYBACK DE ÁUDIO ---
 
@@ -454,30 +461,7 @@ class MainController:
         """Tecla (Ex: Seta Direita): Avança 5 segundos"""
         if hasattr(self.audio_app, 'forward'):
             self.audio_app.forward(seconds=5)
-            
-    # --- FUNCOES PARA TROCAR O IDIOMA ---
-    def set_system_language(self, new_lang: str):
-        """
-        Altera o idioma global, persiste a escolha e reinicializa os subsistemas.
-        """
-        if new_lang == Config.LANGUAGE:
-            return
 
-        print(f">>> [Sistema] A alterar idioma para: {new_lang.upper()} e a guardar...")
-        
-        # 1. Atualiza e Persiste (Guarda no JSON)
-        Config.set_language(new_lang)
-
-        # 2. Recria as instâncias que dependem do idioma (Hot-Swap)
-        self.clock_app = ClockApplication(language=new_lang)
-        self.date_app = DateApplication(language=new_lang)
-        self.msg_app = SystemMessageApplication(language=new_lang)
-        
-        # Se estas apps também tiverem suporte a multi-idioma, recrie-as também:
-        # self.description_app = DescriptionApplication(language=new_lang)
-        
-        print(f">>> [Sistema] Idioma {new_lang.upper()} aplicado e persistido.")
-        
     def handle_cycle_language(self):
         """
         Cicla entre os idiomas disponíveis (PT -> EN -> ES -> ...)

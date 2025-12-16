@@ -2,6 +2,7 @@ import evdev
 from manager import KeyboardManager
 from config import Config
 
+
 class KeyboardApplication:
     """
     Responsabilidade:
@@ -10,7 +11,7 @@ class KeyboardApplication:
     - Tratar a lógica (se deve agir no press ou no release)
     - Gerenciar o Menu Rolável
     """
-    
+
     # --- Configuração das Teclas de Navegação do Menu ---
     # Altere aqui para os códigos do seu hardware se necessário
     KEY_MENU_BACK = evdev.ecodes.KEY_LEFT
@@ -19,14 +20,14 @@ class KeyboardApplication:
 
     def __init__(self, controller, device_path):
         self.controller = controller
-        
+
         # Instancia o manager (sem modificações)
         self.manager = KeyboardManager(device_path)
-        
+
         # Estado do Menu
         self.menu_index = 0
-        self.menu_active = True # Se quiser que o menu comece ativo
-        
+        self.menu_active = True  # Se quiser que o menu comece ativo
+
         # --- Configuração do Dicionário do Menu (W, D, R, Q) ---
         self._setup_menu_structure()
 
@@ -66,7 +67,7 @@ class KeyboardApplication:
                 'callback': self.on_key_p
             }
         }
-        
+
         # Lista ordenada para garantir a navegação: w -> d -> r -> q
         self.menu_order = ['w', 'd', 'r', 'q', 'p']
 
@@ -78,7 +79,7 @@ class KeyboardApplication:
 
     def _setup_bindings(self):
         """Registra as teclas no manager."""
-        
+
         # --- Teclas de Navegação do Menu ---
         self.manager.register_key(self.KEY_MENU_BACK, self.on_menu_back)
         self.manager.register_key(self.KEY_MENU_FORWARD, self.on_menu_forward)
@@ -92,7 +93,7 @@ class KeyboardApplication:
         self.manager.register_key(evdev.ecodes.KEY_V, self.on_key_v)
         self.manager.register_key(evdev.ecodes.KEY_D, self.on_key_d)
         self.manager.register_key(evdev.ecodes.KEY_R, self.on_key_r)
-        
+
         # Funções de audio control
         self.manager.register_key(evdev.ecodes.KEY_J, self.on_key_j)
         self.manager.register_key(evdev.ecodes.KEY_K, self.on_key_k)
@@ -111,9 +112,10 @@ class KeyboardApplication:
         IMPORTANTE: Adicione aqui a chamada para o seu TTS (self.controller.falar(...))
         """
         item = self._get_current_menu_item()
-        msg = f">> [MENU] Selecionado: {item['description']} (Tecla virtual: {self.menu_order[self.menu_index].upper()})"
+        msg = f">> [MENU] Selecionado: {item['description']} (Tecla virtual: {
+            self.menu_order[self.menu_index].upper()})"
         print(msg)
-        # Exemplo: self.controller.speak(item['description']) 
+        # Exemplo: self.controller.speak(item['description'])
 
     def on_menu_forward(self, event_type, duration):
         if event_type == 'PRESS':
@@ -131,7 +133,7 @@ class KeyboardApplication:
         if event_type == 'PRESS':
             item = self._get_current_menu_item()
             print(f">> [MENU] Confirmando ação: {item['description']}")
-            
+
             # Chama a função mapeada simulando um evento 'PRESS' com duração 0
             # Isso reutiliza exatamente a lógica que você já programou abaixo.
             item['callback'](event_type='PRESS', duration=0.0)
@@ -146,17 +148,19 @@ class KeyboardApplication:
     def on_key_t(self, event_type, duration):
         if event_type == 'RELEASE':
             if (duration > Config.LOCK_THRESHOLD_MS_DATE):
-                print(f">> [App] 'T' Solto após {duration:.2f}ms. Dizendo data...")
+                print(f">> [App] 'T' Solto após {
+                      duration:.2f}ms. Dizendo data...")
                 self.controller.handle_date_request()
             else:
-                print(f">> [App] 'T' Solto após {duration:.2f}ms. Dizendo horas...")
+                print(f">> [App] 'T' Solto após {
+                      duration:.2f}ms. Dizendo horas...")
                 self.controller.handle_time_request()
 
     def on_key_q(self, event_type, duration):
         if event_type == 'PRESS':
             print(">> [App] 'Q' Action Triggered. Quitting...")
             self.controller.handle_quit()
-            
+
     def on_key_a(self, event_type, duration):
         if event_type == 'PRESS':
             if not self.audio_pressed:
@@ -174,8 +178,8 @@ class KeyboardApplication:
                 self.audio_is_locked = True
             else:
                 print("Audio Hold finalizado")
-                self.controller.stop_sending_audio() 
-        
+                self.controller.stop_sending_audio()
+
     def on_key_v(self, event_type, duration):
         if event_type == 'PRESS':
             if not self.video_pressed:
@@ -185,11 +189,7 @@ class KeyboardApplication:
                 self.controller.start_sending_audio_video()
         elif event_type == 'RELEASE':
             if (self.video_is_locked):
-                if (self.audio_is_locked or self.audio_pressed):
-                    print("Parando vídeo, mantendo audio")
-                    self.controller.stop_sending_video()
-                else:
-                    self.controller.stop_all_sending()
+                self.controller.stop_sending_video()
                 print("Video finalizado (V - UNLOCK)")
                 self.video_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_VIDEO:
@@ -197,11 +197,9 @@ class KeyboardApplication:
                 self.video_is_locked = True
             else:
                 print("Video Hold finalizado")
-                if (self.audio_is_locked or self.audio_pressed):
-                    self.controller.stop_sending_video()
-                else:
-                    self.controller.stop_all_sending()
-                    
+                self.controller.stop_sending_video()
+                self.video_pressed = False
+
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':
             print(">> [App] 'D' Action Triggered.")
@@ -211,15 +209,15 @@ class KeyboardApplication:
         if event_type == 'PRESS':
             print(">> [App] 'R' Action Triggered.")
             self.controller.handle_transcription_request()
-            
+
     def on_key_j(self, event_type, duration):
         if event_type == 'PRESS':
             self.controller.handle_audio_rewind()
-            
+
     def on_key_k(self, event_type, duration):
         if event_type == 'PRESS':
             self.controller.handle_audio_pause_toggle()
-            
+
     def on_key_l(self, event_type, duration):
         if event_type == 'PRESS':
             self.controller.handle_audio_forward()
