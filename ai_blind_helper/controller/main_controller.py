@@ -461,3 +461,20 @@ class MainController:
         """Tecla (Ex: Seta Direita): Avança 5 segundos"""
         if hasattr(self.audio_app, 'forward'):
             self.audio_app.forward(seconds=5)
+
+    def handle_cycle_language(self):
+        """
+        Cicla entre os idiomas disponíveis (PT -> EN -> ES -> ...)
+        """
+        
+        try:
+            current_index = Config.LANGUAGES.index(Config.LANGUAGE)
+        except ValueError:
+            current_index = 0
+
+        # Calcula o próximo índice
+        next_index = (current_index + 1) % len(Config.LANGUAGES)
+        next_lang = Config.LANGUAGES[next_index]
+
+        # Aplica a mudança
+        self.set_system_language(next_lang)
