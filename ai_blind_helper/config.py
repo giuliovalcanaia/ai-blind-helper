@@ -53,12 +53,23 @@ class Config:
     LANGUAGES = ['pt', 'en']
     LANGUAGE = _initial_settings.get("language", "pt")
     
-    
+
     @staticmethod
     def set_language(new_lang):
         """Atualiza a variável em memória e persiste no ficheiro."""
         Config.LANGUAGE = new_lang
         save_persistent_setting("language", new_lang)
+
+
+    # Config do Noise Gate
+    NOISE_GATE_THRESHOLD = 150
+    NOISE_GATE_RELEASE_TIME = 0.5
+
+
+
+
+
+
 
     # Audio Settings
     AUDIO_FORMAT = pyaudio.paInt16

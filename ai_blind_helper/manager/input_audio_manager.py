@@ -8,8 +8,8 @@ class InputAudioManager:
         self.input_stream = None
         
         # --- Configurações do Noise Gate ---
-        self.threshold = 150  # Ajuste conforme necessário
-        self.release_time = 0.5 # Segundos
+        self.threshold = Config.NOISE_GATE_THRESHOLD
+        self.release_time = Config.NOISE_GATE_RELEASE_TIME
         
         # Estado do Gate
         self.gate_open = False

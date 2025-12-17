@@ -1,8 +1,9 @@
-from manager import InputAudioManager # Supondo que salvou a classe neste arquivo
+from manager import InputAudioManager, OutputAudioManager
 import time
 
 def teste_monitoramento():
-    manager = InputAudioManager()
+    input_manager = InputAudioManager()
+    output_manager = OutputAudioManager()
     
     print("--- INICIANDO TESTE DE NOISE GATE ---")
     print("Use FONES DE OUVIDO para evitar microfonia.")
@@ -10,21 +11,22 @@ def teste_monitoramento():
     print("Silêncio: O chiado de fundo deve sumir completamente.")
     print("Pressione CTRL+C para parar.")
     
-    manager.start_input_stream()
-    manager.start_output_stream()
+    input_manager.start_input_stream()
+    output_manager.start_output_stream()
     
     try:
         while True:
             # 1. Lê o chunk (o gate é aplicado aqui dentro)
-            chunk = manager.read_chunk()
+            chunk = input_manager.read_chunk()
             
             # 2. Toca o chunk processado
-            manager.write_chunk(chunk)
+            output_manager.write_chunk(chunk)
             
     except KeyboardInterrupt:
         print("\nTeste finalizado.")
     finally:
-        manager.close()
+        input_manager.close()
+        output_manager.close()
 
 if __name__ == "__main__":
     teste_monitoramento()
