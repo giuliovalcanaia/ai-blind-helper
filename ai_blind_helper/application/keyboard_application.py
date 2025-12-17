@@ -89,8 +89,7 @@ class KeyboardApplication:
         self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_w)
         self.manager.register_key(evdev.ecodes.KEY_Q, self.on_key_q)
         self.manager.register_key(evdev.ecodes.KEY_T, self.on_key_t)
-        self.manager.register_key(evdev.ecodes.KEY_A, self.on_key_a)
-        self.manager.register_key(evdev.ecodes.KEY_V, self.on_key_v)
+        self.manager.register_key(evdev.ecodes.KEY_A, self.on_key_a) 
         self.manager.register_key(evdev.ecodes.KEY_D, self.on_key_d)
         self.manager.register_key(evdev.ecodes.KEY_R, self.on_key_r)
 
@@ -179,26 +178,6 @@ class KeyboardApplication:
             else:
                 print("Audio Hold finalizado")
                 self.controller.stop_sending_audio()
-
-    def on_key_v(self, event_type, duration):
-        if event_type == 'PRESS':
-            if not self.video_pressed:
-                print("Video iniciado (V)")
-                self.video_pressed = True
-                self.video_is_locked = False
-                self.controller.start_sending_audio_video()
-        elif event_type == 'RELEASE':
-            if (self.video_is_locked):
-                self.controller.stop_sending_video()
-                print("Video finalizado (V - UNLOCK)")
-                self.video_pressed = False
-            elif duration < Config.LOCK_THRESHOLD_MS_VIDEO:
-                print("Video Lock ativado")
-                self.video_is_locked = True
-            else:
-                print("Video Hold finalizado")
-                self.controller.stop_sending_video()
-                self.video_pressed = False
 
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':

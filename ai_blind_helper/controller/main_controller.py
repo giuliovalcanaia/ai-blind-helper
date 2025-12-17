@@ -77,6 +77,8 @@ class MainController:
             return
 
         if self.session_task and not self.session_task.done():
+            print("[DEBUM MainController handle_toggle_connect] Parando de enviar vídeo com stop da sessão do websocket")
+            self.stop_sending_video() 
             print("\n[Comando] Tecla 'W': Encerrando conexão...")
             self.stop_session()
         else:
@@ -168,10 +170,9 @@ class MainController:
         # Opcional: Se quiser garantir que o vídeo pare ao ligar só áudio:
         # self.loop.call_soon_threadsafe(self.start_video_event.clear)
 
-    def start_sending_audio_video(self):
+    def start_sending_video(self):
         """Libera o fluxo de áudio E vídeo."""
-        print(">>> ATIVANDO: Áudio + Vídeo")
-        self.loop.call_soon_threadsafe(self.start_audio_event.set)
+        print(">>> ATIVANDO: Vídeo")
         self.loop.call_soon_threadsafe(self.start_video_event.set)
 
     def stop_sending_audio(self):
@@ -183,7 +184,6 @@ class MainController:
         """Pausa o envio de vídeo (Hardware continua ligado, mas loop trava)."""
         print(">>> PAUSANDO: Vídeo")
         self.loop.call_soon_threadsafe(self.start_video_event.clear)
-        self.loop.call_soon_threadsafe(self.start_audio_event.clear)
 
     # def stop_all_sending(self):
     #     """Pausa tudo (modo mute/privacidade)."""
@@ -210,6 +210,9 @@ class MainController:
                 # 2. Wrappers de captura (Loops de monitoramento)
                 tg.create_task(self._audio_capture_wrapper())
                 tg.create_task(self._video_capture_wrapper())
+
+                print("[DEBUG MainController _run_session_lifecycle] Iniciando envio de áudio junto com conexão do websocket")
+                self.start_sending_video()
 
         except asyncio.CancelledError:
             print(">>> Sessão encerrada.")
