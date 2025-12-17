@@ -38,38 +38,57 @@ class AudioPlayerApplication:
     # =========================================================================
     async def task_capture_audio(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
         """
-        Lê do Mic continuamente.
-        Se o botão A estiver ATIVO: Envia o som real.
-        Se o botão A estiver INATIVO: Substitui por silêncio (0x00), mas continua enviando.
+        Lê do Mic e realiza ações simultâneas:
+        1. Salva arquivo contínuo.
+        2. Salva chunks individuais.
+        3. Envia para a fila da IA.
         """
-        self.audio_input_manager.start_input_stream()
-        print(" -> [AudioApp] Microfone Iniciado (Modo Always-On).")
-
         try:
-            while True:
-                # 1. LEITURA DO HARDWARE (Sempre executada)
-                # É crucial ler mesmo quando "pausado" para manter o clock do hardware
-                # e esvaziar o buffer do sistema operacional.
-                data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
+            self.audio_input_manager.start_input_stream()
+            print("🎙️ [AudioApp] Input stream iniciado.")
 
-                if data:
-                    # 2. LÓGICA DO BOTÃO "A"
-                    # Se o evento NÃO estiver setado (Botão desligado), forçamos silêncio.
+            # --- PREPARAÇÃO DAS PASTAS DESTA SESSÃO ---
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            session_dir = os.path.join(self.base_debug_folder, f"sessao_{timestamp}")
+            chunks_dir = os.path.join(session_dir, "chunks")
+
+            os.makedirs(chunks_dir, exist_ok=True)
+            print(f"🎙️ [Audio] Salvando debug completo e chunks em: {session_dir}")
+
+            full_filename = os.path.join(session_dir, "full_recording.wav")
+            chunk_counter = 0
+
+            # Abre o arquivo "PAI" (Gravação contínua)
+            with wave.open(full_filename, 'wb') as wf_full:
+                self._setup_wav_header(wf_full)
+
+                while True:
+                    # 1. PAUSA / RESUME (Controle de Input)
                     if not control_event.is_set():
-                        # Cria um bloco de bytes nulos do mesmo tamanho do chunk lido
-                        data = b'\x00' * len(data)
+                        print("🔴 [Audio Input] Pausado...")
+                        await control_event.wait()
+                        print("🟢 [Audio Input] Retomando...")
+                        self._flush_input_buffer()
 
-                        # Opcional: Se quiser um debug visual para saber que está em "Mute Ativo"
-                        # print(".", end="", flush=True)
+                    # 2. LEITURA DO HARDWARE
+                    data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
 
-                    # 3. ENVIO (Voz Real ou Silêncio Fabricado)
-                    # O Gemini receberá o fluxo contínuo, mantendo a sessão estável.
-                    await out_queue.put({"data": data, "mime_type": "audio/pcm"})
+                    if data:
+                        # A: Salva no arquivo contínuo
+                        wf_full.writeframes(data)
 
-        except asyncio.CancelledError:
-            print(" -> [AudioApp] Cancelado.")
-        except Exception as e:
-            print(f" -> [AudioApp] Erro fatal: {e}")
+                        # B: Salva o Chunk isolado
+                        chunk_filename = os.path.join(chunks_dir, f"chunk_{chunk_counter:05d}.wav")
+                        with wave.open(chunk_filename, 'wb') as wf_chunk:
+                            self._setup_wav_header(wf_chunk)
+                            wf_chunk.writeframes(data)
+                        
+                        chunk_counter += 1
+
+                        # C: Envia para a IA (Output Queue)
+                        await out_queue.put({"data": data, "mime_type": "audio/pcm"})
+                    else:
+                        await asyncio.sleep(0.01)
 
         except asyncio.CancelledError:
             print("⏹️ [AudioApp] Captura cancelada. Arquivos salvos.")
@@ -214,29 +233,16 @@ class AudioPlayerApplication:
         """Configura o cabeçalho WAV padrão"""
         wav_file.setnchannels(Config.CHANNELS)
         wav_file.setsampwidth(2)  # 16-bit PCM
-        wav_file.setframerate(Config.SEND_SAMPLE_RATE)
+        wav_file.setframerate(Config.RECEIVE_SAMPLE_RATE)
 
     def _flush_input_buffer(self):
         """Limpeza de buffer ao retomar pause no input"""
         try:
-            available = self.audio_input_manager.input_stream.get_read_available()
-            if available > 0:
-                self.audio_input_manager.input_stream.read(
-                    available, exception_on_overflow=False)
-        except:
-            pass
-
-    # ... (Restante dos métodos task_play_audio e play_file permanecem iguais)
-
-    async def task_play_audio(self, input_queue: asyncio.Queue):
-        self.audio_output_manager.start_output_stream()
-        try:
-            while True:
-                bytestream = await input_queue.get()
-                await asyncio.to_thread(self.audio_output_manager.write_chunk, bytestream)
-                input_queue.task_done()
-        except asyncio.CancelledError:
-            pass
+            if self.audio_input_manager.input_stream:
+                available = self.audio_input_manager.input_stream.get_read_available()
+                if available > 0:
+                    self.audio_input_manager.input_stream.read(available, exception_on_overflow=False)
+        except: pass
 
     def close(self):
         try:
