@@ -71,14 +71,12 @@ class MainController:
 
     # --- Callbacks do Teclado ---
 
-    def handle_toggle_connect(self):
-        """Tecla 'I': Conecta/Desconecta o WebSocket."""
+    def handle_audio_live_connect(self):
+        print("Conectando com o Websocket para comunicação somente de áudio")
         if self.loop is None:
             return
 
         if self.session_task and not self.session_task.done():
-            print("[DEBUM MainController handle_toggle_connect] Parando de enviar vídeo com stop da sessão do websocket")
-            self.stop_sending_video() 
             print("\n[Comando] Tecla 'W': Encerrando conexão...")
             self.stop_session()
         else:
@@ -88,7 +86,25 @@ class MainController:
             self.start_video_event.clear()
 
             asyncio.run_coroutine_threadsafe(
-                self._start_connection_manager(), self.loop)
+                self._start_audio_connection_manager(), self.loop)
+
+    def handle_video_live_connect(self):
+        print("Conectando com o websocket para conexão de áudio e vídeo")
+        if self.loop is None:
+            return
+
+        if self.session_task and not self.session_task.done():
+            print("\n[Comando] Tecla 'W': Encerrando conexão...")
+            self.stop_session()
+        else:
+            print("\n[Comando] Tecla 'W': Conectando WebSocket...")
+            # Garante que começa travado
+            self.start_audio_event.clear()
+            self.start_video_event.clear()
+
+            asyncio.run_coroutine_threadsafe(
+                self._start_video_connection_manager(), self.loop)
+
 
     def handle_quit(self):
         print("\n[Comando] Tecla Q: Saindo...")
@@ -193,15 +209,14 @@ class MainController:
 
     # --- Gerenciamento da Sessão ---
 
-    async def _start_connection_manager(self):
-        self.session_task = asyncio.create_task(self._run_session_lifecycle())
+    async def _start_audio_connection_manager(self):
+        self.session_task = asyncio.create_task(self._run_audio_session_lifecycle())
 
-    async def _run_session_lifecycle(self):
+    async def _run_audio_session_lifecycle(self):
         try:
             print(">>> WebSocket Conectado. Aguardando ativação de stream...")
 
             async with asyncio.TaskGroup() as tg:
-                # 1. WebSocket Client
                 tg.create_task(self.gemini_client.start_session(
                     input_queue=self.out_queue,
                     output_queue=self.audio_in_queue
@@ -209,10 +224,7 @@ class MainController:
 
                 # 2. Wrappers de captura (Loops de monitoramento)
                 tg.create_task(self._audio_capture_wrapper())
-                tg.create_task(self._video_capture_wrapper())
 
-                print("[DEBUG MainController _run_session_lifecycle] Iniciando envio de áudio junto com conexão do websocket")
-                self.start_sending_video()
 
         except asyncio.CancelledError:
             print(">>> Sessão encerrada.")
@@ -226,6 +238,38 @@ class MainController:
                 except:
                     pass
 
+    async def _start_video_connection_manager(self):
+        self.session_task = asyncio.create_task(self._run_video_session_lifecycle())
+        
+
+    async def _run_video_session_lifecycle(self):
+        try:
+            print(">>> WebSocket Conectado. Aguardando ativação de stream...")
+
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(self.gemini_client.start_session(
+                    input_queue=self.out_queue,
+                    output_queue=self.audio_in_queue
+                ))
+
+                # 2. Wrappers de captura (Loops de monitoramento)
+                tg.create_task(self._audio_capture_wrapper())
+                tg.create_task(self._video_capture_wrapper())
+
+                self.start_sending_video()
+        except asyncio.CancelledError:
+            print(">>> Sessão encerrada.")
+        except Exception as e:
+            print(f"Erro na sessão: {e}")
+        finally:
+            # Limpeza da fila de saída
+            while not self.out_queue.empty():
+                try:
+                    self.out_queue.get_nowait()
+                except:
+                    pass
+        
+    
     # --- NOVO HANDLER ---
 
     def handle_description_request(self):

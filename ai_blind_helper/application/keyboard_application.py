@@ -47,8 +47,12 @@ class KeyboardApplication:
         """
         self.menu_actions = {
             'w': {
-                'description': "Conectar / Desconectar",
-                'callback': self.on_key_w
+                'description': "Conectar / Desconectar Audio Live",
+                'callback': self.audio_live_connect
+            },
+            'v': {
+                'description': "Conectar / Desconectar Video Live",
+                'callback': self.video_live_connect
             },
             'd': {
                 'description': "Descrever Ambiente",
@@ -69,7 +73,7 @@ class KeyboardApplication:
         }
 
         # Lista ordenada para garantir a navegação: w -> d -> r -> q
-        self.menu_order = ['w', 'd', 'r', 'q', 'p']
+        self.menu_order = ['w', 'v', 'd', 'r', 'q', 'p']
 
     def start(self):
         self.manager.start()
@@ -86,12 +90,9 @@ class KeyboardApplication:
         self.manager.register_key(self.KEY_MENU_CONFIRM, self.on_menu_confirm)
 
         # --- Teclas de Acesso Direto (Mantidas conforme original) ---
-        self.manager.register_key(evdev.ecodes.KEY_W, self.on_key_w)
         self.manager.register_key(evdev.ecodes.KEY_Q, self.on_key_q)
         self.manager.register_key(evdev.ecodes.KEY_T, self.on_key_t)
         self.manager.register_key(evdev.ecodes.KEY_A, self.on_key_a) 
-        self.manager.register_key(evdev.ecodes.KEY_D, self.on_key_d)
-        self.manager.register_key(evdev.ecodes.KEY_R, self.on_key_r)
 
         # Funções de audio control
         self.manager.register_key(evdev.ecodes.KEY_J, self.on_key_j)
@@ -139,10 +140,15 @@ class KeyboardApplication:
 
     # --- Callbacks Originais (Lógica de Aplicação) ---
 
-    def on_key_w(self, event_type, duration):
+    def audio_live_connect(self, event_type, duration):
         if event_type == 'PRESS':
-            print(">> [App] 'W' Action Triggered. Toggle connect...")
-            self.controller.handle_toggle_connect()
+            print(">> [App] Action Triggered. Toggle audio connect...")
+            self.controller.handle_audio_live_connect()
+
+    def video_live_connect(self, event_type, duration):
+        if event_type == 'PRESS':
+            print(">> [App] Action Triggered. Toggle video connect...")
+            self.controller.handle_video_live_connect()
 
     def on_key_t(self, event_type, duration):
         if event_type == 'RELEASE':
