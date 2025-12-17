@@ -178,7 +178,7 @@ class KeyboardApplication:
             else:
                 print("Audio Hold finalizado")
                 self.controller.stop_sending_audio()
-
+                self.audio_pressed = False
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':
             print(">> [App] 'D' Action Triggered.")
