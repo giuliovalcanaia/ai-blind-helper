@@ -1,4 +1,4 @@
-from application import AgendaApplication, AudioPlayerApplication, ClockApplication, DateApplication, DescriptionApplication, KeyboardApplication, LiveClientApplication, SystemMessageApplication, TextClientApplication, TranscriptionApplication, VideoRecorderApplication, VolumeControlApplication
+from application import *
 from config import Config
 
 class ApplicationProvider:
@@ -8,7 +8,6 @@ class ApplicationProvider:
         self.clock = ClockApplication(Config.LANGUAGE)
         self.date = DateApplication(Config.LANGUAGE)
         self.description = DescriptionApplication()
-        self.keyboard = None
         self.live_client = LiveClientApplication()
         self.system_msg = SystemMessageApplication(Config.LANGUAGE)
         self.text_client = TextClientApplication()

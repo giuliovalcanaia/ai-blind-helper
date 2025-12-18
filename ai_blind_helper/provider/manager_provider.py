@@ -1,4 +1,4 @@
-from manager import CameraSource, ScreenSource, InputAudioManager, KeyboardManager, OutputAudioManager
+from manager import *
 from config import Config
 
 class ManagerProvider:

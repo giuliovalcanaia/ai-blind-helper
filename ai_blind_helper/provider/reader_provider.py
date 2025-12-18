@@ -1,4 +1,4 @@
-from reader import StreamerReader, WavReader
+from reader import * 
 from config import Config
 
 class ReaderProvider:
