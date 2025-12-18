@@ -24,9 +24,9 @@ from application import (
 class MainController:
     def __init__(self, video_mode):
         # 1. Instanciação dos Sub-Sistemas
-        self.clock_app = ClockApplication(language="pt")
-        self.date_app = DateApplication(language="pt")
-        self.msg_app = SystemMessageApplication(language="pt")
+        self.clock_app = ClockApplication(Config.LANGUAGE)
+        self.date_app = DateApplication(Config.LANGUAGE)
+        self.msg_app = SystemMessageApplication(Config.LANGUAGE)
         self.gemini_client = LiveClientApplication()
 
         # Audio e Video
@@ -508,6 +508,30 @@ class MainController:
         """Tecla (Ex: Seta Direita): Avança 5 segundos"""
         if hasattr(self.audio_app, 'forward'):
             self.audio_app.forward(seconds=5)
+
+    # --- FUNCOES PARA TROCAR O IDIOMA ---
+    def set_system_language(self, new_lang: str):
+        """
+        Altera o idioma global, persiste a escolha e reinicializa os subsistemas.
+        """
+        if new_lang == Config.LANGUAGE:
+            return
+
+        print(f">>> [Sistema] A alterar idioma para: {new_lang.upper()} e a guardar...")
+        
+        # 1. Atualiza e Persiste (Guarda no JSON)
+        Config.set_language(new_lang)
+
+        # 2. Recria as instâncias que dependem do idioma (Hot-Swap)
+        self.clock_app = ClockApplication(language=new_lang)
+        self.date_app = DateApplication(language=new_lang)
+        self.msg_app = SystemMessageApplication(language=new_lang)
+        
+        # Se estas apps também tiverem suporte a multi-idioma, recrie-as também:
+        # self.description_app = DescriptionApplication(language=new_lang)
+        
+        print(f">>> [Sistema] Idioma {new_lang.upper()} aplicado e persistido.")
+        
 
     def handle_cycle_language(self):
         """
