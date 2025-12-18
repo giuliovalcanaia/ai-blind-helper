@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 
 class SystemMessageApplication:
-    def __init__(self, language="pt", base_dir="audio"):
+    def __init__(self, language, base_dir="audio"):
         """
         Inicializa o serviço de relógio.
         :param language: 'pt' ou 'en'

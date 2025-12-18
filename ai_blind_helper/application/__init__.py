@@ -6,7 +6,7 @@ from .description_application import DescriptionApplication
 from .keyboard_application import KeyboardApplication
 from .live_client_application import LiveClientApplication
 from .transcription_application import TranscriptionApplication
-from .video_recorder_application import VideoPlayerApplication
+from .video_recorder_application import VideoRecorderApplication
 from .volume_control_application import VolumeControlApplication
 from .text_client_application import TextClientApplication
 from .system_message_application import SystemMessageApplication

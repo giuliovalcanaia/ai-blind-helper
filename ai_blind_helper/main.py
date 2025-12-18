@@ -1,6 +1,6 @@
 import argparse
 import sys
-from controller import MainController 
+from provider import ApplicationProvider, ControllerProvider, ManagerProvider, ReaderProvider
 
 def main():
     parser = argparse.ArgumentParser()
@@ -8,11 +8,16 @@ def main():
                         choices=["camera", "screen", "none"])
     args = parser.parse_args()
 
-    # Toda a complexidade foi movida para dentro do controller
-    controller = MainController(video_mode=args.mode)
+    manager_provider = ManagerProvider()
+    reader_provider = ReaderProvider()
+    application_provider = ApplicationProvider(manager_provider=manager_provider, reader_provider=reader_provider)
+    controller_provider = ControllerProvider(video_mode=args.mode, application_provider=application_provider)
+    application_provider.keyboard.set_controller(controller_provider.main_controller)
+
+    main_controller = controller_provider.main_controller
     
     try:
-        controller.run()
+        main_controller.run()
     except KeyboardInterrupt:
         print("\nInterrupção forçada via Terminal.")
         sys.exit(0)

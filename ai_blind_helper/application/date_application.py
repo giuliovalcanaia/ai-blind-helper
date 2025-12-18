@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class DateApplication:
-    def __init__(self, language="pt", base_dir="audio"):
+    def __init__(self, language, base_dir="audio"):
         self.language = language
         self.base_dir = base_dir
 

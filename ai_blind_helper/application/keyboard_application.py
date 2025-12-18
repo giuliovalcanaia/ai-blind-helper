@@ -18,11 +18,11 @@ class KeyboardApplication:
     KEY_MENU_FORWARD = evdev.ecodes.KEY_RIGHT
     KEY_MENU_CONFIRM = evdev.ecodes.KEY_ENTER
 
-    def __init__(self, controller, device_path):
-        self.controller = controller
+    def __init__(self, keyboard_manager):
+        self.controller = None
 
         # Instancia o manager (sem modificações)
-        self.manager = KeyboardManager(device_path)
+        self.manager = keyboard_manager
 
         # Estado do Menu
         self.menu_index = 0
@@ -39,6 +39,9 @@ class KeyboardApplication:
 
         # --- Inicia binds de teclas físicas ---
         self._setup_bindings()
+        
+    def set_controller(self, controller):
+        self.controller = controller
 
     def _setup_menu_structure(self):
         """

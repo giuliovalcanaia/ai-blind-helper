@@ -3,12 +3,8 @@ from google.genai import types
 from config import Config
 
 class TextClientApplication:
-    # 1. Recomendado: Instanciar o cliente no __init__ se for reutilizar (como no LiveClientApplication)
-    #    Ou manter o cliente dentro da função se ele for de uso único. Mantive na função para proximidade com o original.
     
-    # 2. Mudança de parâmetro para refletir o dado de entrada esperado
-    @staticmethod
-    def generate_text_by_imagem_text(prompt: str, image_part_data: dict):
+    def generate_text_by_imagem_text(self, prompt: str, image_part_data: dict):
         # NOTA: O cliente v1alpha usa 'api_key' ou a variável de ambiente. 
         # Certifique-se de que a API Key esteja configurada, se necessário, adicione `api_key=Config.API_KEY`
         client = genai.Client(

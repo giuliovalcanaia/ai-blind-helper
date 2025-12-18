@@ -4,13 +4,13 @@ from manager import IVideoSource, CameraSource, ScreenSource
 import time
 
 
-class VideoPlayerApplication:
-    def __init__(self, mode: str):
+class VideoRecorderApplication:
+    def __init__(self, mode: str, camera_source, screen_source):
         self.video_source: Optional[IVideoSource] = None
         if mode == "camera":
-            self.video_source = CameraSource()
+            self.video_source = camera_source
         elif mode == "screen":
-            self.video_source = ScreenSource()
+            self.video_source = screen_source
         else:
             print(f" -> [VideoApp] Modo desconhecido: {mode}")
 

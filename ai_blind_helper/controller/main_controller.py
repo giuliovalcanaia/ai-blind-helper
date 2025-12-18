@@ -6,40 +6,25 @@ from typing import Optional
 from config import Config
 import traceback
 
-# Seus imports de aplicação
-from application import (
-    ClockApplication,
-    LiveClientApplication,
-    AudioPlayerApplication,
-    VideoPlayerApplication,
-    KeyboardApplication,
-    DateApplication,
-    DescriptionApplication,
-    TranscriptionApplication,
-    TextClientApplication,
-    SystemMessageApplication
-)
-
-
 class MainController:
-    def __init__(self, video_mode):
+    def __init__(self, audio_player_application, clock_application, date_application, description_application, keyboard_application, live_client_application, system_message_application, text_client_application, transcription_application, video_recorder_application):
         # 1. Instanciação dos Sub-Sistemas
-        self.clock_app = ClockApplication(Config.LANGUAGE)
-        self.date_app = DateApplication(Config.LANGUAGE)
-        self.msg_app = SystemMessageApplication(Config.LANGUAGE)
-        self.gemini_client = LiveClientApplication()
+        self.clock_app = clock_application
+        self.date_app = date_application
+        self.msg_app = system_message_application
+        self.txt_client_app = text_client_application
+        self.gemini_client = live_client_application
 
         # Audio e Video
-        self.audio_app = AudioPlayerApplication()
-        self.video_app = VideoPlayerApplication(mode=video_mode)
+        self.audio_app = audio_player_application
+        self.video_app = video_recorder_application
 
         # Descrição e Transcrição
-        self.description_app = DescriptionApplication()
-        self.transcription_app = TranscriptionApplication()
+        self.description_app = description_application
+        self.transcription_app = transcription_application
 
         # Teclado
-        self.keyboard_app = KeyboardApplication(
-            controller=self, device_path=Config.KEYBOARD_PATH)
+        self.keyboard_app = keyboard_application
 
         # 2. Filas de comunicação
         self.audio_in_queue = asyncio.Queue()     # Recebe do Gemini
@@ -315,7 +300,7 @@ class MainController:
             # --- CORREÇÃO AQUI ---
             # Passando o dicionário completo `frame_data` (que tem 'data' e 'mime_type')
             try:
-                response_text = TextClientApplication.generate_text_by_imagem_text(
+                response_text = self.txt_client_app.generate_text_by_imagem_text(
                     prompt=prompt_text,
                     image_part_data=frame_data  # Usando o nome do parâmetro da classe
                 )
@@ -374,7 +359,7 @@ class MainController:
             # --- CORREÇÃO AQUI ---
             # Passando o dicionário completo `frame_data` (que tem 'data' e 'mime_type')
             try:
-                response_text = TextClientApplication.generate_text_by_imagem_text(
+                response_text = self.txt_client_app.generate_text_by_imagem_text(
                     prompt=prompt_text,
                     image_part_data=frame_data  # Usando o nome do parâmetro da classe
                 )
@@ -523,9 +508,9 @@ class MainController:
         Config.set_language(new_lang)
 
         # 2. Recria as instâncias que dependem do idioma (Hot-Swap)
-        self.clock_app = ClockApplication(language=new_lang)
-        self.date_app = DateApplication(language=new_lang)
-        self.msg_app = SystemMessageApplication(language=new_lang)
+        self.clock_app.set_language(language = new_lang)
+        self.date_app.set_language(language = new_lang)
+        self.msg_app.set_language(language = new_lang)
         
         # Se estas apps também tiverem suporte a multi-idioma, recrie-as também:
         # self.description_app = DescriptionApplication(language=new_lang)

@@ -4,20 +4,15 @@ import wave
 import traceback
 import time
 from datetime import datetime
-from manager import InputAudioManager, OutputAudioManager
-from reader import WavReader
 from config import Config
 
 class AudioPlayerApplication:
-    def __init__(self):
+    def __init__(self, audio_input_manager, audio_output_manager, wav_reader):
         try:
             print("🛠️ [AudioApp] Inicializando construtor...")
-            self.audio_input_manager = InputAudioManager()
-            self.audio_output_manager = OutputAudioManager()
-            self.wav_reader = WavReader(
-                target_rate=Config.RECEIVE_SAMPLE_RATE,
-                target_channels=Config.CHANNELS
-            )
+            self.audio_input_manager = audio_input_manager
+            self.audio_output_manager = audio_output_manager
+            self.wav_reader = wav_reader 
             
             # --- Configuração de Buffer (Necessário para Pause/Rewind) ---
             self.audio_buffer = bytearray()

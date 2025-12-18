@@ -1,8 +1,4 @@
 import asyncio
-from typing import Optional
-
-# Importando sua classe de câmera existente
-from manager import CameraSource 
 
 class TranscriptionApplication:
     def __init__(self):
