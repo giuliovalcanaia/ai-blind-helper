@@ -128,3 +128,14 @@ class AudioSFXController:
     async def closing_gemini_audio_sfx(self):
         path = self.sfx_app.get_close_websocket()
         await self.play_file_by_path(path)
+        
+    def hold_button_press_sfx(self): # Método que o Teclado vai chamar
+        """Chamado pelo timer do teclado. Agenda a tarefa no loop principal."""
+        if self.loop and self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(
+                self.hold_button_audio(), self.loop
+            )
+
+    async def hold_button_audio(self): # O que realmente toca
+        path = self.sfx_app.get_hold_button()
+        await self.play_file_by_path(path) 

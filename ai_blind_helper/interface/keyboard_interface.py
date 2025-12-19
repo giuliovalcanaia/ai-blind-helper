@@ -1,5 +1,6 @@
 import evdev
 from config import Config
+import threading
 
 
 class KeyboardInterface:
@@ -32,6 +33,9 @@ class KeyboardInterface:
         self.video_pressed = False
 
         self._setup_bindings()
+        
+        # Dicionário literal para rastrear os timers: { código_da_tecla: objeto_timer }
+        self._hold_timers = {}
 
     def run(self):
         print("[KeyboardInterface run] Repassando execução para o LoopController")
@@ -158,7 +162,11 @@ class KeyboardInterface:
             self.session_controller.handle_video_live_connect()
 
     def on_key_t(self, event_type, duration):
+        key_code = evdev.ecodes.KEY_T
+        if event_type == 'PRESS':
+            self._start_hold_timer(key_code, Config.LOCK_THRESHOLD_MS_AUDIO)
         if event_type == 'RELEASE':
+            self._cancel_hold_timer(key_code)
             if (duration > Config.LOCK_THRESHOLD_MS_DATE):
                 print(f"[KeyboardInterface on_key_t] Long press detectado ({
                       duration:.2f}ms). Solicitando data")
@@ -174,7 +182,9 @@ class KeyboardInterface:
             self.handle_quit()
 
     def on_key_a(self, event_type, duration):
+        key_code = evdev.ecodes.KEY_1
         if event_type == 'PRESS':
+            self._start_hold_timer(key_code, Config.LOCK_THRESHOLD_MS_AUDIO)
             if not self.audio_pressed:
                 print(
                     "[KeyboardInterface on_key_a] Iniciando envio de áudio (Hold/Lock)")
@@ -183,6 +193,7 @@ class KeyboardInterface:
                 self.audio_is_locked = False
                 self.session_controller.start_sending_audio_only()
         elif event_type == 'RELEASE':
+            self._cancel_hold_timer(key_code)
             if (self.audio_is_locked):
                 print("[KeyboardInterface on_key_a] Destravando áudio fixo")
                 self.session_controller.stop_sending_audio()
@@ -233,3 +244,32 @@ class KeyboardInterface:
         print("[KeyboardInterface handle_quit] Iniciando encerramento do sistema")
         self.loop_controller.stop_running()
         self.session_controller.stop_session()
+        
+        
+        
+        
+    # Lógica dos botões de hold
+        
+    def _trigger_hold_sound(self):
+        """Função que será chamada quando o tempo de hold expirar."""
+        print("[KeyboardInterface] Tempo de HOLD atingido! Disparando som.")
+        self.sfx_controller.hold_button_press_sfx() 
+
+    def _start_hold_timer(self, key_code, threshold_ms):
+        # 1. Se já existir um timer para essa tecla, cancela (segurança)
+        self._cancel_hold_timer(key_code)
+        
+        # 2. Cria um novo timer
+        # threading.Timer recebe (tempo_em_segundos, função_para_rodar)
+        timer = threading.Timer(threshold_ms / 1000.0, self._trigger_hold_sound)
+        
+        # 3. Guarda e inicia
+        self._hold_timers[key_code] = timer
+        timer.start()
+
+    def _cancel_hold_timer(self, key_code):
+        # Busca o timer no dicionário e o remove ao mesmo tempo
+        timer = self._hold_timers.pop(key_code, None)
+        if timer:
+            timer.cancel()
+            print(f"[KeyboardInterface] Timer da tecla {key_code} cancelado.")
