@@ -9,4 +9,6 @@ from .video_recorder_application import VideoRecorderApplication
 from .volume_control_application import VolumeControlApplication
 from .text_client_application import TextClientApplication
 from .system_message_application import SystemMessageApplication
+from .audio_sfx_application import AudioSFXApplication
+from .menu_application import MenuApplication
 from .keyboard_application import KeyboardApplication

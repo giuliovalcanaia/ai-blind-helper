@@ -20,7 +20,15 @@ class IVideoSource(ABC):
 
 class CameraSource(IVideoSource):
     def __init__(self, camera_index=0):
-        self.cap = cv2.VideoCapture(camera_index)
+        self.cap = None
+        self.camera_index = camera_index
+
+    def open(self):
+        if self.cap is None or not self.cap.isOpened():
+            print("[CameraSource open] Inicializando cv2.VideoCapture(0)...")
+            self.cap = cv2.VideoCapture(self.camera_index)
+        else:
+            print("[CameraSource open] Câmera já estava aberta.")
 
     def get_frame(self) -> Optional[Dict[str, str]]:
         ret, frame = self.cap.read()

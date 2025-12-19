@@ -6,3 +6,5 @@ from .time_controller import TimeController
 from .session_controller import SessionController
 from .description_controller import DescritpionController
 from .transcription_controller import TranscriptionController
+from .audio_menu_controller import AudioMenuController
+from .audio_sfx_controller import AudioSFXController

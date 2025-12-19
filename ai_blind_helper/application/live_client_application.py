@@ -5,13 +5,15 @@ from google import genai
 from config import Config
 
 class LiveClientApplication:
-    def __init__(self):
+    def __init__(self, audio_in_queue):
         print("[LiveClientApplication __init__] Inicializando cliente Gemini Live")
         self.client = genai.Client(
             http_options={"api_version": "v1beta"},
             api_key=Config.API_KEY,
         )
         self._is_connected = False
+
+        self.audio_in_queue = audio_in_queue
 
     @property
     def is_connected(self) -> bool:
@@ -63,6 +65,13 @@ class LiveClientApplication:
                         output_queue.put_nowait(data)
                     if text := response.text:
                         print(text, end="", flush=True)
+                
+                # If you interrupt the model, it sends a turn_complete.
+                # For interruptions to work, we need to stop playback.
+                # So empty out the audio queue because it may have loaded
+                # much more audio than has played yet.
+                while not self.audio_in_queue.empty():
+                    self.audio_in_queue.get_nowait()
 
             except Exception as e:
                 print(f"[LiveClientApplication _receiver] Erro durante a recepção de dados: {e}")
