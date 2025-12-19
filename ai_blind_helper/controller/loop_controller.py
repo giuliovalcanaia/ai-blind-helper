@@ -6,7 +6,7 @@ import traceback
 
 class LoopController:
 
-    def __init__(self, audio_app, loop, app_running, msg_app, audio_in_queue, keyboard_app):
+    def __init__(self, audio_app, loop, app_running, msg_app, audio_in_queue, keyboard_app, state_provider):
         print("[LoopController __init__] Inicializando controlador de loop principal")
         self.audio_app = audio_app
         self.loop = loop
@@ -14,6 +14,7 @@ class LoopController:
         self.msg_app = msg_app
         self.audio_in_queue = audio_in_queue
         self.keyboard_app = keyboard_app
+        self.state_provider = state_provider
 
     def run(self):
         print("[LoopController run] Tentando iniciar o loop de eventos assíncrono")
@@ -24,7 +25,9 @@ class LoopController:
     
     async def start_main_loop(self):
         print("[LoopController start_main_loop] Configurando loop e iniciando serviços")
-        self.loop = asyncio.get_running_loop()
+        running_loop = asyncio.get_running_loop()
+        self.loop = running_loop
+        self.state_provider.loop = running_loop
         
         print("[LoopController start_main_loop] Acionando monitor de teclado")
         self.keyboard_app.start()

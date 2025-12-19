@@ -1,13 +1,17 @@
 import asyncio
 
 class TimeController:
-    def __init__(self, clock_app, date_app, audio_app, audio_in_queue, loop):
+    def __init__(self, clock_app, date_app, audio_app, audio_in_queue, state_provider):
         print("[TimeController __init__] Inicializando controlador de tempo e data")
         self.clock_app = clock_app
         self.date_app = date_app
         self.audio_app = audio_app
         self.audio_in_queue = audio_in_queue
-        self.loop = loop
+        self.state_provider = state_provider
+        
+    @property
+    def loop(self):
+        return self.state_provider.loop
     
     async def play_current_time(self):
         print("[TimeController play_current_time] Solicitando caminho do áudio de hora atual")

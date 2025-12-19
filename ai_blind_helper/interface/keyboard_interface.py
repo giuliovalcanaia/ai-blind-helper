@@ -7,7 +7,7 @@ class KeyboardInterface:
     KEY_MENU_FORWARD = evdev.ecodes.KEY_RIGHT
     KEY_MENU_CONFIRM = evdev.ecodes.KEY_ENTER
 
-    def __init__(self, loop_controller, keyboard_controller, session_controller, language_controller, time_controller, transcription_controller, description_controller):
+    def __init__(self, loop_controller, keyboard_controller, session_controller, language_controller, time_controller, transcription_controller, description_controller, audio_controller):
         print("[KeyboardInterface __init__] Inicializando interface de teclado e mapeando dependências")
         self.keyboard_controller = keyboard_controller
         self.language_controller = language_controller
@@ -16,6 +16,7 @@ class KeyboardInterface:
         self.time_controller = time_controller
         self.transcription_controller = transcription_controller
         self.description_controller = description_controller
+        self.audio_controller = audio_controller
 
         self.menu_index = 0
         self.menu_active = True 
@@ -158,7 +159,7 @@ class KeyboardInterface:
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':
             print("[KeyboardInterface on_key_d] Solicitando descrição de ambiente")
-            self.session_controller.handle_description_request()
+            self.description_controller.handle_description_request()
 
     def on_key_r(self, event_type, duration):
         if event_type == 'PRESS':
