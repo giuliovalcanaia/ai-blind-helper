@@ -7,7 +7,7 @@ class KeyboardInterface:
     KEY_MENU_FORWARD = evdev.ecodes.KEY_RIGHT
     KEY_MENU_CONFIRM = evdev.ecodes.KEY_ENTER
 
-    def __init__(self, loop_controller, keyboard_controller, session_controller, language_controller, time_controller, transcription_controller, description_controller, audio_controller):
+    def __init__(self, loop_controller, keyboard_controller, session_controller, language_controller, time_controller, transcription_controller, description_controller, audio_controller, menu_controller):
         print("[KeyboardInterface __init__] Inicializando interface de teclado e mapeando dependências")
         self.keyboard_controller = keyboard_controller
         self.language_controller = language_controller
@@ -17,6 +17,8 @@ class KeyboardInterface:
         self.transcription_controller = transcription_controller
         self.description_controller = description_controller
         self.audio_controller = audio_controller
+        self.menu_controller = menu_controller
+
 
         self.menu_index = 0
         self.menu_active = True 
@@ -39,27 +41,33 @@ class KeyboardInterface:
         self.menu_actions = {
             'w': {
                 'description': "Conectar / Desconectar Audio Live",
-                'callback': self.audio_live_connect
+                'callback': self.audio_live_connect,
+                'on_select': lambda: self.menu_controller.play_menu_websocket_audio()
             },
             'v': {
                 'description': "Conectar / Desconectar Video Live",
-                'callback': self.video_live_connect
+                'callback': self.video_live_connect,
+                'on_select': lambda: self.menu_controller.play_menu_websocket_video()
             },
             'd': {
                 'description': "Descrever Ambiente",
-                'callback': self.on_key_d
+                'callback': self.on_key_d,
+                'on_select': lambda: self.menu_controller.play_menu_describe()
             },
             'r': {
                 'description': "Ler / Transcrever",
-                'callback': self.on_key_r
+                'callback': self.on_key_r,
+                'on_select': lambda: self.menu_controller.play_menu_transcribe()
             },
             'q': {
                 'description': "Sair do Sistema",
-                'callback': self.on_key_q
+                'callback': self.on_key_q,
+                'on_select': lambda: self.menu_controller.play_menu_exit()
             },
             'p': {
                 'description': "Mudar idioma",
-                'callback': self.change_language
+                'callback': self.change_language,
+                'on_select': lambda: self.menu_controller.play_menu_change_language()
             }
         }
         self.menu_order = ['w', 'v', 'd', 'r', 'q', 'p']
@@ -91,8 +99,22 @@ class KeyboardInterface:
         return self.menu_actions[key_char]
 
     def _announce_current_selection(self):
+        """
+        Feedback visual/auditivo ao navegar.
+        Puxa o runnable de audio do dicionário e executa.
+        """
+        # 1. Pega o item atual baseando-se no index
         item = self._get_current_menu_item()
-        print(f"[KeyboardInterface _announce_current_selection] Menu selecionado: {item['description']} (Tecla: {self.menu_order[self.menu_index].upper()})")
+        # 2. Feedback Visual (Log)
+        msg = f">> [MENU] Selecionado: {item['description']} (Tecla virtual: {self.menu_order[self.menu_index].upper()})"
+        print(msg)
+        # 3. Feedback Auditivo (Executa o runnable configurado)
+        if 'on_select' in item and callable(item['on_select']):
+            try:
+                # Aqui ele "puxa o runnable e roda"
+                item['on_select']() 
+            except Exception as e:
+                print(f"Erro ao executar audio do menu: {e}")
 
     def on_menu_forward(self, event_type, duration):
         if event_type == 'PRESS':
@@ -159,7 +181,7 @@ class KeyboardInterface:
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':
             print("[KeyboardInterface on_key_d] Solicitando descrição de ambiente")
-            self.description_controller.handle_description_request()
+            self.session_controller.handle_description_request()
 
     def on_key_r(self, event_type, duration):
         if event_type == 'PRESS':

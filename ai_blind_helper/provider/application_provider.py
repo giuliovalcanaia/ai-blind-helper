@@ -15,3 +15,4 @@ class ApplicationProvider:
         self.transcription = TranscriptionApplication()
         self.video = VideoRecorderApplication(Config.VIDEO_MODE, manager_provider.camera, manager_provider.screen)
         self.volume = VolumeControlApplication()
+        self.menu = MenuApplication()
