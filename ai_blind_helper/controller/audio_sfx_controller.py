@@ -56,14 +56,68 @@ class AudioSFXController:
             asyncio.run_coroutine_threadsafe(
                 self._task_audio_button_release(), self.loop
             )
-
+            
     async def _task_audio_button_press(self):
+        """
+        Preserva o áudio da IA, toca o SFX do botão e retoma a fala.
+        """
+        print("[AudioSFXController] Pausando áudio da IA para tocar o bip...")
+
+        # 1. Criar uma lista temporária para salvar os chunks que estavam na fila
+        saved_chunks = []
+        
+        # 2. Esvaziar a fila atual movendo os itens para a nossa lista
+        while not self.audio_in_queue.empty():
+            try:
+                # Pegamos o chunk sem esperar (nowait)
+                chunk = self.audio_in_queue.get_nowait()
+                saved_chunks.append(chunk)
+            except asyncio.QueueEmpty:
+                break
+
+        # 3. Tocar o som do botão (o bip)
+        # Isso será reproduzido enquanto a fila da IA está vazia
         path = self.sfx_app.get_audio_button_press()
-        await self.play_file_by_path(path)
+        if path:
+            await self.play_file_by_path(path)
+
+        # 4. Devolver os áudios salvos para a fila na ordem original
+        # Assim que o bip terminar, a IA continuará falando de onde parou
+        for chunk in saved_chunks:
+            await self.audio_in_queue.put(chunk)
+            
+        print(f"[AudioSFXController] Retomando {len(saved_chunks)} pacotes de áudio da IA.") 
 
     async def _task_audio_button_release(self):
+        """
+        Preserva o áudio da IA, toca o SFX do botão e retoma a fala.
+        """
+        print("[AudioSFXController] Pausando áudio da IA para tocar o bip...")
+
+        # 1. Criar uma lista temporária para salvar os chunks que estavam na fila
+        saved_chunks = []
+        
+        # 2. Esvaziar a fila atual movendo os itens para a nossa lista
+        while not self.audio_in_queue.empty():
+            try:
+                # Pegamos o chunk sem esperar (nowait)
+                chunk = self.audio_in_queue.get_nowait()
+                saved_chunks.append(chunk)
+            except asyncio.QueueEmpty:
+                break
+
+        # 3. Tocar o som do botão (o bip)
+        # Isso será reproduzido enquanto a fila da IA está vazia
         path = self.sfx_app.get_audio_button_release()
-        await self.play_file_by_path(path) 
+        if path:
+            await self.play_file_by_path(path)
+
+        # 4. Devolver os áudios salvos para a fila na ordem original
+        # Assim que o bip terminar, a IA continuará falando de onde parou
+        for chunk in saved_chunks:
+            await self.audio_in_queue.put(chunk)
+            
+        print(f"[AudioSFXController] Retomando {len(saved_chunks)} pacotes de áudio da IA.") 
 
         
     async def initiating_gemini_audio_sfx(self):
