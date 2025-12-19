@@ -1,5 +1,6 @@
 import os
 
+
 class MenuApplication:
     def __init__(self, language="pt", base_dir="audio"):
         """
@@ -33,25 +34,25 @@ class MenuApplication:
         """Retorna o caminho para o áudio de troca de idioma."""
         return self._get_menu_audio_path("change-language.wav")
 
-    def get_describe_audio_path(self):
-        """Retorna o caminho para o áudio da funcionalidade de descrição."""
-        return self._get_menu_audio_path("describe.wav")
+    # def get_describe_audio_path(self):
+    #     """Retorna o caminho para o áudio da funcionalidade de descrição."""
+    #     return self._get_menu_audio_path("describe.wav")
 
-    def get_exit_audio_path(self):
-        """Retorna o caminho para o áudio de saída/encerramento."""
-        return self._get_menu_audio_path("exit.wav")
+    # def get_exit_audio_path(self):
+    #     """Retorna o caminho para o áudio de saída/encerramento."""
+    #     return self._get_menu_audio_path("exit.wav")
 
-    def get_transcribe_audio_path(self):
-        """Retorna o caminho para o áudio da funcionalidade de transcrição."""
-        return self._get_menu_audio_path("transcribe.wav")
+    # def get_transcribe_audio_path(self):
+        # """Retorna o caminho para o áudio da funcionalidade de transcrição."""
+        # return self._get_menu_audio_path("transcribe.wav")
 
     def get_websocket_audio_path(self):
         """Retorna o caminho para o áudio relacionado ao status do websocket."""
-        return self._get_menu_audio_path("websocket-audio.wav")
+        return self._get_menu_audio_path("gemini-audio-mode.wav")
 
     def get_websocket_video_path(self):
         """Retorna o caminho para o vídeo relacionado ao status do websocket."""
-        return self._get_menu_audio_path("websocket-video.wav")
+        return self._get_menu_audio_path("gemini-video-mode.wav")
 
     def set_language(self, language):
         """Permite trocar o idioma dinamicamente"""
