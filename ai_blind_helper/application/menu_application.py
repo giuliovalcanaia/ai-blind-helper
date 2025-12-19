@@ -1,15 +1,19 @@
 import os
-
+from config import Config
 
 class MenuApplication:
-    def __init__(self, language="pt", base_dir="audio"):
+    def __init__(self, base_dir="audio"):
         """
         Inicializa o serviço de áudios do menu.
         :param language: 'pt' ou 'en'
         :param base_dir: Diretório raiz onde os áudios estão (padrão: 'audio')
         """
-        self.language = language
+        
         self.base_dir = base_dir
+        
+    @property
+    def language(self):
+        return Config.LANGUAGE
 
     def _get_menu_audio_path(self, filename):
         """
