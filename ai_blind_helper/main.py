@@ -3,13 +3,6 @@ import sys
 from provider import *
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", type=str, default="camera",
-                        choices=["camera", "screen", "none"])
-    args = parser.parse_args()
-
-    print(f"[Main main] Iniciando aplicação no modo: {args.mode}")
-
     state_provider = StateProvider()
     manager_provider = ManagerProvider()
     reader_provider = ReaderProvider()
@@ -20,7 +13,6 @@ def main():
     )
     
     controller_provider = ControllerProvider(
-        video_mode=args.mode, 
         application_provider=application_provider, 
         state_provider=state_provider
     )

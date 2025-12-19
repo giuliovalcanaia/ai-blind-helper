@@ -1,7 +1,7 @@
 from controller import *
 
 class ControllerProvider:
-    def __init__(self, video_mode, application_provider, state_provider):
+    def __init__(self, application_provider, state_provider):
         self.audio = AudioController(application_provider.audio)
         self.keyboard = KeyboardController(application_provider.keyboard)
         self.language = LanguageController(application_provider.clock, application_provider.date, application_provider.system_msg)

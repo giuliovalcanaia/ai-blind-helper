@@ -74,3 +74,6 @@ class LoopController:
                 await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
             else:
                 print("[LoopController play_current_power_on_message] Aviso: Nenhum áudio de inicialização disponível")
+
+    def stop_running(self):
+        self.app_running = False
