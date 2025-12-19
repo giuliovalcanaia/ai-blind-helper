@@ -81,6 +81,10 @@ class SessionController:
             print(f"[SessionController _run_video_session_lifecycle] Erro na sessão: {e}")
         finally:
             print("[SessionController _run_video_session_lifecycle] Limpando fila de saída")
+            if hasattr(self.video_app, 'stop_capture'):
+                await self.video_app.stop_capture() 
+            elif hasattr(self.video_app, 'release'):
+                 self.video_app.release()
             while not self.out_queue.empty():
                 try:
                     self.out_queue.get_nowait()

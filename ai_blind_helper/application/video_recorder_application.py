@@ -21,6 +21,11 @@ class VideoRecorderApplication:
             print("[VideoRecorderApplication task_capture_video] Erro crítico: Fonte de vídeo não detectada")
             return
 
+        if hasattr(self.video_source, 'open'):
+            print("[VideoRecorderApplication task_capture_video] Solicitando abertura do hardware de vídeo...")
+            await asyncio.to_thread(self.video_source.open)
+        
+        
         TARGET_FPS = 2 
         FRAME_DELAY = 1.0 / TARGET_FPS
 
