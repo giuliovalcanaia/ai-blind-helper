@@ -47,7 +47,11 @@ class MenuApplication:
 
     def get_websocket_audio_path(self):
         """Retorna o caminho para o áudio relacionado ao status do websocket."""
-        return self._get_menu_audio_path("websocket.wav")
+        return self._get_menu_audio_path("websocket-audio.wav")
+
+    def get_websocket_video_path(self):
+        """Retorna o caminho para o vídeo relacionado ao status do websocket."""
+        return self._get_menu_audio_path("websocket-video.wav")
 
     def set_language(self, language):
         """Permite trocar o idioma dinamicamente"""

@@ -34,11 +34,11 @@ class Config:
     """Configurações globais."""
     # Defina sua API KEY aqui ou garanta que está nas variáveis de ambiente
     API_KEY = os.getenv(
-        "GOOGLE_API_KEY", "AIzaSyCgcpCz46tJvT0RneuhTZvlOAXGGqAGDiI")
+        "GOOGLE_API_KEY", "AIzaSyCR-vzULcH74a52UN3NfJN0c95Zo8i7oT8")
 
     API_VERSION_TEXT_API_GEMINI_3 = 'v1alpha'
 
-    MODEL = "models/gemini-2.5-flash-native-audio-preview-09-2025"
+    MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025"
     MODEL_TEXT = "models"
 
     MODEL_TEXT_GENERATOR = "gemini-3-pro-preview"
@@ -53,19 +53,31 @@ class Config:
     LANGUAGES = ['pt', 'en']
     LANGUAGE = _initial_settings.get("language", "pt")
     
-    
+
     @staticmethod
     def set_language(new_lang):
         """Atualiza a variável em memória e persiste no ficheiro."""
         Config.LANGUAGE = new_lang
         save_persistent_setting("language", new_lang)
 
+
+    # Config do Noise Gate
+    NOISE_GATE_THRESHOLD = 150
+    NOISE_GATE_RELEASE_TIME = 0.5
+
+
+
+    VIDEO_MODE = "camera"
+
+
+
+
     # Audio Settings
     AUDIO_FORMAT = pyaudio.paInt16
     CHANNELS = 1
     SEND_SAMPLE_RATE = 16000
     RECEIVE_SAMPLE_RATE = 24000
-    CHUNK_SIZE = 4096
+    CHUNK_SIZE = 1024
     LOCK_THRESHOLD_MS_AUDIO = 500
     LOCK_THRESHOLD_MS_VIDEO = 500
     LOCK_THRESHOLD_MS_DATE = 500

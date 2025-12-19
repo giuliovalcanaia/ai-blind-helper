@@ -1,16 +1,13 @@
 import asyncio
-from typing import Optional
-
-# Importando sua classe de câmera existente
-from manager import CameraSource 
 
 class TranscriptionApplication:
     def __init__(self):
+        print("[TranscriptionApplication __init__] Inicializando aplicação de transcrição e configurando prompt de OCR")
         
-        # Prompt focado especificamente em transcrever texto (OCR)
         self.prompt = (
             "Analise a imagem e transcreva todo o texto visível nela. "
         )
 
     def get_prompt(self):
+        print("[TranscriptionApplication get_prompt] Retornando prompt configurado para transcrição")
         return self.prompt
