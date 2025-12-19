@@ -7,6 +7,7 @@ import traceback
 class LoopController:
 
     def __init__(self, audio_app, loop, app_running, msg_app, audio_in_queue, keyboard_app):
+        print("[LoopController __init__] Inicializando controlador de loop principal")
         self.audio_app = audio_app
         self.loop = loop
         self.app_running = app_running
@@ -14,63 +15,59 @@ class LoopController:
         self.audio_in_queue = audio_in_queue
         self.keyboard_app = keyboard_app
 
-    # --- PONTO DE ENTRADA ---
     def run(self):
-        
+        print("[LoopController run] Tentando iniciar o loop de eventos assíncrono")
         try:
             asyncio.run(self.start_main_loop())
         except KeyboardInterrupt:
-            print("\n[Sistema] Interrupção detectada (CTRL+C).")
-        # finally:
-        #     self.cleanup()
+            print("[LoopController run] Interrupção detectada via hardware (CTRL+C)")
     
     async def start_main_loop(self):
+        print("[LoopController start_main_loop] Configurando loop e iniciando serviços")
         self.loop = asyncio.get_running_loop()
-        print("[Sistema] Iniciando monitor de teclado...")
+        
+        print("[LoopController start_main_loop] Acionando monitor de teclado")
         self.keyboard_app.start()
 
+        print("[LoopController start_main_loop] Criando tarefa de reprodução de áudio")
         self.audio_playback_task = asyncio.create_task(
             self.audio_app.task_play_audio(self.audio_in_queue)
         )
 
+        print("[LoopController start_main_loop] Solicitando mensagem de inicialização")
         await asyncio.create_task(self.play_current_power_on_message())
 
-        # --- MENU VISUAL ATUALIZADO ---
         print("\n" + "="*45)
         print("      SISTEMA AI-BLIND-HELPER ONLINE      ")
         print("="*45)
-        print(" [NAVEGAÇÃO MENU ROLÁVEL]")
-        print("  < Esq >    : Navegar Anterior/Próximo")
-        print("  [ENTER]    : Confirmar Opção Selecionada")
         print("-" * 45)
-        print(" [ATALHOS GLOBAIS]")
-        print("  [T]        : Data / Hora")
-        print("  [A]        : Hold Áudio (Trava com duplo toque)")
-        print("  [V]        : Hold Vídeo (Trava com duplo toque)")
+        print("[<] [ENTER] [>]")
+        print("  [A] AUDIO")
+        print("  [T] TEMPO") 
         print("="*45 + "\n")
 
         try:
+            print("[LoopController start_main_loop] Entrando no loop de espera ativo")
             while self.app_running:
                 await asyncio.sleep(0.5)
-            print("[Sistema] Loop encerrado.")
+            print("[LoopController start_main_loop] Condição app_running encerrada")
 
         except asyncio.CancelledError:
-            print("\n[Sistema] Loop interrompido pelo Sistema (Ctrl+C).")
+            print("[LoopController start_main_loop] Tarefa cancelada pelo sistema")
 
         finally:
-            print("\n[Sistema] Iniciando protocolo de desconexão...")
-            await self._stop_session_task()
+            print("[LoopController start_main_loop] Iniciando protocolo de encerramento e limpeza")
             if self.audio_playback_task:
                 self.audio_playback_task.cancel()
+                print("[LoopController start_main_loop] Tarefa de áudio cancelada")
 
 
     async def play_current_power_on_message(self):
-            # O método get_current_welcome_message_path é rápido (só strings),
-            # pode chamar direto sem thread ou await.
+            print("[LoopController play_current_power_on_message] Buscando caminho do áudio de boas-vindas")
             path = self.msg_app.get_current_welcome_message_path()
+            
             if path:
-                print(f"[Sistema] Reproduzindo Power On: {path}")
-                # Toca o arquivo diretamente. NÃO use 'for', pois path é uma string única.
+                print(f"[LoopController play_current_power_on_message] Reproduzindo arquivo: {path}")
                 await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
             else:
-                print("[Sistema] Nenhum áudio de power on encontrado.")
+                print("[LoopController play_current_power_on_message] Aviso: Nenhum áudio de inicialização disponível")

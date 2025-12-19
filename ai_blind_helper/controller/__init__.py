@@ -2,7 +2,6 @@ from .audio_controller import AudioController
 from .keyboard_controller import KeyboardController
 from .language_controller import LanguageController
 from .loop_controller import LoopController
-from .message_controller import MessageController
 from .time_controller import TimeController
 from .session_controller import SessionController
 from .description_controller import DescritpionController

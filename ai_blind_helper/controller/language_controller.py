@@ -2,46 +2,39 @@ from config import Config
 
 class LanguageController:
     def __init__(self, clock_app, date_app, msg_app):
+        print(f"[LanguageController __init__] Inicializando controlador de idioma")
         self.clock_app = clock_app
         self.date_app = date_app
         self.msg_app = msg_app
     
     def set_system_language(self, new_lang: str):
-        """
-        Altera o idioma global, persiste a escolha e reinicializa os subsistemas.
-        """
+        print(f"[LanguageController set_system_language] Solicitada alteração de idioma para: {new_lang}")
+        
         if new_lang == Config.LANGUAGE:
+            print(f"[LanguageController set_system_language] Idioma {new_lang} já é o atual. Nenhuma ação necessária.")
             return
 
-        print(f">>> [Sistema] A alterar idioma para: {new_lang.upper()} e a guardar...")
-        
-        # 1. Atualiza e Persiste (Guarda no JSON)
+        print(f"[LanguageController set_system_language] Atualizando Config e persistindo novo idioma: {new_lang}")
         Config.set_language(new_lang)
 
-        # 2. Recria as instâncias que dependem do idioma (Hot-Swap)
+        print(f"[LanguageController set_system_language] Reinicializando subsistemas (Clock, Date, Msg) para {new_lang}")
         self.clock_app.set_language(language = new_lang)
         self.date_app.set_language(language = new_lang)
         self.msg_app.set_language(language = new_lang)
         
-        # Se estas apps também tiverem suporte a multi-idioma, recrie-as também:
-        # self.description_app = DescriptionApplication(language=new_lang)
-        
-        print(f">>> [Sistema] Idioma {new_lang.upper()} aplicado e persistido.")
-        
+        print(f"[LanguageController set_system_language] Idioma {new_lang.upper()} aplicado com sucesso em todos os sistemas")
 
     def handle_cycle_language(self):
-        """
-        Cicla entre os idiomas disponíveis (PT -> EN -> ES -> ...)
-        """
+        print("[LanguageController handle_cycle_language] Iniciando ciclo de troca de idioma")
         
         try:
             current_index = Config.LANGUAGES.index(Config.LANGUAGE)
         except ValueError:
+            print("[LanguageController handle_cycle_language] Erro: Idioma atual não encontrado na lista. Resetando para índice 0")
             current_index = 0
 
-        # Calcula o próximo índice
         next_index = (current_index + 1) % len(Config.LANGUAGES)
         next_lang = Config.LANGUAGES[next_index]
 
-        # Aplica a mudança
+        print(f"[LanguageController handle_cycle_language] Próximo idioma identificado: {next_lang}")
         self.set_system_language(next_lang)

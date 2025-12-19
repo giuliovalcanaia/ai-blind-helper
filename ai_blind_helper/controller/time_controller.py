@@ -2,6 +2,7 @@ import asyncio
 
 class TimeController:
     def __init__(self, clock_app, date_app, audio_app, audio_in_queue, loop):
+        print("[TimeController __init__] Inicializando controlador de tempo e data")
         self.clock_app = clock_app
         self.date_app = date_app
         self.audio_app = audio_app
@@ -9,34 +10,38 @@ class TimeController:
         self.loop = loop
     
     async def play_current_time(self):
+        print("[TimeController play_current_time] Solicitando caminho do áudio de hora atual")
         path = await asyncio.to_thread(self.clock_app.get_current_time_audio_path)
+        
         if path:
-            print(path)
+            print(f"[TimeController play_current_time] Reproduzindo áudio: {path}")
             asyncio.create_task(self.audio_app.play_file(
                 path, self.audio_in_queue, self.loop))
+        else:
+            print("[TimeController play_current_time] Erro: Caminho de áudio da hora não encontrado")
 
     async def play_current_date(self):
-        # Agora chamamos o método novo (que retorna lista) e rodamos na thread
+        print("[TimeController play_current_date] Solicitando caminhos dos áudios de data atual")
         paths = await asyncio.to_thread(self.date_app.get_current_date_audio_paths)
 
         if paths:
-            print(f"[Sistema] Reproduzindo data: {len(paths)} arquivos.")
+            print(f"[TimeController play_current_date] Iniciando reprodução de {len(paths)} arquivos de data")
             for path in paths:
-                # O 'await' aqui é crucial para garantir a ordem de inserção na fila
-                # ou o início da task de reprodução na ordem correta
                 await self.audio_app.play_file(path, self.audio_in_queue, self.loop)
-
-                # Opcional: Um pequeno delay entre os áudios para não ficar encavalado
-                # await asyncio.sleep(0.1)
+            print("[TimeController play_current_date] Todos os arquivos de data foram enviados para reprodução")
         else:
-            print("[Sistema] Nenhum áudio de data encontrado.")
+            print("[TimeController play_current_date] Erro: Nenhum áudio de data encontrado")
             
     def handle_time_request(self):
+        print("[TimeController handle_time_request] Requisição de hora detectada")
         if self.loop is None:
+            print("[TimeController handle_time_request] Erro: Loop de eventos não disponível")
             return
         asyncio.run_coroutine_threadsafe(self.play_current_time(), self.loop)
 
     def handle_date_request(self):
+        print("[TimeController handle_date_request] Requisição de data detectada")
         if self.loop is None:
+            print("[TimeController handle_date_request] Erro: Loop de eventos não disponível")
             return
         asyncio.run_coroutine_threadsafe(self.play_current_date(), self.loop)
