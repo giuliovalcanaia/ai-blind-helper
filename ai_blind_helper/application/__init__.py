@@ -3,10 +3,10 @@ from .audio_player_application import AudioPlayerApplication
 from .clock_application import ClockApplication
 from .date_application import DateApplication
 from .description_application import DescriptionApplication
-from .keyboard_application import KeyboardApplication
 from .live_client_application import LiveClientApplication
 from .transcription_application import TranscriptionApplication
-from .video_recorder_application import VideoPlayerApplication
+from .video_recorder_application import VideoRecorderApplication
 from .volume_control_application import VolumeControlApplication
 from .text_client_application import TextClientApplication
 from .system_message_application import SystemMessageApplication
+from .keyboard_application import KeyboardApplication

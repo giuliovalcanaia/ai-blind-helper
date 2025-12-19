@@ -67,6 +67,7 @@ class Config:
 
 
 
+    VIDEO_MODE = "camera"
 
 
 
