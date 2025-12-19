@@ -4,7 +4,7 @@ class StateProvider:
     def __init__(self):
         # Comunicação
         self.audio_in_queue = asyncio.Queue()
-        self.out_queue = asyncio.Queue(maxsize=200)
+        self.out_queue = asyncio.Queue(maxsize=5)
         
         # Sincronização
         self.start_audio_event = asyncio.Event()

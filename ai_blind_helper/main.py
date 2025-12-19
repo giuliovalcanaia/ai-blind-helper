@@ -15,7 +15,8 @@ def main():
     
     application_provider = ApplicationProvider(
         manager_provider=manager_provider, 
-        reader_provider=reader_provider
+        reader_provider=reader_provider,
+        state_provider=state_provider
     )
     
     controller_provider = ControllerProvider(
