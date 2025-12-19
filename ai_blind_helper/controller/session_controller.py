@@ -16,24 +16,27 @@ class SessionController:
         self.audio_app = audio_app
         self.start_audio_event = start_audio_event
         self.start_video_event = start_video_event
-        # self.loop = loop
         self.state_provider = state_provider
         self.sfx_controller = sfx_controller
+        self.background_tasks = set()
     
     @property
     def loop(self):
         return self.state_provider.loop
-    
+
+    def _fire_and_forget_sfx(self, coro):
+        task = asyncio.create_task(coro)
+        self.background_tasks.add(task)
+        task.add_done_callback(self.background_tasks.discard)
+
     async def _orchestrate_audio_start(self):
-        """Toca a voz de 'iniciando', espera terminar, e depois conecta."""
         await self.sfx_controller.initiating_gemini_audio()
         await self._start_audio_connection_manager()
 
     async def _orchestrate_video_start(self):
-        """Toca a voz de 'iniciando', espera terminar, e depois conecta."""
         await self.sfx_controller.initiating_gemini_video()
         await self._start_video_connection_manager()
-
+    
     async def _audio_capture_wrapper(self):
         print(f"[SessionController _audio_capture_wrapper] Inicializando loop de áudio (Event ID: {id(self.start_audio_event)})")
         await self.audio_app.task_capture_audio(self.out_queue, self.start_audio_event)
@@ -45,8 +48,7 @@ class SessionController:
     async def _run_audio_session_lifecycle(self):
         print("[SessionController _run_audio_session_lifecycle] WebSocket Conectado. Iniciando TaskGroup de áudio")
         try:
-            # Alterado de create_task para await para evitar sobreposição com o inicio da sessão
-            await self.sfx_controller.initiating_gemini_audio_sfx()
+            self._fire_and_forget_sfx(self.sfx_controller.initiating_gemini_audio_sfx())
             
             async with asyncio.TaskGroup() as tg:
                 tg.create_task(self.gemini_client.start_session(
@@ -60,7 +62,7 @@ class SessionController:
         except Exception as e:
             print(f"[SessionController _run_audio_session_lifecycle] Erro na sessão: {e}")
         finally:
-            asyncio.create_task(self.sfx_controller.closing_gemini_audio_sfx())
+            self._fire_and_forget_sfx(self.sfx_controller.closing_gemini_audio_sfx())
             print("[SessionController _run_audio_session_lifecycle] Limpando fila de saída")
             while not self.out_queue.empty():
                 try:
@@ -79,9 +81,9 @@ class SessionController:
     async def _run_video_session_lifecycle(self):
         print("[SessionController _run_video_session_lifecycle] WebSocket Conectado. Iniciando TaskGroup de áudio e vídeo")
         try:
+            self._fire_and_forget_sfx(self.sfx_controller.initiating_gemini_audio_sfx())
             
             async with asyncio.TaskGroup() as tg:
-                
                 tg.create_task(self.gemini_client.start_session(
                     input_queue=self.out_queue,
                     output_queue=self.audio_in_queue
@@ -89,16 +91,17 @@ class SessionController:
                 tg.create_task(self._audio_capture_wrapper())
                 tg.create_task(self._video_capture_wrapper())
 
-                # Toca o SFX de conexão (Bip)
-                await self.sfx_controller.initiating_gemini_audio_sfx()
-                
                 self.start_sending_video()
         except asyncio.CancelledError:
             print("[SessionController _run_video_session_lifecycle] Sessão de vídeo cancelada")
         except Exception as e:
             print(f"[SessionController _run_video_session_lifecycle] Erro na sessão: {e}")
         finally:
-            asyncio.create_task(self.sfx_controller.closing_gemini_audio_sfx())
+            if hasattr(self.sfx_controller, 'closing_gemini_video_sfx'):
+                 self._fire_and_forget_sfx(self.sfx_controller.closing_gemini_video_sfx())
+            else:
+                 self._fire_and_forget_sfx(self.sfx_controller.closing_gemini_audio_sfx())
+
             print("[SessionController _run_video_session_lifecycle] Limpando fila de saída")
             if hasattr(self.video_app, 'stop_capture'):
                 await self.video_app.stop_capture() 
@@ -159,14 +162,11 @@ class SessionController:
 
         if self.session_task and not self.session_task.done():
             print("[SessionController handle_audio_live_connect] Sessão ativa detectada, encerrando...")
-            asyncio.run_coroutine_threadsafe(self.sfx_controller.closing_gemini_audio(), self.loop)
             self.stop_session()
         else:
             print("[SessionController handle_audio_live_connect] Iniciando nova conexão sequencial...")
             self.start_audio_event.clear()
             self.start_video_event.clear()
-            
-            # Usando o orquestrador para evitar sobreposição de áudio
             asyncio.run_coroutine_threadsafe(self._orchestrate_audio_start(), self.loop)
 
     def handle_video_live_connect(self):
@@ -176,14 +176,11 @@ class SessionController:
 
         if self.session_task and not self.session_task.done():
             print("[SessionController handle_video_live_connect] Sessão ativa detectada, encerrando...")
-            asyncio.run_coroutine_threadsafe(self.sfx_controller.closing_gemini_video(), self.loop)
             self.stop_session()
         else:
             print("[SessionController handle_video_live_connect] Iniciando nova conexão sequencial...")
             self.start_audio_event.clear()
             self.start_video_event.clear()
-            
-            # Usando o orquestrador para evitar sobreposição de áudio
             asyncio.run_coroutine_threadsafe(self._orchestrate_video_start(), self.loop)
 
     def start_sending_audio_only(self):

@@ -1,0 +1,149 @@
+--- [Logger] Gravando sessão em: logs/log_2025-12-19_11-08-07.txt ---
+[InputAudioManager __init__] Inicializando gerenciador de entrada de áudio (Hardware)
+[InputAudioManager __init__] Noise Gate configurado (Threshold: 150, Release: 0.5s)
+[OutputAudioManager __init__] Inicializando gerenciador de saída de áudio (Hardware)
+[ClockApplication __init__] Inicializando serviço de relógio (Idioma: pt)
+[DateApplication __init__] Inicializando serviço de data (Idioma: pt)
+[LiveClientApplication __init__] Inicializando cliente Gemini Live
+[SystemMessageApplication __init__] Inicializando serviço de mensagens do sistema (Idioma: pt)
+[KeyboardApplication __init__] Inicializando aplicação de teclado com gerenciador: <manager.keyboard_manager.KeyboardManager object at 0x78bf3dcbc050>
+[TranscriptionApplication __init__] Inicializando aplicação de transcrição e configurando prompt de OCR
+[VideoRecorderApplication __init__] Inicializando aplicação de vídeo no modo: camera
+[AudioController __init__] Inicializando controlador com audio_app: <application.audio_player_application.AudioPlayerApplication object at 0x78bf3dcbc980>
+[KeyboardController __init__] Inicializando controlador com keyboard_application: <application.keyboard_application.KeyboardApplication object at 0x78bf34f55fd0>
+[LanguageController __init__] Inicializando controlador de idioma
+[LoopController __init__] Inicializando controlador de loop principal
+[TimeController __init__] Inicializando controlador de tempo e data
+[SessionController __init__] Inicializando controlador de sessão
+[DescritpionController __init__] Inicializando controlador de descrição
+[TranscriptionController __init__] Inicializando controlador de transcrição
+[KeyboardInterface __init__] Inicializando interface de teclado e mapeando dependências
+[KeyboardInterface _setup_menu_structure] Configurando estrutura do menu rolável
+[KeyboardInterface _setup_bindings] Registrando atalhos de teclado físicos
+[KeyboardController register_key] Registrando callback para a tecla: 105
+[KeyboardApplication register_key] Vinculando código de tecla 105 ao callback fornecido
+[Manager] Tecla KEY_LEFT registrada.
+[KeyboardApplication register_key] Registro da tecla 105 concluído
+[KeyboardController register_key] Tecla 105 registrada com sucesso
+[KeyboardController register_key] Registrando callback para a tecla: 106
+[KeyboardApplication register_key] Vinculando código de tecla 106 ao callback fornecido
+[Manager] Tecla KEY_RIGHT registrada.
+[KeyboardApplication register_key] Registro da tecla 106 concluído
+[KeyboardController register_key] Tecla 106 registrada com sucesso
+[KeyboardController register_key] Registrando callback para a tecla: 28
+[KeyboardApplication register_key] Vinculando código de tecla 28 ao callback fornecido
+[Manager] Tecla KEY_ENTER registrada.
+[KeyboardApplication register_key] Registro da tecla 28 concluído
+[KeyboardController register_key] Tecla 28 registrada com sucesso
+[KeyboardController register_key] Registrando callback para a tecla: 16
+[KeyboardApplication register_key] Vinculando código de tecla 16 ao callback fornecido
+[Manager] Tecla KEY_Q registrada.
+[KeyboardApplication register_key] Registro da tecla 16 concluído
+[KeyboardController register_key] Tecla 16 registrada com sucesso
+[KeyboardController register_key] Registrando callback para a tecla: 20
+[KeyboardApplication register_key] Vinculando código de tecla 20 ao callback fornecido
+[Manager] Tecla KEY_T registrada.
+[KeyboardApplication register_key] Registro da tecla 20 concluído
+[KeyboardController register_key] Tecla 20 registrada com sucesso
+[KeyboardController register_key] Registrando callback para a tecla: 30
+[KeyboardApplication register_key] Vinculando código de tecla 30 ao callback fornecido
+[Manager] Tecla KEY_A registrada.
+[KeyboardApplication register_key] Registro da tecla 30 concluído
+[KeyboardController register_key] Tecla 30 registrada com sucesso
+[Main main] Chamando interface_provider.keyboard_interface.run()
+[KeyboardInterface run] Repassando execução para o LoopController
+[LoopController run] Tentando iniciar o loop de eventos assíncrono
+[LoopController start_main_loop] Configurando loop e iniciando serviços
+[LoopController start_main_loop] Acionando monitor de teclado
+[KeyboardApplication start] Solicitando início do monitoramento de hardware via keyboard_manager
+[Manager] Loop iniciado.[Manager] Escutando device: AT Translated Set 2 keyboard
+
+[KeyboardApplication start] Monitoramento de hardware iniciado
+[LoopController start_main_loop] Criando tarefa de reprodução de áudio
+[LoopController start_main_loop] Solicitando mensagem de inicialização
+[OutputAudioManager start_output_stream] Abrindo stream de reprodução para alto-falantes
+[OutputAudioManager start_output_stream] Saída de áudio ativada (24000 Hz)
+[AudioPlayerApplication task_play_audio] Stream de saída iniciado.
+[LoopController play_current_power_on_message] Buscando caminho do áudio de boas-vindas
+[SystemMessageApplication get_current_welcome_message_path] Determinando saudação baseada no horário atual
+[SystemMessageApplication get_current_welcome_message_path] Arquivo de saudação encontrado: audio/pt/system/power-on-good-morning.wav
+[LoopController play_current_power_on_message] Reproduzindo arquivo: audio/pt/system/power-on-good-morning.wav
+[AudioPlayerApplication play_file] Iniciando reprodução do arquivo: audio/pt/system/power-on-good-morning.wav
+[AudioPlayerApplication play_file] Arquivo processado e enviado para a fila.
+
+=============================================
+      SISTEMA AI-BLIND-HELPER ONLINE      
+=============================================
+---------------------------------------------
+[<] [ENTER] [>]
+  [A] AUDIO
+  [T] TEMPO
+=============================================
+
+[LoopController start_main_loop] Entrando no loop de espera ativo
+[KeyboardInterface on_key_a] Iniciando envio de áudio (Hold/Lock)
+/home/arthur/python/ai-blind-helper/ai_blind_helper/interface/keyboard_interface.py:181: RuntimeWarning: coroutine 'AudioSFXController.audio_button_press' was never awaited
+  self.sfx_controller.audio_button_press()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+[SessionController start_sending_audio_only] Ativando fluxo de áudio
+[KeyboardInterface on_key_a] Curto toque detectado: Travando áudio (Lock)
+[KeyboardInterface on_key_a] Destravando áudio fixo
+[SessionController stop_sending_audio] Pausando fluxo de áudio
+/home/arthur/python/ai-blind-helper/ai_blind_helper/interface/keyboard_interface.py:189: RuntimeWarning: coroutine 'AudioSFXController.audio_button_release' was never awaited
+  self.sfx_controller.audio_button_release()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+[KeyboardInterface on_menu_confirm] Confirmando ação: Conectar / Desconectar Gemini Audio
+[KeyboardInterface audio_live_connect] Acionando alternância de conexão de áudio
+[SessionController handle_audio_live_connect] Processando solicitação de conexão de áudio
+[SessionController handle_audio_live_connect] Iniciando nova conexão sequencial...
+audio/pt/system/initiating-gemini.wav
+[Sistema] Reproduzindo: audio/pt/system/initiating-gemini.wav
+[AudioPlayerApplication play_file] Iniciando reprodução do arquivo: audio/pt/system/initiating-gemini.wav
+[AudioPlayerApplication play_file] Arquivo processado e enviado para a fila.
+[SessionController _start_audio_connection_manager] Criando tarefa para ciclo de vida de áudio
+[SessionController _run_audio_session_lifecycle] WebSocket Conectado. Iniciando TaskGroup de áudio
+audio/sfx/open-websocket.wav
+[Sistema] Reproduzindo: audio/sfx/open-websocket.wav
+[AudioPlayerApplication play_file] Iniciando reprodução do arquivo: audio/sfx/open-websocket.wav
+[LiveClientApplication start_session] Tentando estabelecer conexão WebSocket com Gemini
+[SessionController _audio_capture_wrapper] Inicializando loop de áudio (Event ID: 132762770753168)
+[InputAudioManager start_input_stream] Localizando dispositivo padrão e abrindo stream de entrada
+[InputAudioManager start_input_stream] Microfone ativado: default
+[AudioPlayerApplication task_capture_audio] Microfone iniciado.
+[AudioPlayerApplication task_capture_audio] Loop pausado. Aguardando evento...
+[AudioPlayerApplication play_file] Arquivo processado e enviado para a fila.
+[LiveClientApplication start_session] Conexão estabelecida com sucesso. Iniciando Workers
+[LiveClientApplication _sender] Worker de envio iniciado
+[LiveClientApplication _receiver] Worker de recepção iniciado
+[KeyboardInterface on_key_a] Iniciando envio de áudio (Hold/Lock)
+[SessionController start_sending_audio_only] Ativando fluxo de áudio
+[AudioPlayerApplication task_capture_audio] Loop retomado.
+[AudioPlayerApplication _flush_input_buffer] Buffer limpo com sucesso (3071 frames descartados).
+[InputAudioManager read_chunk] Gate ABERTO (RMS: 423)
+[InputAudioManager read_chunk] Gate FECHADO por inatividade
+[InputAudioManager read_chunk] Gate ABERTO (RMS: 188)
+[KeyboardInterface on_key_a] Curto toque detectado: Travando áudio (Lock)
+[InputAudioManager read_chunk] Gate FECHADO por inatividade
+[InputAudioManager read_chunk] Gate ABERTO (RMS: 233)
+[InputAudioManager read_chunk] Gate FECHADO por inatividade
+[InputAudioManager read_chunk] Gate ABERTO (RMS: 227)
+[KeyboardInterface on_key_a] Destravando áudio fixo
+[SessionController stop_sending_audio] Pausando fluxo de áudio
+[AudioPlayerApplication task_capture_audio] Loop pausado. Aguardando evento...
+[KeyboardInterface on_key_a] Iniciando envio de áudio (Hold/Lock)
+[SessionController start_sending_audio_only] Ativando fluxo de áudio
+[AudioPlayerApplication task_capture_audio] Loop retomado.
+[AudioPlayerApplication _flush_input_buffer] Buffer limpo com sucesso (3071 frames descartados).
+[InputAudioManager read_chunk] Gate FECHADO por inatividade
+[InputAudioManager read_chunk] Gate ABERTO (RMS: 168)
+[KeyboardInterface on_key_a] Curto toque detectado: Travando áudio (Lock)
+[InputAudioManager read_chunk] Gate FECHADO por inatividade
+[KeyboardInterface on_key_a] Destravando áudio fixo
+[SessionController stop_sending_audio] Pausando fluxo de áudio
+[AudioPlayerApplication task_capture_audio] Loop pausado. Aguardando evento...
+[LoopController start_main_loop] Tarefa cancelada pelo sistema
+[LoopController start_main_loop] Iniciando protocolo de encerramento e limpeza
+[LoopController start_main_loop] Tarefa de áudio cancelada
+[AudioPlayerApplication task_play_audio] Tarefa cancelada.
+[AudioPlayerApplication task_capture_audio] Tarefa cancelada.
+[LoopController run] Interrupção detectada via hardware (CTRL+C)
