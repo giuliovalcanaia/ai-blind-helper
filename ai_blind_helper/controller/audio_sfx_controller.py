@@ -64,3 +64,13 @@ class AudioSFXController:
     async def _task_audio_button_release(self):
         path = self.sfx_app.get_audio_button_release()
         await self.play_file_by_path(path) 
+
+        
+    async def initiating_gemini_audio_sfx(self):
+        path = self.sfx_app.get_open_websocket()
+        await self.play_file_by_path(path)
+        
+        
+    async def closing_gemini_audio_sfx(self):
+        path = self.sfx_app.get_close_websocket()
+        await self.play_file_by_path(path)
