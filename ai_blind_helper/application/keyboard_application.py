@@ -1,3 +1,8 @@
+import evdev
+import asyncio
+from manager import KeyboardManager
+from config import Config
+
 class KeyboardApplication:
     def __init__(self, keyboard_manager):
         print(f"[KeyboardApplication __init__] Inicializando aplicação de teclado com gerenciador: {keyboard_manager}")

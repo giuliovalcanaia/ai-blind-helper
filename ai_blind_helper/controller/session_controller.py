@@ -6,7 +6,7 @@ import traceback
 
 class SessionController:
     
-    def __init__(self, gemini_client, video_app, audio_app, session_task, out_queue, audio_in_queue, start_audio_event, start_video_event, state_provider):
+    def __init__(self, gemini_client, video_app, audio_app, session_task, out_queue, audio_in_queue, start_audio_event, start_video_event, state_provider, sfx_controller):
         print(f"[SessionController __init__] Inicializando controlador de sessão")
         self.session_task = session_task
         self.out_queue = out_queue
@@ -18,6 +18,7 @@ class SessionController:
         self.start_video_event = start_video_event
         # self.loop = loop
         self.state_provider = state_provider
+        self.sfx_controller = sfx_controller
     
     @property
     def loop(self):
@@ -135,13 +136,14 @@ class SessionController:
 
         if self.session_task and not self.session_task.done():
             print("[SessionController handle_audio_live_connect] Sessão ativa detectada, encerrando...")
+            asyncio.run_coroutine_threadsafe(self.sfx_controller.closing_gemini_audio(), self.loop)
             self.stop_session()
         else:
             print("[SessionController handle_audio_live_connect] Iniciando nova conexão...")
             self.start_audio_event.clear()
             self.start_video_event.clear()
-            asyncio.run_coroutine_threadsafe(
-                self._start_audio_connection_manager(), self.loop)
+            asyncio.run_coroutine_threadsafe(self.sfx_controller.initiating_gemini_audio(), self.loop)
+            asyncio.run_coroutine_threadsafe(self._start_audio_connection_manager(), self.loop)
 
     def handle_video_live_connect(self):
         print("[SessionController handle_video_live_connect] Processando solicitação de conexão de vídeo")
@@ -150,13 +152,14 @@ class SessionController:
 
         if self.session_task and not self.session_task.done():
             print("[SessionController handle_video_live_connect] Sessão ativa detectada, encerrando...")
+            asyncio.run_coroutine_threadsafe(self.sfx_controller.closing_gemini_video(), self.loop)
             self.stop_session()
         else:
             print("[SessionController handle_video_live_connect] Iniciando nova conexão...")
             self.start_audio_event.clear()
             self.start_video_event.clear()
-            asyncio.run_coroutine_threadsafe(
-                self._start_video_connection_manager(), self.loop)
+            asyncio.run_coroutine_threadsafe(self.sfx_controller.initiating_gemini_video(), self.loop)
+            asyncio.run_coroutine_threadsafe(self._start_video_connection_manager(), self.loop)
 
     def start_sending_audio_only(self):
         print("[SessionController start_sending_audio_only] Ativando fluxo de áudio")
