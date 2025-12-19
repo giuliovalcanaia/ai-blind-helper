@@ -17,7 +17,7 @@ class SystemMessageApplication:
         elif hour in range(13, 18):
             filename = "power-on-good-afternoon.wav"
         else:
-            filename = "power-on-good-night.wav"
+            filename = "power-on-good-evening.wav"
 
         full_path = os.path.join(
             self.base_dir,
