@@ -1,5 +1,5 @@
 from .agenda_application import AgendaApplication
-from .audio_player_application import AudioPlayerApplication
+from .audio_player_application import AudioApplication
 from .clock_application import ClockApplication
 from .date_application import DateApplication
 from .description_application import DescriptionApplication

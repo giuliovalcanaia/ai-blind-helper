@@ -98,3 +98,24 @@ class Config:
             sliding_window=types.SlidingWindow(target_tokens=12800),
         ),
     )
+
+    TURN_CONFIG = types.LiveConnectConfig(
+        response_modalities=["AUDIO"],
+        media_resolution="MEDIA_RESOLUTION_MEDIUM",
+        speech_config=types.SpeechConfig(
+            voice_config=types.VoiceConfig(
+                prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                    voice_name="Zephyr")
+            )
+        ),
+        context_window_compression=types.ContextWindowCompressionConfig(
+            trigger_tokens=25600,
+            sliding_window=types.SlidingWindow(target_tokens=12800),
+        ),
+        # Configuração de entrada em tempo real
+        realtime_input_config=types.RealtimeInputConfig(
+            # Aqui definimos como o modelo lida com a interrupção (Barge-in)
+            activity_handling=types.ActivityHandling.NO_INTERRUPTION
+        ),
+    )
+ 

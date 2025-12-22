@@ -3,7 +3,7 @@ from manager import InputAudioManager, OutputAudioManager
 from reader import WavReader
 from config import Config
 
-class AudioPlayerApplication:
+class AudioApplication:
     def __init__(self, input_manager, output_manager, wav_reader):
         self.audio_input_manager = input_manager
         self.audio_output_manager = output_manager
