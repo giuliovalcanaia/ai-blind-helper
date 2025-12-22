@@ -1,5 +1,5 @@
 from .agenda_application import AgendaApplication
-from .audio_player_application import AudioApplication
+from .audio_application import AudioApplication
 from .clock_application import ClockApplication
 from .date_application import DateApplication
 from .description_application import DescriptionApplication
@@ -12,3 +12,5 @@ from .system_message_application import SystemMessageApplication
 from .audio_sfx_application import AudioSFXApplication
 from .menu_application import MenuApplication
 from .keyboard_application import KeyboardApplication
+from .audio_player_application import AudioPlayerApplication
+from .turn_client_application import TurnClientApplication

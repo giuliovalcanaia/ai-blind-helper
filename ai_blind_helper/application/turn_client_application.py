@@ -5,7 +5,7 @@ from google.genai import types
 from google import genai
 from config import Config
 
-class LiveClientApplication:
+class TurnClientApplication:
     def __init__(self, audio_in_queue):
         print("[LiveClientApplication __init__] Inicializando cliente Gemini Live")
         self.client = genai.Client(

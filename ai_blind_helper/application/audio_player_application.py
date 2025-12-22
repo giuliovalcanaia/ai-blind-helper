@@ -1,105 +1,169 @@
 import asyncio
+import os
+import traceback
 from manager import InputAudioManager, OutputAudioManager
 from reader import WavReader
 from config import Config
 
-class AudioApplication:
-    def __init__(self, input_manager, output_manager, wav_reader):
-        self.audio_input_manager = input_manager
-        self.audio_output_manager = output_manager
-        self.wav_reader = wav_reader
 
-    async def task_capture_audio(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
-        """
-        Lê do Mic e envia para a fila da IA com proteção contra latência (Drop frame).
-        """
-        self.audio_input_manager.start_input_stream()
-        print(f"[{self.__class__.__name__} task_capture_audio] Microfone iniciado (Modo Baixa Latência).")
-
+class AudioPlayerApplication:
+    def __init__(self):
         try:
-            while True:
-                # 1. GERENCIAMENTO DE PAUSA E FLUSH
-                if not control_event.is_set():
-                    # print(f"[{self.__class__.__name__}] Pausado. Aguardando...")
-                    await control_event.wait()
-                    # Ao retomar, limpa o buffer de hardware para não enviar áudio "velho"
-                    await asyncio.to_thread(self._flush_input_buffer)
-                
-                # 2. LEITURA OTIMIZADA DO HARDWARE
-                # Read chunk deve ser rápido. Se o hardware tiver overflow, ignoramos o erro
-                try:
-                    data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
-                except Exception as e:
-                    # Input Overflow é comum em tempo real se a CPU pular. Ignora e segue.
-                    continue
+            print("🛠️ [AudioApp] Inicializando construtor...")
+            self.audio_input_manager = InputAudioManager()
+            self.audio_output_manager = OutputAudioManager()
+            self.wav_reader = WavReader(
+                target_rate=Config.RECEIVE_SAMPLE_RATE,
+                target_channels=Config.CHANNELS
+            )
 
-                if data:
-                    # 3. ENVIO NÃO-BLOQUEANTE (REAL-TIME)
-                    # Se a fila estiver cheia (rede lenta), descartamos o pacote (Drop)
-                    # Isso garante que a IA sempre receba o áudio MAIS RECENTE, não o antigo.
+            # Estado do Player
+            self.audio_buffer = bytearray()
+            self.playback_cursor = 0
+            self.is_paused = False
+            self.BYTES_PER_SECOND = Config.RECEIVE_SAMPLE_RATE * Config.CHANNELS * 2
+
+            print("✅ [AudioApp] Construtor OK.")
+
+        except Exception as e:
+            print(f"❌ [AudioApp] ERRO FATAL no __init__: {e}")
+            traceback.print_exc()
+
+
+    # --- INPUT (Mantido simples, pois parece estar OK) ---
+    async def task_capture_audio(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
+        try:
+            self.audio_input_manager.start_input_stream()
+            print("🎙️ [AudioApp] Input stream iniciado.")
+            while True:
+                if not control_event.is_set():
+                    await control_event.wait()
                     try:
-                        out_queue.put_nowait({"data": data, "mime_type": "audio/pcm"})
-                    except asyncio.QueueFull:
-                        pass # Drop frame intencional para manter sincronia
+                        await asyncio.to_thread(self.audio_input_manager.input_stream.read, 
+
+                                              self.audio_input_manager.input_stream.get_read_available())
+                    except: pass
+                data = await asyncio.to_thread(self.audio_input_manager.read_chunk)
+                if data:
+                    await out_queue.put({"data": data, "mime_type": "audio/pcm"})
+                else:
+                    await asyncio.sleep(0.01)
 
         except asyncio.CancelledError:
-            print(f"[{self.__class__.__name__} task_capture_audio] Tarefa cancelada.")
+            print("⏹️ [AudioApp] Captura cancelada.")
         except Exception as e:
-            print(f"[{self.__class__.__name__} task_capture_audio] Erro fatal: {e}")
-
-    def _flush_input_buffer(self):
-        """Limpeza agressiva de buffer de entrada"""
-        try:
-            if hasattr(self.audio_input_manager, 'input_stream'):
-                available = self.audio_input_manager.input_stream.get_read_available()
-                if available > 0:
-                    self.audio_input_manager.input_stream.read(available, exception_on_overflow=False)
-        except Exception:
-            pass
+            print(f"❌ [AudioApp] Erro na CAPTURA: {e}")
 
     async def task_play_audio(self, input_queue: asyncio.Queue):
-        """
-        Consome a fila de áudio e escreve na saída.
-        """
-        self.audio_output_manager.start_output_stream()
-        print(f"[{self.__class__.__name__} task_play_audio] Stream de saída iniciado.")
-        
+        print("🛠️ [AudioApp] Iniciando task_play_audio...")
         try:
-            while True:
-                bytestream = await input_queue.get()
-                
-                # Escreve no hardware (bloqueante, mas em thread separada)
-                await asyncio.to_thread(self.audio_output_manager.write_chunk, bytestream)
-                
-                input_queue.task_done()
-        except asyncio.CancelledError:
-             print(f"[{self.__class__.__name__} task_play_audio] Tarefa cancelada.")
+            print("🛠️ [AudioApp] Tentando iniciar output stream...")
+            self.audio_output_manager.start_output_stream()
+            print("✅ [AudioApp] Output stream iniciado.")
+        except Exception as e:
+            print(f"❌ [AudioApp] FALHA AO ABRIR AUDIO OUTPUT: {e}")
+            print("⚠️ [AudioApp] Continuando apenas ingestão para debug...")
+        self.reset_playback_state()
 
-    def drain_audio_queue(self, queue: asyncio.Queue):
-        """
-        Método CRÍTICO para sensação de tempo real.
-        Esvazia a fila de reprodução imediatamente (Barge-in).
-        """
-        items_dropped = 0
-        while not queue.empty():
+        try:
+            await asyncio.gather(
+                self._loop_ingest_data(input_queue),
+                self._loop_playback_stream()
+            )
+        except Exception as e:
+            print(f"❌ [AudioApp] Erro CRÍTICO no gather: {e}")
+            traceback.print_exc()
+
+    async def _loop_ingest_data(self, input_queue: asyncio.Queue):
+
+        print("Start: Ingest Loop")
+
+        while True:
             try:
-                queue.get_nowait()
-                queue.task_done()
-                items_dropped += 1
-            except (asyncio.QueueEmpty, ValueError):
-                break
-        
-        if items_dropped > 0:
-            print(f"[{self.__class__.__name__}] Drain: {items_dropped} chunks de áudio descartados.")
+                chunk_wrapper = await input_queue.get()
+                data = None
 
-    async def play_file(self, file_path: str, target_queue: asyncio.Queue, loop):
-        print(f"[{self.__class__.__name__} play_file] Reproduzindo: {file_path}")
-        def process_file():
-            for chunk in self.wav_reader.read_chunks(file_path):
-                loop.call_soon_threadsafe(target_queue.put_nowait, chunk)
-        await asyncio.to_thread(process_file)
+                if isinstance(chunk_wrapper, dict):
+                    data = chunk_wrapper.get("data")
+
+                elif isinstance(chunk_wrapper, bytes) or isinstance(chunk_wrapper, bytearray):
+                    data = chunk_wrapper
+
+                if data:
+                    self.audio_buffer.extend(data)
+
+                input_queue.task_done()
+
+
+            except asyncio.CancelledError:
+                print("Stop: Ingest Loop (Cancelled)")
+                break
+
+            except Exception as e:
+                print(f"❌ [AudioApp] Erro Ingestão: {e}")
+                await asyncio.sleep(0.1)
+
+    async def _loop_playback_stream(self):
+        print("Start: Playback Loop")
+        chunk_read_size = 4096 
+        while True:
+            try:
+                if self.is_paused:
+                    await asyncio.sleep(0.1)
+                    continue
+                buffer_len = len(self.audio_buffer)
+                if self.playback_cursor < buffer_len:
+                    end_pos = min(self.playback_cursor + chunk_read_size, buffer_len)
+                    data_chunk = self.audio_buffer[self.playback_cursor : end_pos]
+                    if self.audio_output_manager and self.audio_output_manager.output_stream:
+                        await asyncio.to_thread(self.audio_output_manager.write_chunk, bytes(data_chunk))
+                        self.playback_cursor = end_pos
+                    else:
+                        self.playback_cursor = end_pos
+                        await asyncio.sleep(0.01) # Simula tempo de playback
+                else:
+                    await asyncio.sleep(0.01)
+            except asyncio.CancelledError:
+                print("Stop: Playback Loop (Cancelled)")
+                break
+
+            except OSError as oe:
+                print(f"⚠️ [AudioApp] Erro de Hardware (OSError): {oe}")
+                await asyncio.sleep(0.5) # Espera um pouco antes de tentar de novo
+            except Exception as e:
+                print(f"❌ [AudioApp] Erro Playback Genérico: {e}")
+                traceback.print_exc()
+                await asyncio.sleep(0.5)
+
+
+    def reset_playback_state(self):
+        self.audio_buffer = bytearray()
+        self.playback_cursor = 0
+        self.is_paused = False
+
 
     def close(self):
-        print(f"[{self.__class__.__name__} close] Encerrando gerenciadores.")
-        self.audio_input_manager.close()
-        self.audio_output_manager.close()
+        try:
+            if self.audio_input_manager: self.audio_input_manager.close()
+            if self.audio_output_manager: self.audio_output_manager.close()
+            print("✅ [AudioApp] Fechado com sucesso.")
+        except Exception as e:
+            print(f"⚠️ [AudioApp] Erro ao fechar: {e}")
+
+    def toggle_pause(self):
+        self.is_paused = not self.is_paused
+        print(f">>> [Audio] Pausado: {self.is_paused}")
+
+    def rewind(self, seconds=5):
+        try:
+            bytes_to_rewind = int(seconds * self.BYTES_PER_SECOND)
+            self.playback_cursor = max(0, self.playback_cursor - bytes_to_rewind)
+            print(f">>> [Audio] Rewind. Pos: {self.playback_cursor}")
+        except: pass
+
+    def forward(self, seconds=5):
+        try:
+            bytes_to_forward = int(seconds * self.BYTES_PER_SECOND)
+            self.playback_cursor = min(len(self.audio_buffer), self.playback_cursor + bytes_to_forward)
+            print(f">>> [Audio] Forward. Pos: {self.playback_cursor}")
+        except: pass     

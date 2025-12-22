@@ -4,7 +4,7 @@ from config import Config
 class ApplicationProvider:
     def __init__(self, manager_provider, reader_provider, state_provider):
         self.agenda = AgendaApplication()
-        self.audio = AudioPlayerApplication(manager_provider.audio_input, manager_provider.audio_output, reader_provider.wav)
+        self.audio = AudioApplication(manager_provider.audio_input, manager_provider.audio_output, reader_provider.wav)
         self.clock = ClockApplication(Config.LANGUAGE)
         self.date = DateApplication(Config.LANGUAGE)
         self.description = DescriptionApplication()
@@ -17,3 +17,5 @@ class ApplicationProvider:
         self.volume = VolumeControlApplication()
         self.menu = MenuApplication()
         self.sfx = AudioSFXApplication()
+        self.player = AudioPlayerApplication()
+        self.turn = TurnClientApplication()
