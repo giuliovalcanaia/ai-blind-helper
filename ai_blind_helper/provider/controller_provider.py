@@ -12,4 +12,4 @@ class ControllerProvider:
         self.description = DescritpionController(application_provider.video, application_provider.description, state_provider.loop)
         self.transcription = TranscriptionController(application_provider.video, application_provider.live_client, application_provider.transcription, state_provider.loop)
         self.menu = AudioMenuController(application_provider.audio, state_provider.audio_in_queue, state_provider, application_provider.menu)
-        self.turn = TurnController(application_provider.live_client, application_provider.audio, state_provider.session_task, state_provider.out_queue, state_provider.audio_in_queue, state_provider.start_audio_event, state_provider, self.sfx)
+        self.turn = TurnController(application_provider.turn, application_provider.player, state_provider.session_task, state_provider.out_queue, state_provider.audio_in_queue, state_provider.start_audio_event, state_provider, self.sfx)

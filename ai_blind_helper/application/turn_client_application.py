@@ -1,7 +1,6 @@
 import asyncio
 import time
 import traceback
-from google.genai import types
 from google import genai
 from config import Config
 
@@ -13,8 +12,13 @@ class TurnClientApplication:
             api_key=Config.API_KEY,
         )
         self._is_connected = False
+        
+        self.interface = None
 
         self.audio_in_queue = audio_in_queue
+        
+    def set_interface(self, interface):
+        self.interface = interface
 
     @property
     def is_connected(self) -> bool:
@@ -24,7 +28,7 @@ class TurnClientApplication:
         print("[LiveClientApplication start_session] Tentando estabelecer conexão WebSocket com Gemini")
         try:
             async with (
-                self.client.aio.live.connect(model=Config.MODEL, config=Config.TURN_CONFIG) as session,
+                self.client.aio.live.connect(model=Config.MODEL, config=Config.LIVE_CONFIG) as session,
                 asyncio.TaskGroup() as tg
             ):
                 self._is_connected = True
@@ -44,21 +48,16 @@ class TurnClientApplication:
             print("[LiveClientApplication start_session] Sessão encerrada e estado de conexão resetado")
 
     async def _sender(self, session, input_queue: asyncio.Queue):
+        print("[LiveClientApplication _sender] Worker de envio iniciado")
         while True:
-            # Agora esperamos um dicionário ou tupla com o conteúdo e a flag
-            item = await input_queue.get()
+            msg = await input_queue.get()
             
-            # Exemplo de estrutura: {"data": ..., "end_of_turn": True/False}
-            msg = item.get("msg")
-            eot = item.get("end_of_turn", False) # Por padrão, não termina o turno
-
             try:
-                # A 'flag' mágica é o end_of_turn
-                await session.send(input=msg if msg is not None else [], end_of_turn=eot)
+                await session.send(input=msg)
                 input_queue.task_done()
             except Exception as e:
-                print(f"Erro no envio: {e}")
-                break 
+                print(f"[LiveClientApplication _sender] Erro ao enviar dados para a API: {e}")
+                break
 
     async def _receiver(self, session, output_queue: asyncio.Queue):
         print("[LiveClientApplication _receiver] Worker de recepção iniciado")
@@ -67,19 +66,25 @@ class TurnClientApplication:
                 turn = session.receive()
 
                 async for response in turn:
+                    # 1. Verificar se há conteúdo do servidor
+                    if sc := response.server_content:
+                        
+                        # 2. Checar se a geração de conteúdo acabou
+                        if sc.generation_complete:
+                            print("\n[DEBUG] IA terminou de gerar o conteúdo.")
+
+                        # 3. Checar se o turno inteiro acabou (fim da resposta)
+                        if sc.turn_complete:
+                            print("\n[DEBUG] Fim do turno. IA pronta para ouvir novamente.")
+                            self.interface.unlock_turn()
+
+                    # Seu processamento de dados atual
                     if data := response.data:
                         output_queue.put_nowait(data)
+                    
                     if text := response.text:
                         print(text, end="", flush=True)
-                
-                # If you interrupt the model, it sends a turn_complete.
-                # For interruptions to work, we need to stop playback.
-                # So empty out the audio queue because it may have loaded
-                # much more audio than has played yet.
-                # while not self.audio_in_queue.empty():
-                #     self.audio_in_queue.get_nowait()
 
             except Exception as e:
-                print(f"[LiveClientApplication _receiver] Erro durante a recepção de dados: {e}")
-                traceback.print_exc()
+                print(f"Erro no receiver: {e}")
                 break

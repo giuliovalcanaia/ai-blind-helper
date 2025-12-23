@@ -195,7 +195,7 @@ class KeyboardInterface:
             
     def audio_turn_connect(self, event_type, duration):
         if event_type == 'PRESS':
-            self.turn_controller.handle_toggle_session()
+            self.turn_controller.handle_audio_live_connect()
             self.turn_connected = not self.turn_connected
             self.blocked = not self.blocked
             self.turn_blocked = False
@@ -224,7 +224,9 @@ class KeyboardInterface:
             self.handle_quit()
 
     def on_key_a(self, event_type, duration):
-        if self.turn_connected and not self.turn_blocked:
+        if self.turn_connected and self.turn_blocked:
+            return
+        if self.turn_connected:
             key_code = evdev.ecodes.KEY_1
             if event_type == 'PRESS':
                 self._start_hold_timer(key_code, Config.LOCK_THRESHOLD_MS_AUDIO)
@@ -234,15 +236,15 @@ class KeyboardInterface:
                     self.sfx_controller.audio_button_press()
                     self.audio_pressed = True
                     self.audio_is_locked = False
-                    self.turn_controller.start_recording()
+                    self.turn_controller.start_sending_audio_only()
             elif event_type == 'RELEASE':
                 self._cancel_hold_timer(key_code)
                 if (self.audio_is_locked):
                     print("[KeyboardInterface on_key_a] Destravando áudio fixo")
-                    self.turn_controller.stop_recording_and_send()
+                    self.turn_controller.stop_sending_audio()
                     self.sfx_controller.audio_button_release()
                     self.audio_pressed = False
-                    # self.turn_blocked = True
+                    self.lock_turn()
                 elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
                     print(
                         "[KeyboardInterface on_key_a] Curto toque detectado: Travando áudio (Lock)")
@@ -250,11 +252,11 @@ class KeyboardInterface:
                 else:
                     print(
                         "[KeyboardInterface on_key_a] Soltura de tecla detectada: Finalizando Hold de áudio")
-                    self.turn_controller.stop_recording_and_send()
+                    self.turn_controller.stop_sending_audio()
                     self.sfx_controller.audio_button_release()
                     self.audio_pressed = False 
-                    # self.turn_blocked = True
-        elif not self.turn_connected:
+                    self.lock_turn()
+        else:
             key_code = evdev.ecodes.KEY_1
             if event_type == 'PRESS':
                 self._start_hold_timer(key_code, Config.LOCK_THRESHOLD_MS_AUDIO)
@@ -345,3 +347,15 @@ class KeyboardInterface:
         if timer:
             timer.cancel()
             print(f"[KeyboardInterface] Timer da tecla {key_code} cancelado.")
+
+    # Dentro da classe KeyboardInterface
+
+    def lock_turn(self):
+        print("[KeyboardInterface] Turno bloqueado: IA processando/falando...")
+        self.turn_blocked = True
+
+    def unlock_turn(self):
+        print("[KeyboardInterface] Turno liberado: Pode falar agora.")
+        self.turn_blocked = False
+        # Opcional: tocar um som de "beep" para avisar o usuário que ele pode falar
+        self.sfx_controller.hold_button_press_sfx()

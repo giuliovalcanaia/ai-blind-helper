@@ -25,6 +25,8 @@ def main():
     )
     
     interface_provider = InterfaceProvider(controller_provider)
+
+    application_provider.turn.set_interface(interface_provider.keyboard_interface)
     
     try:
         print("[Main main] Chamando interface_provider.keyboard_interface.run()")
