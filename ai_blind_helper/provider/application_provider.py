@@ -18,4 +18,4 @@ class ApplicationProvider:
         self.menu = MenuApplication()
         self.sfx = AudioSFXApplication()
         self.player = AudioPlayerApplication()
-        self.turn = TurnClientApplication()
+        self.turn = TurnClientApplication(state_provider.audio_in_queue)

@@ -125,16 +125,26 @@ class TurnController:
             capture_task.cancel()
 
     def handle_toggle_session(self):
-        """Liga ou desliga a conexão WebSocket com o Gemini"""
-        if self.loop is None: return
+        """Liga ou desliga a conexão WebSocket com o Gemini de forma segura entre threads"""
+        if self.loop is None: 
+            print("❌ [TurnController] Loop não inicializado.")
+            return
 
         if self.session_task and not self.session_task.done():
-            self.stop_full_session()
+            print("[TurnController] Parando sessão ativa...")
+            # Para cancelar de outra thread, usamos call_soon_threadsafe
+            self.loop.call_soon_threadsafe(self.session_task.cancel)
         else:
+            print("[TurnController] Iniciando nova sessão...")
             self.start_audio_event.clear()
-            self.session_task = asyncio.create_task(self._run_turn_session_lifecycle())
-
-    def stop_full_session(self):
-        """Encerra a conexão WebSocket completamente"""
-        if self.session_task:
-            self.session_task.cancel()
+            
+            # CORREÇÃO AQUI: run_coroutine_threadsafe agenda a corotina no loop correto
+            # e retorna um Future. Armazenamos a task para controle futuro.
+            future = asyncio.run_coroutine_threadsafe(
+                self._run_turn_session_lifecycle(), 
+                self.loop
+            )
+            
+            # Para manter compatibilidade com seu check 'self.session_task.done()'
+            # Podemos extrair a Task real do loop se necessário, ou apenas gerenciar o future.
+            self.session_task = future 

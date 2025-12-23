@@ -54,7 +54,7 @@ class TurnClientApplication:
 
             try:
                 # A 'flag' mágica é o end_of_turn
-                await session.send(input=msg, end_of_turn=eot)
+                await session.send(input=msg if msg is not None else [], end_of_turn=eot)
                 input_queue.task_done()
             except Exception as e:
                 print(f"Erro no envio: {e}")

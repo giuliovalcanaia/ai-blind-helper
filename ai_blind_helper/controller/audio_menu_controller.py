@@ -68,3 +68,10 @@ class AudioMenuController:
         path = self.menu_app.get_websocket_video_path()
         print(f"Play menu Websocket Video")
         asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+
+    def play_menu_websocket_turn(self):
+        if self.loop is None:
+            return
+        path = self.menu_app.get_websocket_turn_path()
+        print(f"Play menu Websocket Audio")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)

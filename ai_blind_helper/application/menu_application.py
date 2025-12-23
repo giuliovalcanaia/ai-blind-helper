@@ -58,6 +58,11 @@ class MenuApplication:
         """Retorna o caminho para o vídeo relacionado ao status do websocket."""
         return self._get_menu_audio_path("gemini-video-mode.wav")
 
+    def get_websocket_turn_path(self):
+            """Retorna o caminho para o áudio relacionado ao status do websocket."""
+            return self._get_menu_audio_path("gemini-turn-mode.wav")
+    
+
     def set_language(self, language):
         """Permite trocar o idioma dinamicamente"""
         self.language = language
