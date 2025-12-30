@@ -2,7 +2,7 @@ from controller import *
 
 class ControllerProvider:
     def __init__(self, application_provider, state_provider):
-        self.audio = AudioController(application_provider.audio)
+        self.audio = AudioController(application_provider.player)
         self.keyboard = KeyboardController(application_provider.keyboard)
         self.language = LanguageController(application_provider.clock, application_provider.date, application_provider.system_msg)
         self.loop = LoopController(application_provider.audio, state_provider.loop, state_provider.app_running, application_provider.system_msg, state_provider.audio_in_queue, application_provider.keyboard, state_provider)

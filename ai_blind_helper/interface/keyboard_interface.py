@@ -123,9 +123,9 @@ class KeyboardInterface:
         self.keyboard_controller.register_key(
             evdev.ecodes.KEY_A, self.on_key_a)
 
-        # self.keyboard_controller.register_key(evdev.ecodes.KEY_J, self.on_key_j)
-        # self.keyboard_controller.register_key(evdev.ecodes.KEY_K, self.on_key_k)
-        # self.keyboard_controller.register_key(evdev.ecodes.KEY_L, self.on_key_l)
+        self.keyboard_controller.register_key(evdev.ecodes.KEY_J, self.on_key_j)
+        self.keyboard_controller.register_key(evdev.ecodes.KEY_K, self.on_key_k)
+        self.keyboard_controller.register_key(evdev.ecodes.KEY_L, self.on_key_l)
 
     def _get_current_menu_item(self):
         key_char = self.menu_order[self.menu_index]
