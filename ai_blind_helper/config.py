@@ -83,6 +83,29 @@ class Config:
     # Keyboard Settings (ls -l /dev/input/by-path/)
     KEYBOARD_PATH = '/dev/input/by-path/platform-i8042-serio-0-event-kbd'
 
+
+
+
+    # TTS CONFIGS
+
+    TTS_CONFIG =types.GenerateContentConfig(
+        response_modalities=["AUDIO"],
+        speech_config=types.SpeechConfig(
+            voice_config=types.VoiceConfig(
+                prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                voice_name='Charon',
+                )
+            )
+        ),
+    )
+
+    TTS_MODEL = "gemini-2.5-flash-preview-tts"
+
+
+
+
+
+
     # Gemini Config
     LIVE_CONFIG = types.LiveConnectConfig(
         response_modalities=["AUDIO"],
