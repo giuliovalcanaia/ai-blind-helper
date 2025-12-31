@@ -61,3 +61,6 @@ class MenuApplication:
     def set_language(self, language):
         """Permite trocar o idioma dinamicamente"""
         self.language = language
+
+    def get_language_changed_path(self):
+        return self._get_menu_audio_path("language-changed.wav")

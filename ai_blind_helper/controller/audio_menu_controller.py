@@ -68,3 +68,8 @@ class AudioMenuController:
         path = self.menu_app.get_websocket_video_path()
         print(f"Play menu Websocket Video")
         asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+
+    def play_language_changed(self):
+        path = self.menu_app.get_language_changed_path()
+        print(f"[AudioMenuController] Play Language Changed with path {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)

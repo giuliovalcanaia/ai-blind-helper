@@ -1,11 +1,12 @@
 from config import Config
 
 class LanguageController:
-    def __init__(self, clock_app, date_app, msg_app):
+    def __init__(self, clock_app, date_app, msg_app, audio_menu):
         print(f"[LanguageController __init__] Inicializando controlador de idioma")
         self.clock_app = clock_app
         self.date_app = date_app
         self.msg_app = msg_app
+        self.audio_menu = audio_menu
     
     def set_system_language(self, new_lang: str):
         print(f"[LanguageController set_system_language] Solicitada alteração de idioma para: {new_lang}")
@@ -38,3 +39,4 @@ class LanguageController:
 
         print(f"[LanguageController handle_cycle_language] Próximo idioma identificado: {next_lang}")
         self.set_system_language(next_lang)
+        self.audio_menu.play_language_changed()
