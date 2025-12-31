@@ -9,6 +9,6 @@ class ControllerProvider:
         self.time = TimeController(application_provider.clock, application_provider.date, application_provider.audio, state_provider.audio_in_queue, state_provider)
         self.sfx = AudioSFXController(application_provider.audio, state_provider.audio_in_queue, state_provider, application_provider.system_msg, application_provider.sfx)
         self.session = SessionController(application_provider.live_client, application_provider.video, application_provider.audio, state_provider.session_task, state_provider.out_queue, state_provider.audio_in_queue, state_provider.start_audio_event, state_provider.start_video_event, state_provider, self.sfx)
-        self.description = DescritpionController(application_provider.video, application_provider.description, state_provider.loop)
-        self.transcription = TranscriptionController(application_provider.video, application_provider.live_client, application_provider.transcription, state_provider.loop)
+        self.description = DescritpionController(application_provider.video, application_provider.description, state_provider, application_provider.live_client)
+        self.transcription = TranscriptionController(application_provider.video, application_provider.text_client, application_provider.transcription, state_provider, application_provider.tts)
         self.menu = AudioMenuController(application_provider.audio, state_provider.audio_in_queue, state_provider, application_provider.menu)

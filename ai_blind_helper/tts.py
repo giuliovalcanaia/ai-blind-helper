@@ -15,7 +15,7 @@ client = genai.Client(api_key=Config.API_KEY)
 
 response = client.models.generate_content(
    model=Config.TTS_MODEL,
-   contents="Diga em tom suave: describe surroundings",
+   contents="Say cheerfully: describe surroundings",
    config=Config.TTS_CONFIG
 )
 

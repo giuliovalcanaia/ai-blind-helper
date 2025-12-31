@@ -93,7 +93,7 @@ class Config:
         speech_config=types.SpeechConfig(
             voice_config=types.VoiceConfig(
                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                voice_name='Charon',
+                voice_name='Zephyr',
                 )
             )
         ),

@@ -6,11 +6,16 @@ import traceback
 
 class DescritpionController:
     
-    def __init__(self, video_app, description_app, loop):
+    def __init__(self, video_app, description_app, state_provider, gemini_client):
         print(f"[DescritpionController __init__] Inicializando controlador de descrição")
-        self.loop = loop
         self.video_app = video_app
         self.description_app = description_app
+        self.gemini_client = gemini_client
+        self.state_provider = state_provider
+        
+    @property
+    def loop(self):
+        return self.state_provider.loop
     
     def handle_description_request(self):
         print("[DescritpionController handle_description_request] Tecla 'D' detectada, iniciando processo de descrição")
@@ -48,7 +53,7 @@ class DescritpionController:
             prompt_text = self.description_app.get_prompt()
 
             try:
-                response_text = self.txt_client_app.generate_text_by_imagem_text(
+                response_text = self.gemini_client.describe_surroundings(
                     prompt=prompt_text,
                     image_part_data=frame_data
                 )

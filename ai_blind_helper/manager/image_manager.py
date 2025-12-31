@@ -31,6 +31,15 @@ class CameraSource(IVideoSource):
             print("[CameraSource open] Câmera já estava aberta.")
 
     def get_frame(self) -> Optional[Dict[str, str]]:
+
+        if self.cap is None or not self.cap.isOpened():
+            print("[CameraSource get_frame] Câmera fechada detectada. Tentando abrir...")
+            self.open()
+            
+             
+        for _ in range(5):
+            self.cap.grab()
+        
         ret, frame = self.cap.read()
         if not ret:
             return None
@@ -78,3 +87,4 @@ class ScreenSource(IVideoSource):
 
     def release(self):
         self.sct.close()
+        self.cap = None

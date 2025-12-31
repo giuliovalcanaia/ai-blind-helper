@@ -3,15 +3,21 @@ import base64
 import os
 import time
 import traceback
+from application import TextToSpeechApplication, TranscriptionApplication
 
 class TranscriptionController:
     
-    def __init__(self, video_app, gemini_client, transcription, loop):
+    def __init__(self, video_app, gemini_client, transcription: TranscriptionApplication, state_provider, tts_app: TextToSpeechApplication):
         print("[TranscriptionController __init__] Inicializando controlador de transcrição")
-        self.loop = loop
         self.gemini_client = gemini_client
         self.video_app = video_app
         self.transcription_app = transcription
+        self.state_provider = state_provider
+        self.tts_app = tts_app
+
+    @property
+    def loop(self):
+        return self.state_provider.loop
     
     def handle_transcription_request(self):
         print("[TranscriptionController handle_transcription_request] Tecla 'R' detectada, iniciando processo de transcrição")
@@ -20,9 +26,9 @@ class TranscriptionController:
             print("[TranscriptionController handle_transcription_request] Erro: Loop de eventos não definido")
             return
 
-        if not self.gemini_client.is_connected:
-            print("[TranscriptionController handle_transcription_request] Aviso: Cliente Gemini não está conectado")
-            return
+        # if not self.gemini_client.is_connected:
+        #     print("[TranscriptionController handle_transcription_request] Aviso: Cliente Gemini não está conectado")
+        #     return
 
         print("[TranscriptionController handle_transcription_request] Disparando tarefa assíncrona _send_transcription_task")
         asyncio.run_coroutine_threadsafe(
@@ -49,7 +55,7 @@ class TranscriptionController:
             prompt_text = self.transcription_app.get_prompt()
 
             try:
-                response_text = self.txt_client_app.generate_text_by_imagem_text(
+                response_text = self.gemini_client.generate_text_by_imagem_text(
                     prompt=prompt_text,
                     image_part_data=frame_data
                 )
@@ -57,6 +63,7 @@ class TranscriptionController:
                 print("\n\n>>> [Gemini Response] <<<")
                 print(response_text)
                 print(">>> ------------------- <<<")
+                await self.tts_app.run_tts(response_text)
             except Exception as e:
                 print(f"[TranscriptionController _send_transcription_task] Erro ao gerar texto via Gemini: {e}")
                 traceback.print_exc()

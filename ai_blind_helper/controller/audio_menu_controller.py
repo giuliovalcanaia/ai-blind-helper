@@ -30,12 +30,12 @@ class AudioMenuController:
         print(f"Play menu change language: {path}")
         asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
 
-    # def play_menu_describe(self):
-    #     """Toca o áudio: describe.wav (Ao focar na opção de descrever)"""
-    #     path = self.menu_app.get_describe_audio_path()
-    #     if self.loop is None: return
-    #     print(f"Play menu describe: {path}")
-    #     asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+    def play_menu_describe(self):
+        """Toca o áudio: describe.wav (Ao focar na opção de descrever)"""
+        path = self.menu_app.get_describe_audio_path()
+        if self.loop is None: return
+        print(f"Play menu describe: {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
 
     # def play_menu_exit(self):
     #     """Toca o áudio: exit.wav (Ao focar na opção de sair)"""
@@ -45,13 +45,13 @@ class AudioMenuController:
     #     print(f"Play menu exit: {path}")
     #     asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
 
-    # def play_menu_transcribe(self):
-    #     """Toca o áudio: transcribe.wav (Ao focar na opção de ler texto)"""
-    #     if self.loop is None:
-    #         return
-    #     path = self.menu_app.get_transcribe_audio_path()
-    #     print(f"Play menu transcribe: {path}")
-    #     asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+    def play_menu_transcribe(self):
+        """Toca o áudio: transcribe.wav (Ao focar na opção de ler texto)"""
+        if self.loop is None:
+            return
+        path = self.menu_app.get_transcribe_audio_path()
+        print(f"Play menu transcribe: {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
 
     def play_menu_websocket_audio(self):
         """Toca o áudio: websocket.wav (Ao focar na opção de conexão)"""

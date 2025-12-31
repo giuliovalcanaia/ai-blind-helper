@@ -87,7 +87,7 @@ class KeyboardInterface:
                 'block': False
             }
         }
-        self.menu_order = ['w', 'v', 'p']
+        self.menu_order = ['w', 'v', 'd', 'r', 'p']
 
     def start(self):
         print("[KeyboardInterface start] Iniciando KeyboardController")
@@ -239,7 +239,7 @@ class KeyboardInterface:
     def on_key_d(self, event_type, duration):
         if event_type == 'PRESS':
             print("[KeyboardInterface on_key_d] Solicitando descrição de ambiente")
-            self.session_controller.handle_description_request()
+            self.description_controller.handle_description_request()
 
     def on_key_r(self, event_type, duration):
         if event_type == 'PRESS':
