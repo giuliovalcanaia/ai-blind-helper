@@ -16,14 +16,16 @@ config = {
         NÃO seja educado.
         NÃO explique o que você vai fazer.
         Sua ÚNICA função é ler o texto fornecido pelo usuário em voz alta, exatamente como está escrito.
+        Você deve ler no idioma que estiver escrito.
         Se o usuário enviar "Transcrever texto", você deve dizer o áudio "Transcrever texto".
     """
 }
 
+
 async def main():
     audio_buffer = bytearray()
     async with client.aio.live.connect(model=model, config=config) as session:
-        message = "Transcrever texto"
+        message = "Descrever Ambiente"
 
         await session.send_client_content(
             turns={"role": "user", "parts": [{"text": message}]}, turn_complete=True
