@@ -19,11 +19,26 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 
 - [x] Audio chamada
 - [x] Video chamada
-- [ ] Relógio e data
+- [x] Relógio e data
 - [ ] Descrição do ambiente
 - [ ] Trancrição de texto em voz
 
-## 💻 Pré-requisitos
+## 💻 Lista de materiais
+
+O projeto pode rodar em qualquer computador que tenha:
+- Câmera
+- Microfone
+- Alto falante
+- Teclado
+
+Entretanto é extremamente recomendado ter um dispositivo dedicado para esta tarefa em uma case reforçada, como por exemplo um raspberry pi.
+
+Abaixo é possível encontrar a lista de materiais bem como o link de aquisição:
+
+- Raspberry zero 2W
+- 2x baterias de lítio 18650
+- Módulo de carga
+- Módulo boost (Para subir a tensão das baterias)
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
