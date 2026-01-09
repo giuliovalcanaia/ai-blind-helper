@@ -5,7 +5,7 @@
 ![GitHub forks](https://img.shields.io/github/forks/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
 ![GitHub open issues](https://img.shields.io/github/issues/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
 ![GitHub open pull requests](https://img.shields.io/github/issues-pr/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
-![License](https://img.shields.io/github/license/giuliovalcanaia/ai-blind-helper?style=for-the-badge&color=orange)
+![License](https://img.shields.io/badge/license-Apache%202.0-orange?style=for-the-badge&logo=apache)
 
 <img src="imagem.png" alt="Exemplo imagem">
 
