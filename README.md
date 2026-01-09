@@ -11,17 +11,17 @@
 
 <img src="image.jpg" alt="Exemplo imagem">
 
-> Linha adicional de texto informativo sobre o que o projeto faz. Sua introdução deve ter cerca de 2 ou 3 linhas. Não exagere, as pessoas não vão ler.
+> Projeto destinado a desenvolver um dispositivo voltado para auxiliar o dia a dia das pessoas cegas por meio da integração da inteligência artificial com o mundo real.
 
 ### Ajustes e melhorias
 
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas para as seguintes tarefas:
 
-- [x] Tarefa 1
-- [x] Tarefa 2
-- [x] Tarefa 3
-- [ ] Tarefa 4
-- [ ] Tarefa 5
+- [x] Audio chamada
+- [x] Video chamada
+- [ ] Relógio e data
+- [ ] Descrição do ambiente
+- [ ] Trancrição de texto em voz
 
 ## 💻 Pré-requisitos
 
