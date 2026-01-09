@@ -17,7 +17,7 @@
 
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas para as seguintes tarefas:
 
-- [x] Audio chamada
+- [x] Áudio chamada
 - [x] Video chamada
 - [x] Relógio e data
 - [ ] Descrição do ambiente
@@ -47,39 +47,23 @@ Abaixo é possível encontrar a lista de materiais bem como o link de aquisiçã
 
 ## 🚀 Instalando AI Blind Helper
 
-Para instalar o <nome_do_projeto>, siga estas etapas:
+Comando único para baixar e instalar o AI Blind Helper
 
-Linux e macOS:
+Linux:
 
+```bash
+sudo ./install.sh
 ```
-<comando_de_instalação>
-```
-
-Windows:
-
-```
-<comando_de_instalação>
-```
-
-## ☕ Tutorial de uso
-
-Para usar <nome_do_projeto>, siga estas etapas:
-
-```
-<exemplo_de_uso>
-```
-
-Adicione comandos de execução e exemplos que você acha que os usuários acharão úteis. Forneça uma referência de opções para pontos de bônus!
 
 ## 📫 Contribuindo com o projeto
 
-Para contribuir com <nome_do_projeto>, siga estas etapas:
+Para contribuir, siga estas etapas:
 
-1. Bifurque este repositório.
-2. Crie um branch: `git checkout -b <nome_branch>`.
-3. Faça suas alterações e confirme-as: `git commit -m '<mensagem_commit>'`
-4. Envie para o branch original: `git push origin <nome_do_projeto> / <local>`
-5. Crie a solicitação de pull.
+1. **Bifurque** (Fork) este repositório.
+2. Crie uma **branch** para sua modificação: `git checkout -b feature/minha-melhoria`.
+3. Faça suas alterações e **confirme-as** (Commit): `git commit -m 'feat: adiciona nova funcionalidade'`.
+4. Envie para o seu repositório remoto: `git push origin feature/minha-melhoria`.
+5. Abra uma **Solicitação de Pull** (Pull Request) para o repositório original.
 
 Como alternativa, consulte a documentação do GitHub em [como criar uma solicitação pull](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
 
@@ -91,7 +75,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
   <tr>
     <td align="center">
       <a href="#" title="Giulio Luiz Valcanaia">
-        <img src="https://avatars.githubusercontent.com/u/67170840" width="100px;" alt="Foto de Giulio Luiz Valcanaia no GitHub"/><br>
+        <img src="https://avatars.githubusercontent.com/u/67170840" width="100px;" alt="Foto do Giulio Luiz Valcanaia no GitHub"/><br>
         <sub>
           <b>Giulio Luiz Valcanaia</b>
         </sub>
@@ -107,6 +91,10 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
     </td>
   </tr>
 </table>
+
+## 🎓 Apoio e Colaboração
+
+Este projeto só é possível graças ao apoio da **APP da Escola de Educação Básica Frei Lucínio Korte**. O patrocínio do hardware demonstra o compromisso da instituição com a inovação e a inclusão escolar de alunos com deficiência visual.
 
 ## 📝 Licença
 
