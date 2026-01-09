@@ -1,11 +1,13 @@
 # AI Blind Helper
 
-![GitHub repo size](https://img.shields.io/github/repo-size/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
-![GitHub language count](https://img.shields.io/github/languages/count/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
-![GitHub open issues](https://img.shields.io/github/issues/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
-![GitHub open pull requests](https://img.shields.io/github/issues-pr/giuliovalcanaia/ai-blind-helper?style=for-the-badge)
-![License](https://img.shields.io/badge/license-Apache%202.0-orange?style=for-the-badge&logo=apache)
+<p align="center">
+  <img src="https://img.shields.io/github/repo-size/giuliovalcanaia/ai-blind-helper?style=for-the-badge" />
+  <img src="https://img.shields.io/github/languages/count/giuliovalcanaia/ai-blind-helper?style=for-the-badge" />
+  <img src="https://img.shields.io/github/forks/giuliovalcanaia/ai-blind-helper?style=for-the-badge" />
+  <img src="https://img.shields.io/github/issues/giuliovalcanaia/ai-blind-helper?style=for-the-badge" />
+  <img src="https://img.shields.io/github/issues-pr/giuliovalcanaia/ai-blind-helper?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/license-Apache%202.0-orange?style=for-the-badge&logo=apache" />
+</p>
 
 <img src="imagem.png" alt="Exemplo imagem">
 
