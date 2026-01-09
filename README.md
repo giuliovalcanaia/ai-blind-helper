@@ -40,13 +40,8 @@ Abaixo é possível encontrar a lista de materiais bem como o link de aquisiçã
 - Módulo de carga
 - Módulo boost (Para subir a tensão das baterias)
 
-Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- Você instalou a versão mais recente de `<linguagem / dependência / requeridos>`
-- Você tem uma máquina `<Windows / Linux / Mac>`. Indique qual sistema operacional é compatível / não compatível.
-- Você leu `<guia / link / documentação_relacionada_ao_projeto>`.
-
-## 🚀 Instalando <nome_do_projeto>
+## 🚀 Instalando AI Blind Helper
 
 Para instalar o <nome_do_projeto>, siga estas etapas:
 
@@ -62,7 +57,7 @@ Windows:
 <comando_de_instalação>
 ```
 
-## ☕ Usando <nome_do_projeto>
+## ☕ Tutorial de uso
 
 Para usar <nome_do_projeto>, siga estas etapas:
 
@@ -72,7 +67,7 @@ Para usar <nome_do_projeto>, siga estas etapas:
 
 Adicione comandos de execução e exemplos que você acha que os usuários acharão úteis. Forneça uma referência de opções para pontos de bônus!
 
-## 📫 Contribuindo para <nome_do_projeto>
+## 📫 Contribuindo com o projeto
 
 Para contribuir com <nome_do_projeto>, siga estas etapas:
 
@@ -92,25 +87,17 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
   <tr>
     <td align="center">
       <a href="#" title="defina o título do link">
-        <img src="https://avatars3.githubusercontent.com/u/31936044" width="100px;" alt="Foto do Iuri Silva no GitHub"/><br>
+        <img src="https://avatars3.githubusercontent.com/u/31936044" width="100px;" alt="Foto de Giulio Luiz Valcanaia no GitHub"/><br>
         <sub>
-          <b>Iuri Silva</b>
+          <b>Giulio Luiz Valcanaia</b>
         </sub>
       </a>
     </td>
     <td align="center">
       <a href="#" title="defina o título do link">
-        <img src="https://s2.glbimg.com/FUcw2usZfSTL6yCCGj3L3v3SpJ8=/smart/e.glbimg.com/og/ed/f/original/2019/04/25/zuckerberg_podcast.jpg" width="100px;" alt="Foto do Mark Zuckerberg"/><br>
+        <img src="https://s2.glbimg.com/FUcw2usZfSTL6yCCGj3L3v3SpJ8=/smart/e.glbimg.com/og/ed/f/original/2019/04/25/zuckerberg_podcast.jpg" width="100px;" alt="Foto do Arthur José Bona no GitHub"/><br>
         <sub>
-          <b>Mark Zuckerberg</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="#" title="defina o título do link">
-        <img src="https://miro.medium.com/max/360/0*1SkS3mSorArvY9kS.jpg" width="100px;" alt="Foto do Steve Jobs"/><br>
-        <sub>
-          <b>Steve Jobs</b>
+          <b>Arthur José Bona</b>
         </sub>
       </a>
     </td>
@@ -123,4 +110,4 @@ Quer fazer parte desse projeto? Clique [AQUI](CONTRIBUTING.md) e leia como contr
 
 ## 📝 Licença
 
-Esse projeto está sob licença. Veja o arquivo [LICENÇA](LICENSE.md) para mais detalhes.
+Esse projeto está sob licença Apache 2.0. Veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
