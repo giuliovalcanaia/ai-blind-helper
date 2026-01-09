@@ -76,7 +76,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
     <tr>
       <td align="center">
         <a href="https://github.com/giuliovalcanaia">
-          <img src="https://avatars.githubusercontent.com/u/67170840?v=4" width="100px" height="100px" alt="Foto do Giulio Luiz Valcanaia" style="border-radius: 50%;" /><br>
+          <img src="https://avatars.githubusercontent.com/u/67170840?v=4" width="100px" alt="Foto do Giulio Luiz Valcanaia" style="border-radius: 50%;" /><br>
           <sub>
             <b>Giulio Luiz Valcanaia</b>
           </sub>
@@ -84,7 +84,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
       </td>
       <td align="center">
         <a href="https://github.com/arthurjosebona">
-           <img src="https://avatars.githubusercontent.com/u/224686448?v=4" width="100px" height="100px" alt="Foto do Arthur José Bona" style="border-radius: 50%;" /><br>
+          <img src="https://avatars.githubusercontent.com/u/224686448?v=4" width="100px" alt="Foto do Arthur José Bona" style="border-radius: 50%;" /><br>
           <sub>
             <b>Arthur José Bona</b>
           </sub>
@@ -98,6 +98,22 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
 
 Este projeto só é possível graças ao apoio da [APP da Escola de Educação Básica Frei Lucínio Korte](https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==). O patrocínio do hardware demonstra o compromisso da instituição com a inovação e a inclusão escolar de alunos com deficiência visual.
 
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==">
+          <img src="flk.jpg" width="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%;" /><br>
+          <sub>
+            <b>Escola de Educação Básica Frei Lucínio Korte</b>
+          </sub>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
 ## 📝 Licença
 
-Esse projeto está sob licença Apache 2.0. Veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+Esse projeto está sob licença Apache 2.0. Veja o arquivo [LICENÇA](license) para mais detalhes.
