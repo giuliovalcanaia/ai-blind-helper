@@ -35,17 +35,14 @@ Entretanto é extremamente recomendado ter um dispositivo dedicado para esta tar
 
 Abaixo é possível encontrar a lista de materiais bem como o link de aquisição:
 
-- [[Raspberry Zero 2W](https://pt.aliexpress.com/item/1005007982832720.html?spm=a2g0o.order_list.order_list_main.41.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Raspberry Zero 2W](https://pt.aliexpress.com/item/1005007982832720.html?spm=a2g0o.order_list.order_list_main.41.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
 - [Câmera IMX519](https://pt.aliexpress.com/item/1005008061266530.html?spm=a2g0o.order_list.order_list_main.23.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
-- [Conector USB-C](URL_AQUI)
-- [Módulo Áudio (Waveshare WM8960)](https://www.waveshare.com/wm8960-audio-hat.htm)
-- [2x baterias de lítio (NCR18650B)](URL_AQUI)
-- [Placa de carregamento USB (TP4056)](URL_AQUI)
-- [Step up (MT3608)](URL_AQUI)
-- [Cartão SD 32 GB ou maior](URL_AQUI)
-
-
-
+- [Conector USB-C](https://pt.aliexpress.com/item/1005006297697300.html?spm=a2g0o.order_list.order_list_main.29.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Módulo Áudio (Waveshare WM8960)](https://pt.aliexpress.com/item/1005005042024030.html?spm=a2g0o.order_list.order_list_main.5.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [2x baterias de lítio (NCR18650B)](https://www.mercadolivre.com.br/2-bateria-18650-panasonic-ncr18650b-3450mah-10a-celula-18650/up/MLBU795527633)
+- [Placa de carregamento USB (TP4056)](https://pt.aliexpress.com/item/1005004427739715.html?spm=a2g0o.order_list.order_list_main.35.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Step up (MT3608)](https://pt.aliexpress.com/item/1005008208376182.html?spm=a2g0o.order_list.order_list_main.11.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Cartão SD 32 GB ou maior](https://pt.aliexpress.com/item/1005005633435181.html?spm=a2g0o.order_list.order_list_main.17.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
 ## 🚀 Instalando AI Blind Helper
 
 Para instalar o <nome_do_projeto>, siga estas etapas:
