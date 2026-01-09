@@ -94,7 +94,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
   </table>
 </div>
 
-## 🎓 Apoio e Colaboração
+## 🎓 Apoio
 
 Este projeto só é possível graças ao apoio da [APP da Escola de Educação Básica Frei Lucínio Korte](https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==). O patrocínio do hardware demonstra o compromisso da instituição com a inovação e a inclusão escolar de alunos com deficiência visual.
 
@@ -103,9 +103,9 @@ Este projeto só é possível graças ao apoio da [APP da Escola de Educação B
     <tr>
       <td align="center">
         <a href="https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==">
-          <img src="flk.jpg" width="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%;" /><br>
+          <img src="flk.jpg" width="100px" height="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%; object-fit: cover;" />
           <sub>
-            <b>Escola de Educação Básica Frei Lucínio Korte</b>
+            <b>EEB Frei Lucínio Korte</b>
           </sub>
         </a>
       </td>
