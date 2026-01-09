@@ -103,7 +103,7 @@ Este projeto só é possível graças ao apoio da [APP da Escola de Educação B
     <tr>
       <td align="center">
         <a href="https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==">
-          <img src="flk.jpg" width="100px" height="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%; object-fit: cover;" />
+        <img src="flk.jpg" width="100px" height="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%; object-fit: cover;" />
           <sub>
             <b>EEB Frei Lucínio Korte</b>
           </sub>
