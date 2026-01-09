@@ -9,63 +9,61 @@
   <img src="https://img.shields.io/badge/license-Apache%202.0-orange?style=for-the-badge&logo=apache" />
 </p>
 
-<img src="image.jpg" alt="Exemplo imagem">
+<img src="assets/image.jpg" alt="Imagem de uma pessoa com os olhos cobertos">
 
-> Linha adicional de texto informativo sobre o que o projeto faz. Sua introdução deve ter cerca de 2 ou 3 linhas. Não exagere, as pessoas não vão ler.
+> Projeto destinado a desenvolver um dispositivo para auxiliar o dia a dia das pessoas cegas por meio da integração da inteligência artificial com o mundo real.
 
-### Ajustes e melhorias
+## 🛠️ Ajustes e melhorias
 
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas para as seguintes tarefas:
 
-- [x] Tarefa 1
-- [x] Tarefa 2
-- [x] Tarefa 3
-- [ ] Tarefa 4
-- [ ] Tarefa 5
+- [x] Áudio chamada
+- [x] Video chamada
+- [x] Relógio e data
+- [ ] Descrição do ambiente
+- [ ] Trancrição de texto em voz
 
-## 💻 Pré-requisitos
+## 💻 Lista de materiais
 
-Antes de começar, verifique se você atendeu aos seguintes requisitos:
+O projeto pode rodar em qualquer computador que tenha:
+- Câmera
+- Microfone
+- Alto falante
+- Teclado
 
-- Você instalou a versão mais recente de `<linguagem / dependência / requeridos>`
-- Você tem uma máquina `<Windows / Linux / Mac>`. Indique qual sistema operacional é compatível / não compatível.
-- Você leu `<guia / link / documentação_relacionada_ao_projeto>`.
+Entretanto é extremamente recomendado ter um dispositivo dedicado para esta tarefa em uma case reforçada, como por exemplo um raspberry pi.
 
-## 🚀 Instalando <nome_do_projeto>
+Abaixo é possível encontrar a lista de materiais bem como o link de aquisição:
 
-Para instalar o <nome_do_projeto>, siga estas etapas:
+- [Raspberry Zero 2W](https://pt.aliexpress.com/item/1005007982832720.html?spm=a2g0o.order_list.order_list_main.41.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Câmera IMX519](https://pt.aliexpress.com/item/1005008061266530.html?spm=a2g0o.order_list.order_list_main.23.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Conector USB-C](https://pt.aliexpress.com/item/1005006297697300.html?spm=a2g0o.order_list.order_list_main.29.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Módulo Áudio (Waveshare WM8960)](https://pt.aliexpress.com/item/1005005042024030.html?spm=a2g0o.order_list.order_list_main.5.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [2x baterias de lítio (NCR18650B)](https://www.mercadolivre.com.br/2-bateria-18650-panasonic-ncr18650b-3450mah-10a-celula-18650/up/MLBU795527633)
+- [Placa de carregamento USB (TP4056)](https://pt.aliexpress.com/item/1005004427739715.html?spm=a2g0o.order_list.order_list_main.35.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Step up (MT3608)](https://pt.aliexpress.com/item/1005008208376182.html?spm=a2g0o.order_list.order_list_main.11.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Cartão SD 32 GB ou maior](https://pt.aliexpress.com/item/1005005633435181.html?spm=a2g0o.order_list.order_list_main.17.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+<img src="assets/items.jpg" alt="Lista de materiais">
 
-Linux e macOS:
+## 🚀 Instalando AI Blind Helper
 
+Comando único para baixar e instalar o AI Blind Helper
+
+Linux:
+
+```bash
+sudo ./install.sh
 ```
-<comando_de_instalação>
-```
 
-Windows:
+## 📫 Contribuindo com o projeto
 
-```
-<comando_de_instalação>
-```
+Para contribuir, siga estas etapas:
 
-## ☕ Usando <nome_do_projeto>
-
-Para usar <nome_do_projeto>, siga estas etapas:
-
-```
-<exemplo_de_uso>
-```
-
-Adicione comandos de execução e exemplos que você acha que os usuários acharão úteis. Forneça uma referência de opções para pontos de bônus!
-
-## 📫 Contribuindo para <nome_do_projeto>
-
-Para contribuir com <nome_do_projeto>, siga estas etapas:
-
-1. Bifurque este repositório.
-2. Crie um branch: `git checkout -b <nome_branch>`.
-3. Faça suas alterações e confirme-as: `git commit -m '<mensagem_commit>'`
-4. Envie para o branch original: `git push origin <nome_do_projeto> / <local>`
-5. Crie a solicitação de pull.
+1. **Bifurque** (Fork) este repositório.
+2. Crie uma **branch** para sua modificação: `git checkout -b feature/minha-melhoria`.
+3. Faça suas alterações e **confirme-as** (Commit): `git commit -m 'feat: adiciona nova funcionalidade'`.
+4. Envie para o seu repositório remoto: `git push origin feature/minha-melhoria`.
+5. Abra uma **Solicitação de Pull** (Pull Request) para o repositório original.
 
 Como alternativa, consulte a documentação do GitHub em [como criar uma solicitação pull](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
 
@@ -73,39 +71,49 @@ Como alternativa, consulte a documentação do GitHub em [como criar uma solicit
 
 Agradecemos às seguintes pessoas que contribuíram para este projeto:
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="#" title="defina o título do link">
-        <img src="https://avatars3.githubusercontent.com/u/31936044" width="100px;" alt="Foto do Iuri Silva no GitHub"/><br>
-        <sub>
-          <b>Iuri Silva</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="#" title="defina o título do link">
-        <img src="https://s2.glbimg.com/FUcw2usZfSTL6yCCGj3L3v3SpJ8=/smart/e.glbimg.com/og/ed/f/original/2019/04/25/zuckerberg_podcast.jpg" width="100px;" alt="Foto do Mark Zuckerberg"/><br>
-        <sub>
-          <b>Mark Zuckerberg</b>
-        </sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="#" title="defina o título do link">
-        <img src="https://miro.medium.com/max/360/0*1SkS3mSorArvY9kS.jpg" width="100px;" alt="Foto do Steve Jobs"/><br>
-        <sub>
-          <b>Steve Jobs</b>
-        </sub>
-      </a>
-    </td>
-  </tr>
-</table>
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/giuliovalcanaia">
+          <img src="https://avatars.githubusercontent.com/u/67170840?v=4" width="100px" alt="Foto do Giulio Luiz Valcanaia" style="border-radius: 50%;" /><br>
+          <sub>
+            <b>Giulio Luiz Valcanaia</b>
+          </sub>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://github.com/arthurjosebona">
+          <img src="https://avatars.githubusercontent.com/u/224686448?v=4" width="100px" alt="Foto do Arthur José Bona" style="border-radius: 50%;" /><br>
+          <sub>
+            <b>Arthur José Bona</b>
+          </sub>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
 
-## 😄 Seja um dos contribuidores
+## 💎 Apoio
 
-Quer fazer parte desse projeto? Clique [AQUI](CONTRIBUTING.md) e leia como contribuir.
+Este projeto só é possível graças ao apoio da [APP da Escola de Educação Básica Frei Lucínio Korte](https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==). O patrocínio do hardware demonstra o compromisso da instituição com a inovação e a inclusão escolar de alunos com deficiência visual.
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==">
+          <img src="assets/flk.jpg" width="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%;" /><br>
+          <sub>
+            <b>EEB Frei Lucínio Korte</b>
+          </sub>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
 
 ## 📝 Licença
 
-Esse projeto está sob licença. Veja o arquivo [LICENÇA](LICENSE.md) para mais detalhes.
+Esse projeto está sob licença Apache 2.0. Veja o arquivo [LICENÇA](license) para mais detalhes.
