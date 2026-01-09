@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/license-Apache%202.0-orange?style=for-the-badge&logo=apache" />
 </p>
 
-<img src="image.jpg" alt="Imagem de uma pessoa com os olhos cobertos">
+<img src="assets/image.jpg" alt="Imagem de uma pessoa com os olhos cobertos">
 
 > Projeto destinado a desenvolver um dispositivo para auxiliar o dia a dia das pessoas cegas por meio da integração da inteligência artificial com o mundo real.
 
@@ -43,7 +43,7 @@ Abaixo é possível encontrar a lista de materiais bem como o link de aquisiçã
 - [Placa de carregamento USB (TP4056)](https://pt.aliexpress.com/item/1005004427739715.html?spm=a2g0o.order_list.order_list_main.35.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
 - [Step up (MT3608)](https://pt.aliexpress.com/item/1005008208376182.html?spm=a2g0o.order_list.order_list_main.11.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
 - [Cartão SD 32 GB ou maior](https://pt.aliexpress.com/item/1005005633435181.html?spm=a2g0o.order_list.order_list_main.17.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
-<img src="items.jpg" alt="Lista de materiais">
+<img src="assets/items.jpg" alt="Lista de materiais">
 
 ## 🚀 Instalando AI Blind Helper
 
@@ -94,7 +94,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
   </table>
 </div>
 
-## 🎓 Apoio
+## 💎 Apoio
 
 Este projeto só é possível graças ao apoio da [APP da Escola de Educação Básica Frei Lucínio Korte](https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==). O patrocínio do hardware demonstra o compromisso da instituição com a inovação e a inclusão escolar de alunos com deficiência visual.
 
@@ -103,7 +103,7 @@ Este projeto só é possível graças ao apoio da [APP da Escola de Educação B
     <tr>
       <td align="center">
         <a href="https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==">
-          <img src="flk.jpg" width="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%;" /><br>
+          <img src="assets/flk.jpg" width="100px" alt="Escola de Educação Básica Frei Lucínio Korte" style="border-radius: 50%;" /><br>
           <sub>
             <b>EEB Frei Lucínio Korte</b>
           </sub>
