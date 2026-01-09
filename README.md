@@ -13,7 +13,7 @@
 
 > Projeto destinado a desenvolver um dispositivo para auxiliar o dia a dia das pessoas cegas por meio da integração da inteligência artificial com o mundo real.
 
-### Ajustes e melhorias
+## 🛠️ Ajustes e melhorias
 
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas para as seguintes tarefas:
 
@@ -35,10 +35,15 @@ Entretanto é extremamente recomendado ter um dispositivo dedicado para esta tar
 
 Abaixo é possível encontrar a lista de materiais bem como o link de aquisição:
 
-- Raspberry zero 2W
-- 2x baterias de lítio 18650
-- Módulo de carga
-- Módulo boost (Para subir a tensão das baterias)
+- [[Raspberry Zero 2W](https://pt.aliexpress.com/item/1005007982832720.html?spm=a2g0o.order_list.order_list_main.41.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Câmera IMX519](https://pt.aliexpress.com/item/1005008061266530.html?spm=a2g0o.order_list.order_list_main.23.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
+- [Conector USB-C](URL_AQUI)
+- [Módulo Áudio (Waveshare WM8960)](https://www.waveshare.com/wm8960-audio-hat.htm)
+- [2x baterias de lítio (NCR18650B)](URL_AQUI)
+- [Placa de carregamento USB (TP4056)](URL_AQUI)
+- [Step up (MT3608)](URL_AQUI)
+- [Cartão SD 32 GB ou maior](URL_AQUI)
+
 
 
 ## 🚀 Instalando AI Blind Helper
