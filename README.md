@@ -74,16 +74,16 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
 <table>
   <tr>
     <td align="center">
-      <a href="#" title="Giulio Luiz Valcanaia">
-        <img src="https://avatars.githubusercontent.com/u/67170840" width="100px;" alt="Foto do Giulio Luiz Valcanaia no GitHub"/><br>
+      <a href="https://github.com/Giulio-Luiz-Valcanaia">
+        <img src="https://avatars.githubusercontent.com/u/67170840?v=4" width="100px" alt="Foto do Giulio Luiz Valcanaia" style="border-radius: 50%;" /><br>
         <sub>
           <b>Giulio Luiz Valcanaia</b>
         </sub>
       </a>
     </td>
     <td align="center">
-      <a href="#" title="Arthur José Bona">
-        <img src="https://avatars.githubusercontent.com/u/224686448" width="100px;" alt="Foto do Arthur José Bona no GitHub"/><br>
+      <a href="https://github.com/Arthur-Jose-Bona">
+        <img src="https://avatars.githubusercontent.com/u/224686448?v=4" width="100px" alt="Foto do Arthur José Bona" style="border-radius: 50%;" /><br>
         <sub>
           <b>Arthur José Bona</b>
         </sub>
@@ -94,7 +94,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
 
 ## 🎓 Apoio e Colaboração
 
-Este projeto só é possível graças ao apoio da **APP da Escola de Educação Básica Frei Lucínio Korte**. O patrocínio do hardware demonstra o compromisso da instituição com a inovação e a inclusão escolar de alunos com deficiência visual.
+Este projeto só é possível graças ao apoio da [APP da Escola de Educação Básica Frei Lucínio Korte](https://www.instagram.com/freilucinio?igsh=MWhndzR3ZzV3cHF1ZA==). O patrocínio do hardware demonstra o compromisso da instituição com a inovação e a inclusão escolar de alunos com deficiência visual.
 
 ## 📝 Licença
 
