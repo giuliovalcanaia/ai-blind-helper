@@ -11,7 +11,7 @@
 
 <img src="image.jpg" alt="Exemplo imagem">
 
-> Projeto destinado a desenvolver um dispositivo voltado para auxiliar o dia a dia das pessoas cegas por meio da integração da inteligência artificial com o mundo real.
+> Projeto destinado a desenvolver um dispositivo para auxiliar o dia a dia das pessoas cegas por meio da integração da inteligência artificial com o mundo real.
 
 ### Ajustes e melhorias
 
@@ -86,7 +86,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
 <table>
   <tr>
     <td align="center">
-      <a href="#" title="defina o título do link">
+      <a href="#" title="Giulio Luiz Valcanaia">
         <img src="https://avatars.githubusercontent.com/u/67170840" width="100px;" alt="Foto de Giulio Luiz Valcanaia no GitHub"/><br>
         <sub>
           <b>Giulio Luiz Valcanaia</b>
@@ -94,7 +94,7 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
       </a>
     </td>
     <td align="center">
-      <a href="#" title="defina o título do link">
+      <a href="#" title="Arthur José Bona">
         <img src="https://avatars.githubusercontent.com/u/224686448" width="100px;" alt="Foto do Arthur José Bona no GitHub"/><br>
         <sub>
           <b>Arthur José Bona</b>
@@ -103,10 +103,6 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
     </td>
   </tr>
 </table>
-
-## 😄 Seja um dos contribuidores
-
-Quer fazer parte desse projeto? Clique [AQUI](CONTRIBUTING.md) e leia como contribuir.
 
 ## 📝 Licença
 
