@@ -62,12 +62,6 @@ ssh user@10.10.10.10
 ```
 Type `yes` to add and save the fingerprint, then enter the password you setup.
 
-
-Now update the system:
-```bash
-sudo apt update && sudo apt upgrade
-```
-
 And run the installation script:
 ```bash
 curl -sL https://raw.githubusercontent.com/giuliovalcanaia/ai-blind-helper/hardware/install.sh | bash

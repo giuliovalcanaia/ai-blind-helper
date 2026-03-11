@@ -1,37 +1,54 @@
 #!/bin/bash
 
-# Interrompe o script se ocorrer algum erro
+# Interrompe o script se ocorrer algum erro crítico
 set -e
 
-echo "🚀 Iniciando a instalação do terminal Kitty..."
+echo "🚀 Iniciando a atualização do sistema e instalação do terminal Kitty..."
 
-# Verifica se o usuário é root; se não for, usa sudo
+# Verifica se o usuário é root; se não for, define a variável para usar sudo
 SUDO=''
 if (( $EUID != 0 )); then
     SUDO='sudo'
 fi
 
-# Função para detectar o sistema e instalar o pacote
-install_kitty() {
+# Função para detectar o sistema, atualizar e instalar o pacote
+setup_system() {
     if command -v apt &> /dev/null; then
-        echo "📦 Sistema baseado em Debian/Ubuntu detectado."
+        echo "📦 Sistema baseado em Debian/Ubuntu/Raspberry Pi detectado."
+        echo "🔄 Buscando e instalando atualizações do sistema (isso pode levar alguns minutos)..."
         $SUDO apt update
+        $SUDO apt upgrade -y
+        
+        echo "⚙️ Instalando o Kitty..."
         $SUDO apt install -y kitty
         
     elif command -v pacman &> /dev/null; then
         echo "📦 Sistema baseado em Arch Linux detectado."
-        $SUDO pacman -Sy --noconfirm kitty
+        echo "🔄 Sincronizando repositórios e atualizando o sistema..."
+        $SUDO pacman -Syu --noconfirm
+        
+        echo "⚙️ Instalando o Kitty..."
+        $SUDO pacman -S --noconfirm kitty
         
     elif command -v dnf &> /dev/null; then
         echo "📦 Sistema baseado em Fedora/RHEL detectado."
+        echo "🔄 Buscando e instalando atualizações do sistema..."
+        $SUDO dnf upgrade -y
+        
+        echo "⚙️ Instalando o Kitty..."
         $SUDO dnf install -y kitty
         
     elif command -v zypper &> /dev/null; then
         echo "📦 Sistema baseado em openSUSE detectado."
+        echo "🔄 Buscando e instalando atualizações do sistema..."
+        $SUDO zypper update -y
+        
+        echo "⚙️ Instalando o Kitty..."
         $SUDO zypper install -y kitty
         
     else
         echo "⚠️ Gerenciador de pacotes não reconhecido."
+        echo "⚠️ Pulando a atualização do sistema operacional."
         echo "🌐 Instalando via script oficial do Kitty (binário pré-compilado)..."
         curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
         
@@ -44,6 +61,6 @@ install_kitty() {
 }
 
 # Executa a função
-install_kitty
+setup_system
 
-echo "✅ Instalação concluída com sucesso! Você pode iniciar o Kitty digitando 'kitty'."
+echo "✅ Atualização do sistema e instalação do Kitty concluídas com sucesso!"
