@@ -50,7 +50,27 @@ Below you can find the bill of materials as well as the purchase links:
 
 First things first, you'll need to have a SD card with the operational system installed. [Click here to learn how](INSTALL.md)
 
-After this, you'll connect the SD card into the Raspberry and power the system by the microUSB powerin connector. The system shoud boot 
+After this, you'll connect the SD card into the Raspberry and power the system by the microUSB powerin connector. The system shoud boot normaly.
+
+Wait a few minutes to the system boot up.
+
+Find the **ip** of your raspberry by [scanning the network](https://play.google.com/store/apps/details?id=com.myprog.netscan) and connect via ssh using the credentials we set at the setup in the Raspberry Pi Imager.
+
+You should lookup and find ai-blind-helper ip host. Then connect via ssh using (replace user by the user you set, and 10.10.10.10 by the ip you fing):
+```bash
+ssh user@10.10.10.10
+```
+Type `yes` to add and save the fingerprint, then enter the password you setup.
+
+
+Now update the system:
+```bash
+sudo apt update && sudo apt upgrade
+```
+
+And run the installation script:
+```bash
+```
 
 
 ## 📫 Contributing to the project
