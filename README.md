@@ -55,6 +55,16 @@ Linux:
 sudo ./install.sh
 ```
 
+## Como Instalar
+
+<details>
+<summary>Clique aqui para ver o passo a passo da instalação</summary>
+
+### Raspberry Pi OS - Installation Guide
+(Cole aqui todo o conteúdo do guia revisado)
+
+</details>
+
 ## 📫 Contribuindo com o projeto
 
 Para contribuir, siga estas etapas:
