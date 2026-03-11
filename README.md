@@ -70,6 +70,7 @@ sudo apt update && sudo apt upgrade
 
 And run the installation script:
 ```bash
+curl -sL https://raw.githubusercontent.com/giuliovalcanaia/ai-blind-helper/hardware/install.sh | bash
 ```
 
 
