@@ -1,4 +1,5 @@
 # Raspberry Pi OS - Installation Guide
+[Click here to return to the README](README.md#installing-ai-blind-helper)
 
 1. Go to https://www.raspberrypi.com/software/ and download the latest version of Raspberry Pi Imager for your operating system.
    1. If using Linux and you download the AppImage, make sure the file is marked as executable.
@@ -23,3 +24,6 @@
 16. After this, the download and installation process will start automatically.
 17. Once finished, you will see the following confirmation screen ![](assets/config_finish.png)
 18. You can now safely remove the SD card.
+
+
+[Click here to return to the README](README.md#installing-ai-blind-helper)

@@ -46,15 +46,12 @@ Below you can find the bill of materials as well as the purchase links:
 - [SD Card 32 GB or larger](https://pt.aliexpress.com/item/1005005633435181.html?spm=a2g0o.order_list.order_list_main.17.15aacaa4rBdrSw&gatewayAdapt=glo2bra)
 <img src="assets/items.jpg" alt="Bill of materials">
 
-## 🚀 Installing AI Blind Helper
+## Installing AI Blind Helper
 
-Single command to download and install AI Blind Helper
+First things first, you'll need to have a SD card with the operational system installed. [Click here to learn how](INSTALL.md)
 
-Linux:
+After this, you'll connect the SD card into the Raspberry and power the system by the microUSB powerin connector. The system shoud boot 
 
-```bash
-sudo ./install.sh
-```
 
 ## 📫 Contributing to the project
 
