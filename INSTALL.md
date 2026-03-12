@@ -5,7 +5,7 @@
    1. If using Linux and you download the AppImage, make sure the file is marked as executable.
    2. Ubuntu installation: `sudo apt install rpi-imager`
    3. Arch Linux installation: `sudo pacman -S rpi-imager`
-   4. Run the program with root privileges to ensure it can access and write to the SD card.
+   4. Run the program with root privileges to ensure it can access and write to the SD card: `sudo rpi-imager`
    5. In some cases, such as when using Hyprland or Wayland, a special execution method is required to preserve environment variables: `sudo -E rpi-imager`
 2. Insert the SD card into your computer.
 3. Launch the Raspberry Pi Imager.
