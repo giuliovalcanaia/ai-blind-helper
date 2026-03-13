@@ -1,66 +1,66 @@
 #!/bin/bash
 
-# Interrompe o script se ocorrer algum erro crítico
+# Exit the script if any critical error occurs
 set -e
 
-echo "🚀 Iniciando a atualização do sistema e instalação do terminal Kitty..."
+echo "🚀 Starting system update and Kitty terminal installation..."
 
-# Verifica se o usuário é root; se não for, define a variável para usar sudo
+# Check if the user is root; if not, set the variable to use sudo
 SUDO=''
 if (( $EUID != 0 )); then
     SUDO='sudo'
 fi
 
-# Função para detectar o sistema, atualizar e instalar o pacote
+# Function to detect the OS, update it, and install the package
 setup_system() {
     if command -v apt &> /dev/null; then
-        echo "📦 Sistema baseado em Debian/Ubuntu/Raspberry Pi detectado."
-        echo "🔄 Buscando e instalando atualizações do sistema (isso pode levar alguns minutos)..."
+        echo "📦 Debian/Ubuntu/Raspberry Pi-based system detected."
+        echo "🔄 Fetching and installing system updates (this may take a few minutes)..."
         $SUDO apt update
         $SUDO apt upgrade -y
         
-        echo "⚙️ Instalando o Kitty..."
+        echo "⚙️ Installing Kitty..."
         $SUDO apt install -y kitty
         
     elif command -v pacman &> /dev/null; then
-        echo "📦 Sistema baseado em Arch Linux detectado."
-        echo "🔄 Sincronizando repositórios e atualizando o sistema..."
+        echo "📦 Arch Linux-based system detected."
+        echo "🔄 Synchronizing repositories and updating the system..."
         $SUDO pacman -Syu --noconfirm
         
-        echo "⚙️ Instalando o Kitty..."
+        echo "⚙️ Installing Kitty..."
         $SUDO pacman -S --noconfirm kitty
         
     elif command -v dnf &> /dev/null; then
-        echo "📦 Sistema baseado em Fedora/RHEL detectado."
-        echo "🔄 Buscando e instalando atualizações do sistema..."
+        echo "📦 Fedora/RHEL-based system detected."
+        echo "🔄 Fetching and installing system updates..."
         $SUDO dnf upgrade -y
         
-        echo "⚙️ Instalando o Kitty..."
+        echo "⚙️ Installing Kitty..."
         $SUDO dnf install -y kitty
         
     elif command -v zypper &> /dev/null; then
-        echo "📦 Sistema baseado em openSUSE detectado."
-        echo "🔄 Buscando e instalando atualizações do sistema..."
+        echo "📦 openSUSE-based system detected."
+        echo "🔄 Fetching and installing system updates..."
         $SUDO zypper update -y
         
-        echo "⚙️ Instalando o Kitty..."
+        echo "⚙️ Installing Kitty..."
         $SUDO zypper install -y kitty
         
     else
-        echo "⚠️ Gerenciador de pacotes não reconhecido."
-        echo "⚠️ Pulando a atualização do sistema operacional."
-        echo "🌐 Instalando via script oficial do Kitty (binário pré-compilado)..."
+        echo "⚠️ Package manager not recognized."
+        echo "⚠️ Skipping operating system update."
+        echo "🌐 Installing via official Kitty script (pre-compiled binary)..."
         curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
         
-        # Cria atalhos para que o comando 'kitty' funcione no terminal globalmente
+        # Create shortcuts so the 'kitty' command works globally in the terminal
         mkdir -p ~/.local/bin
         ln -sf ~/.local/kitty.app/bin/kitty ~/.local/bin/kitty
         ln -sf ~/.local/kitty.app/bin/kitten ~/.local/bin/kitten
-        echo "Para usar esta versão, certifique-se de que ~/.local/bin está no seu PATH."
+        echo "To use this version, ensure that ~/.local/bin is in your PATH."
     fi
 }
 
-# Executa a função
+# Execute the function
 setup_system
 
-echo "✅ Atualização do sistema e instalação do Kitty concluídas com sucesso!"
+echo "✅ System update and Kitty installation completed successfully!"# Interrompe o script se ocorrer algum erro crítico
