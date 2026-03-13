@@ -5,6 +5,9 @@ set -e
 
 echo "🚀 Starting system update and Kitty terminal installation..."
 
+# Variável para controlar se o sistema precisará ser reiniciado no final
+REBOOT_REQUIRED=false
+
 # Check if the user is root; if not, set the variable to use sudo
 SUDO=''
 if (( $EUID != 0 )); then
@@ -21,6 +24,33 @@ setup_system() {
         
         echo "⚙️ Installing Kitty..."
         $SUDO apt install -y kitty
+        
+        # ====================================================================
+        # NOVA SESSÃO: Detecção de Raspberry Pi e instalação dos drivers de áudio
+        # ====================================================================
+        if [[ -f /sys/firmware/devicetree/base/model ]] && grep -qi "Raspberry Pi" /sys/firmware/devicetree/base/model; then
+            echo "🍓 Raspberry Pi detected! Installing WM8960-Audio-HAT drivers..."
+            
+            # Instala as dependências necessárias
+            $SUDO apt install git bc -y
+            
+            # Evita erro de diretório já existente caso o script seja rodado mais de uma vez
+            if [ ! -d "WM8960-Audio-HAT" ]; then
+                git clone https://github.com/waveshare/WM8960-Audio-HAT
+            fi
+            
+            # Executa a instalação dentro de uma subshell (...) para que o 'cd'
+            # não altere o diretório de trabalho do resto do script
+            (
+                cd WM8960-Audio-HAT
+                $SUDO ./install.sh
+            )
+            
+            echo "✅ Audio drivers installed. A reboot has been scheduled."
+            # Sinaliza que o reboot deve ocorrer no final do script
+            REBOOT_REQUIRED=true
+        fi
+        # ====================================================================
         
     elif command -v pacman &> /dev/null; then
         echo "📦 Arch Linux-based system detected."
@@ -63,4 +93,13 @@ setup_system() {
 # Execute the function
 setup_system
 
-echo "✅ System update and Kitty installation completed successfully!"# Interrompe o script se ocorrer algum erro crítico
+echo "✅ System update and Kitty installation completed successfully!"
+
+# ====================================================================
+# NOVA SESSÃO: Reinício automático do sistema (se aplicável)
+# ====================================================================
+if [ "$REBOOT_REQUIRED" = true ]; then
+    echo "🔄 Rebooting the system in 10 seconds to apply audio driver changes... Press Ctrl+C to cancel."
+    sleep 10
+    $SUDO reboot
+fi
