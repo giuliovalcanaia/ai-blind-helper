@@ -26,19 +26,29 @@ setup_system() {
         
         # --- Seção Específica para Raspberry Pi ---
         if [[ -f /sys/firmware/devicetree/base/model ]] && grep -qi "Raspberry Pi" /sys/firmware/devicetree/base/model; then
-            echo "🍓 Raspberry Pi detectado! Instalando drivers WM8960-Audio-HAT..."
-            $SUDO apt install bc -y
+            echo "🍓 Raspberry Pi detectado! Verificando drivers WM8960-Audio-HAT..."
             
-            if [ ! -d "WM8960-Audio-HAT" ]; then
-                git clone https://github.com/waveshare/WM8960-Audio-HAT
+            # TRAVA DE SEGURANÇA: Verifica se o driver já está no DKMS ou no config.txt do boot
+            if grep -qi "wm8960" /boot/config.txt /boot/firmware/config.txt 2>/dev/null || (command -v dkms &> /dev/null && dkms status | grep -qi "wm8960"); then
+                echo "✅ O driver WM8960-Audio-HAT já está instalado no sistema. Pulando instalação."
+            else
+                echo "⚙️ Driver não encontrado. Iniciando instalação do WM8960-Audio-HAT..."
+                $SUDO apt install bc -y
+                
+                if [ ! -d "WM8960-Audio-HAT" ]; then
+                    git clone https://github.com/waveshare/WM8960-Audio-HAT
+                fi
+                
+                (
+                    cd WM8960-Audio-HAT
+                    $SUDO ./install.sh
+                )
+                
+                echo "✅ Instalação do driver concluída. O sistema será reiniciado ao final."
+                REBOOT_REQUIRED=true
             fi
-            
-            (
-                cd WM8960-Audio-HAT
-                $SUDO ./install.sh
-            )
-            REBOOT_REQUIRED=true
         fi
+        # ------------------------------------------
 
     elif command -v pacman &> /dev/null; then
         echo "📦 Sistema baseado em Arch Linux detectado."
@@ -80,13 +90,11 @@ setup_system() {
     (
         cd ai-blind-helper
         
-        # Define o comando python correto dependendo do sistema (Arch usa 'python', Debian 'python3')
         PYTHON_CMD="python3"
         if ! command -v $PYTHON_CMD &> /dev/null; then
             PYTHON_CMD="python"
         fi
 
-        # Cria o ambiente virtual se não existir
         if [ ! -d "venv" ]; then
             $PYTHON_CMD -m venv venv
             echo "✅ Ambiente virtual (venv) criado."
@@ -94,7 +102,6 @@ setup_system() {
             echo "ℹ️ Ambiente virtual já existente."
         fi
 
-        # Ativa o venv e instala as dependências
         source venv/bin/activate
         
         if [ -f "requirements.txt" ]; then
