@@ -4,7 +4,7 @@ import time
 import os
 import traceback
 from google.genai import types
-from event import EventBus
+from event import (EventBus, DESCRIPTION_REQUEST)
 
 class DescritpionController:
     
@@ -21,6 +21,11 @@ class DescritpionController:
         self.audio_in_queue = audio_in_queue
 
         print("[DescritpionController __init__] Inicialização concluída com sucesso")
+        
+        event_bus.subscribe(
+            DESCRIPTION_REQUEST,
+            self.handle_description_request
+        )
         
     @property
     def loop(self):

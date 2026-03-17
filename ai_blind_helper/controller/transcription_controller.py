@@ -4,7 +4,7 @@ import os
 import time
 import traceback
 from application import TextToSpeechApplication, TranscriptionApplication
-from event import EventBus
+from event import (EventBus, TRANSCRIPTION_REQUEST)
 
 class TranscriptionController:
     
@@ -15,6 +15,11 @@ class TranscriptionController:
         self.transcription_app = transcription
         self.state_provider = state_provider
         self.tts_app = tts_app
+        
+        event_bus.subscribe(
+            TRANSCRIPTION_REQUEST,
+            self.handle_transcription_request
+        )
 
     @property
     def loop(self):

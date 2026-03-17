@@ -3,7 +3,7 @@ import os
 import time
 import base64
 import traceback
-from event import EventBus
+from event import (EventBus, SESSION_AUDIO_LIVE_CONNECT_TOGGLE, SESSION_STOP_AUDIO_STREAM, SESSION_VIDEO_LIVE_CONNECT_TOGGLE, SESSION_START_AUDIO_STREAM, SESSION_STOP)
 
 class SessionController:
     
@@ -20,6 +20,31 @@ class SessionController:
         self.state_provider = state_provider
         self.sfx_controller = sfx_controller
         self.background_tasks = set()
+        
+        event_bus.subscribe(
+            SESSION_AUDIO_LIVE_CONNECT_TOGGLE,
+            self.handle_audio_live_connect
+        )
+        
+        event_bus.subscribe(
+            SESSION_VIDEO_LIVE_CONNECT_TOGGLE,
+            self.handle_video_live_connect
+        )
+        
+        event_bus.subscribe(
+            SESSION_START_AUDIO_STREAM,
+            self.start_sending_audio_only
+        )
+        
+        event_bus.subscribe(
+            SESSION_STOP_AUDIO_STREAM,
+            self.stop_sending_audio
+        )
+        
+        event_bus.subscribe(
+            SESSION_STOP,
+            self.stop_session
+        )
     
     @property
     def loop(self):

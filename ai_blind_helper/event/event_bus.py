@@ -9,13 +9,13 @@ class EventBus:
     def subscribe(self, event_name, handler):
         self.listeners[event_name].append(handler)
 
-    async def emit(self, event_name, data=None):
+    async def emit(self, event_name, *args, **kwargs):
 
         if event_name not in self.listeners:
             return
  
         for handler in self.listeners[event_name]:
-            result = handler(data)
+            result = handler(args, kwargs)
 
             if asyncio.iscoroutine(result):
                 await result 

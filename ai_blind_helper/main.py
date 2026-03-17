@@ -28,7 +28,7 @@ def main():
         event_bus=event_bus
     )
     
-    interface_provider = InterfaceProvider(event_bus, controller_provider)
+    interface_provider = InterfaceProvider(controller_provider=controller_provider, event_bus=event_bus)
     
     try:
         print("[Main main] Chamando interface_provider.keyboard_interface.run()")

@@ -1,5 +1,5 @@
 from config import Config
-from event import EventBus
+from event import (EventBus, LANGUAGE_CYCLE)
 
 class LanguageController:
     def __init__(self, clock_app, date_app, msg_app, audio_menu, event_bus: EventBus):
@@ -8,6 +8,11 @@ class LanguageController:
         self.date_app = date_app
         self.msg_app = msg_app
         self.audio_menu = audio_menu
+        
+        event_bus.subscribe(
+            LANGUAGE_CYCLE,
+            self.handle_cycle_language
+        )
     
     def set_system_language(self, new_lang: str):
         print(f"[LanguageController set_system_language] Solicitada alteração de idioma para: {new_lang}")

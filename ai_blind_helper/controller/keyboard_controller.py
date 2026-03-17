@@ -1,9 +1,24 @@
-from event import EventBus
+from event import (EventBus, KB_START, KB_STOP, KB_REGISTER)
 
 class KeyboardController:
     def __init__(self, keyboard_application, event_bus: EventBus):
         print(f"[KeyboardController __init__] Inicializando controlador com keyboard_application: {keyboard_application}")
         self.keyboard_application = keyboard_application
+        
+        event_bus.subscribe(
+            KB_START,
+            self.start
+        )
+        
+        event_bus.subscribe(
+            KB_STOP,
+            self.stop
+        )
+        
+        event_bus.subscribe(
+            KB_REGISTER,
+            self.register_key
+        )
         
     def start(self):
         print("[KeyboardController start] Iniciando o serviço de monitoramento do teclado")

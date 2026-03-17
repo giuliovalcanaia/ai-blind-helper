@@ -1,5 +1,5 @@
 import asyncio
-from event import EventBus
+from event import (EventBus, SFX_AUDIO_BUTTON_PRESS, SFX_AUDIO_BUTTON_RELEASE, SFX_HOLD_BUTTON_PRESS)
 
 class AudioSFXController:
 
@@ -9,6 +9,21 @@ class AudioSFXController:
         self.state_provider = state_provider
         self.msg_app = msg_app
         self.sfx_app = sfx_app
+        
+        event_bus.subscribe(
+            SFX_AUDIO_BUTTON_PRESS,
+            self.audio_button_press
+        )
+        
+        event_bus.subscribe(
+            SFX_AUDIO_BUTTON_RELEASE,
+            self.audio_button_release
+        )
+        
+        event_bus.subscribe(
+            SFX_HOLD_BUTTON_PRESS,
+            self.hold_button_press_sfx
+        )
         
     @property
     def loop(self):

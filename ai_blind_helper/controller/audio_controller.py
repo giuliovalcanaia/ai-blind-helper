@@ -1,11 +1,26 @@
 import asyncio
-from event import EventBus
+from event import (EventBus, AUDIO_REWIND, AUDIO_FORWARD, AUDIO_PAUSE_TOGGLE)
 
 class AudioController:
     
     def __init__(self, audio_app, event_bus: EventBus):
         print(f"[AudioController __init__] Inicializando controlador com audio_app: {audio_app}")
         self.audio_app = audio_app
+        
+        event_bus.subscribe(
+            AUDIO_REWIND,
+            self.handle_audio_rewind
+        )
+        
+        event_bus.subscribe(
+            AUDIO_FORWARD,
+            self.handle_audio_forward
+        )
+        
+        event_bus.subscribe(
+            AUDIO_PAUSE_TOGGLE,
+            self.handle_audio_pause_toggle
+        )
     
     def handle_audio_pause_toggle(self):
         print("[AudioController handle_audio_pause_toggle] Tentando alternar pausa do áudio")

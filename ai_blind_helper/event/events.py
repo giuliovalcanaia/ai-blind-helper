@@ -25,6 +25,8 @@ SESSION_VIDEO_LIVE_CONNECT_TOGGLE = "session_video_live_connect_toggle"
 SESSION_START_AUDIO_STREAM = "session_start_audio_stream"
 SESSION_STOP_AUDIO_STREAM = "session_stop_audio_stream"
 
+SESSION_STOP = "session_stop"
+
 
 # =========================
 # AUDIO CONTROL
@@ -79,6 +81,14 @@ INPUT_AUDIO_UNLOCK = "input_audio_unlock"
 # SFX / FEEDBACK
 # =========================
 
-SFX_HOLD_TRIGGER = "sfx_hold_trigger"
+SFX_HOLD_BUTTON_PRESS = "sfx_hold_button_press"
 SFX_AUDIO_BUTTON_PRESS = "sfx_audio_button_press"
 SFX_AUDIO_BUTTON_RELEASE = "sfx_audio_button_release"
+
+
+# =========================
+# KEYBOARD 
+# =========================
+KB_START = "kb_start"
+KB_STOP = "kb_stop"
+KB_REGISTER = "kb_register"

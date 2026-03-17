@@ -1,14 +1,24 @@
 import asyncio
-from event import EventBus
+from event import *
 
 class TimeController:
-    def __init__(self, clock_app, date_app, audio_app, audio_in_queue, state_provider, event_bus):
+    def __init__(self, clock_app, date_app, audio_app, audio_in_queue, state_provider, event_bus: EventBus):
         print("[TimeController __init__] Inicializando controlador de tempo e data")
         self.clock_app = clock_app
         self.date_app = date_app
         self.audio_app = audio_app
         self.audio_in_queue = audio_in_queue
         self.state_provider = state_provider
+        
+        event_bus.subscribe(
+            TIME_REQUEST,
+            self.handle_time_request
+        )
+        
+        event_bus.subscribe(
+            DATE_REQUEST,
+            self.handle_date_request
+        )
         
     @property
     def loop(self):
