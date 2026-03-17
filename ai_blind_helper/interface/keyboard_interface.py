@@ -10,9 +10,10 @@ class KeyboardInterface:
     KEY_MENU_FORWARD = evdev.ecodes.KEY_RIGHT
     KEY_MENU_CONFIRM = evdev.ecodes.KEY_ENTER
 
-    def __init__(self, event_bus: EventBus, loop_controller):
+    def __init__(self, event_bus: EventBus, loop_controller, keyboard_controller):
         print("[KeyboardInterface __init__] Inicializando interface de teclado e mapeando dependências")
         self.loop_controller = loop_controller
+        self.keyboard_controller = keyboard_controller
         
         self.event_bus = event_bus
 
@@ -92,14 +93,14 @@ class KeyboardInterface:
         self.event_bus.emit(KB_STOP)
 
     def _setup_bindings(self):
-        print(
-            "[KeyboardInterface _setup_bindings] Registrando atalhos de teclado físicos")
-        self.event_bus.emit(KB_REGISTER, self.KEY_MENU_BACK, self.on_menu_back)
-        self.event_bus.emit(KB_REGISTER, self.KEY_MENU_FORWARD, self.on_menu_forward)
-        self.event_bus.emit(KB_REGISTER, self.KEY_MENU_CONFIRM, self.on_menu_confirm)
-        self.event_bus.emit(KB_REGISTER, evdev.ecodes.KEY_Q, self.on_quit_request)
-        self.event_bus.emit(KB_REGISTER, evdev.ecodes.KEY_T, self.on_time_request)
-        self.event_bus.emit(KB_REGISTER, evdev.ecodes.KEY_A, self.on_audio_request)
+        print("[KeyboardInterface _setup_bindings] Registrando atalhos de teclado físicos")
+        self.keyboard_controller.register_key(self.KEY_MENU_BACK, self.on_menu_back)
+        self.keyboard_controller.register_key(self.KEY_MENU_FORWARD, self.on_menu_forward)
+        self.keyboard_controller.register_key(self.KEY_MENU_CONFIRM, self.on_menu_confirm)
+
+        self.keyboard_controller.register_key(evdev.ecodes.KEY_Q, self.on_quit_request)
+        self.keyboard_controller.register_key(evdev.ecodes.KEY_T, self.on_time_request)
+        self.keyboard_controller.register_key(evdev.ecodes.KEY_A, self.on_audio_request)
 
         # self.keyboard_controller.register_key(evdev.ecodes.KEY_J, self.on_key_j)
         # self.keyboard_controller.register_key(evdev.ecodes.KEY_K, self.on_key_k)
@@ -153,7 +154,7 @@ class KeyboardInterface:
             # Lógica de bloqueio: verifica se o item selecionado exige bloqueio
             if item.get('block', False):
                 print(f"[KeyboardInterface] Item '{item['description']}' ativou o bloqueio de navegação.")
-                self.is_blocked = True
+                self.blocked = True
             print(f"[KeyboardInterface on_menu_confirm] Confirmando ação: {item['description']}")
             item['callback'](event_type='PRESS', duration=0.0)
 

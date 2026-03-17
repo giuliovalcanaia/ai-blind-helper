@@ -15,11 +15,6 @@ class KeyboardController:
             self.stop
         )
         
-        event_bus.subscribe(
-            KB_REGISTER,
-            self.register_key
-        )
-        
     def start(self):
         print("[KeyboardController start] Iniciando o serviço de monitoramento do teclado")
         self.keyboard_application.start()

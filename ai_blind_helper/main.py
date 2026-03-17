@@ -14,7 +14,7 @@ def main():
     manager_provider = ManagerProvider()
     reader_provider = ReaderProvider()
     
-    event_bus = EventBus()
+    event_bus = EventBus(state_provider=state_provider)
     
     application_provider = ApplicationProvider(
         manager_provider=manager_provider, 
@@ -28,7 +28,10 @@ def main():
         event_bus=event_bus
     )
     
-    interface_provider = InterfaceProvider(controller_provider=controller_provider, event_bus=event_bus)
+    interface_provider = InterfaceProvider(
+        controller_provider=controller_provider, 
+        event_bus=event_bus
+    )
     
     try:
         print("[Main main] Chamando interface_provider.keyboard_interface.run()")
