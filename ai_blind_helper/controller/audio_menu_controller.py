@@ -1,12 +1,42 @@
 import asyncio
-
+from event import *
 
 class AudioMenuController:
-    def __init__(self, audio_app, audio_in_queue, state_provider, menu_app):
+    def __init__(self, audio_app, audio_in_queue, state_provider, menu_app, event_bus: EventBus):
         self.audio_app = audio_app
         self.audio_in_queue = audio_in_queue
         self.state_provider = state_provider
         self.menu_app = menu_app
+        
+        event_bus.subscribe(
+            MENU_SELECT_AUDIO_LIVE,
+            self.play_menu_websocket_audio
+        )
+        
+        event_bus.subscribe(
+            MENU_SELECT_VIDEO_LIVE,
+            self.play_menu_websocket_video
+        )
+        
+        event_bus.subscribe(
+            MENU_SELECT_DESCRIBE,
+            self.play_menu_describe
+        )
+        
+        event_bus.subscribe(
+            MENU_SELECT_TRANSCRIBE,
+            self.play_menu_transcribe
+        )
+        
+        event_bus.subscribe(
+            MENU_SELECT_CHANGE_LANGUAGE,
+            self.play_menu_change_language
+        )
+        
+        event_bus.subscribe(
+            MENU_SELECT_EXIT,
+            self.play_menu_exit
+        )
 
     @property
     def loop(self):
@@ -37,13 +67,13 @@ class AudioMenuController:
         print(f"Play menu describe: {path}")
         asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
 
-    # def play_menu_exit(self):
-    #     """Toca o áudio: exit.wav (Ao focar na opção de sair)"""
-    #     if self.loop is None:
-    #         return
-    #     path = self.menu_app.get_exit_audio_path()
-    #     print(f"Play menu exit: {path}")
-    #     asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
+    def play_menu_exit(self):
+        """Toca o áudio: exit.wav (Ao focar na opção de sair)"""
+        if self.loop is None:
+            return
+        path = self.menu_app.get_exit_audio_path()
+        print(f"Play menu exit: {path}")
+        asyncio.run_coroutine_threadsafe(self._play_menu_path(path), self.loop)
 
     def play_menu_transcribe(self):
         """Toca o áudio: transcribe.wav (Ao focar na opção de ler texto)"""

@@ -1,5 +1,7 @@
+from event import EventBus
+
 class KeyboardController:
-    def __init__(self, keyboard_application):
+    def __init__(self, keyboard_application, event_bus: EventBus):
         print(f"[KeyboardController __init__] Inicializando controlador com keyboard_application: {keyboard_application}")
         self.keyboard_application = keyboard_application
         

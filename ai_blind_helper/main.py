@@ -2,8 +2,9 @@ import argparse
 import sys
 from provider import *
 from logger import *
+from event import EventBus
 
-def main():
+def main():    
     # INICIO DA GRAVAÇÃO: Deve ser a primeira coisa a rodar
     logger = TerminalLogger()
     logger.start()
@@ -13,6 +14,8 @@ def main():
     manager_provider = ManagerProvider()
     reader_provider = ReaderProvider()
     
+    event_bus = EventBus()
+    
     application_provider = ApplicationProvider(
         manager_provider=manager_provider, 
         reader_provider=reader_provider,
@@ -21,10 +24,11 @@ def main():
     
     controller_provider = ControllerProvider(
         application_provider=application_provider, 
-        state_provider=state_provider
+        state_provider=state_provider,
+        event_bus=event_bus
     )
     
-    interface_provider = InterfaceProvider(controller_provider)
+    interface_provider = InterfaceProvider(event_bus, controller_provider)
     
     try:
         print("[Main main] Chamando interface_provider.keyboard_interface.run()")

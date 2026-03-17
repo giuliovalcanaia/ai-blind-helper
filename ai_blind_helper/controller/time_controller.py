@@ -1,7 +1,8 @@
 import asyncio
+from event import EventBus
 
 class TimeController:
-    def __init__(self, clock_app, date_app, audio_app, audio_in_queue, state_provider):
+    def __init__(self, clock_app, date_app, audio_app, audio_in_queue, state_provider, event_bus):
         print("[TimeController __init__] Inicializando controlador de tempo e data")
         self.clock_app = clock_app
         self.date_app = date_app

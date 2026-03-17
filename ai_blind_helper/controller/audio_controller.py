@@ -1,8 +1,9 @@
 import asyncio
+from event import EventBus
 
 class AudioController:
     
-    def __init__(self, audio_app):
+    def __init__(self, audio_app, event_bus: EventBus):
         print(f"[AudioController __init__] Inicializando controlador com audio_app: {audio_app}")
         self.audio_app = audio_app
     

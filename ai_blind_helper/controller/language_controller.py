@@ -1,7 +1,8 @@
 from config import Config
+from event import EventBus
 
 class LanguageController:
-    def __init__(self, clock_app, date_app, msg_app, audio_menu):
+    def __init__(self, clock_app, date_app, msg_app, audio_menu, event_bus: EventBus):
         print(f"[LanguageController __init__] Inicializando controlador de idioma")
         self.clock_app = clock_app
         self.date_app = date_app

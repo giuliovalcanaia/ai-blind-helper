@@ -14,6 +14,8 @@ class LiveClientApplication:
         self._is_connected = False
 
         self.audio_in_queue = audio_in_queue
+        
+        self.input_queue = None # Definição do atributo
 
     @property
     def is_connected(self) -> bool:
@@ -21,6 +23,7 @@ class LiveClientApplication:
 
     async def start_session(self, input_queue: asyncio.Queue, output_queue: asyncio.Queue):
         print("[LiveClientApplication start_session] Tentando estabelecer conexão WebSocket com Gemini")
+        self.input_queue = input_queue # Salva no atributo, para outras classes poderem acessar, isso é utilizado no description controller
         try:
             async with (
                 self.client.aio.live.connect(model=Config.MODEL, config=Config.LIVE_CONFIG) as session,

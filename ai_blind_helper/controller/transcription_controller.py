@@ -4,10 +4,11 @@ import os
 import time
 import traceback
 from application import TextToSpeechApplication, TranscriptionApplication
+from event import EventBus
 
 class TranscriptionController:
     
-    def __init__(self, video_app, gemini_client, transcription: TranscriptionApplication, state_provider, tts_app: TextToSpeechApplication):
+    def __init__(self, video_app, gemini_client, transcription: TranscriptionApplication, state_provider, tts_app: TextToSpeechApplication, event_bus: EventBus):
         print("[TranscriptionController __init__] Inicializando controlador de transcrição")
         self.gemini_client = gemini_client
         self.video_app = video_app

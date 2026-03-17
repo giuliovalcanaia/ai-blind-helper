@@ -36,8 +36,7 @@ _initial_settings = load_persistent_settings()
 class Config:
     """Configurações globais."""
     # Defina sua API KEY aqui ou garanta que está nas variáveis de ambiente
-    API_KEY = os.getenv(
-        "GOOGLE_API_KEY", "AIzaSyCgcpCz46tJvT0RneuhTZvlOAXGGqAGDiI")
+    API_KEY = os.getenv("GOOGLE_API_KEY")
 
     API_VERSION_TEXT_API_GEMINI_3 = 'v1alpha'
 

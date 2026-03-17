@@ -3,10 +3,11 @@ import os
 import time
 import base64
 import traceback
+from event import EventBus
 
 class SessionController:
     
-    def __init__(self, gemini_client, video_app, audio_app, session_task, out_queue, audio_in_queue, start_audio_event, start_video_event, state_provider, sfx_controller):
+    def __init__(self, gemini_client, video_app, audio_app, session_task, out_queue, audio_in_queue, start_audio_event, start_video_event, state_provider, sfx_controller, event_bus: EventBus):
         print(f"[SessionController __init__] Inicializando controlador de sessão")
         self.session_task = session_task
         self.out_queue = out_queue

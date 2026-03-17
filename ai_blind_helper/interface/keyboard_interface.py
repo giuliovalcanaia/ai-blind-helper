@@ -1,6 +1,7 @@
 import evdev
 from config import Config
 import threading
+from event import *
 
 
 class KeyboardInterface:
@@ -9,7 +10,7 @@ class KeyboardInterface:
     KEY_MENU_FORWARD = evdev.ecodes.KEY_RIGHT
     KEY_MENU_CONFIRM = evdev.ecodes.KEY_ENTER
 
-    def __init__(self, loop_controller, keyboard_controller, session_controller, language_controller, time_controller, transcription_controller, description_controller, audio_controller, menu_controller, sfx_controller):
+    def __init__(self, event_bus: EventBus, loop_controller, keyboard_controller, session_controller, language_controller, time_controller, transcription_controller, description_controller, audio_controller, menu_controller, sfx_controller):
         print("[KeyboardInterface __init__] Inicializando interface de teclado e mapeando dependências")
         self.keyboard_controller = keyboard_controller
         self.language_controller = language_controller
@@ -21,6 +22,8 @@ class KeyboardInterface:
         self.audio_controller = audio_controller
         self.menu_controller = menu_controller
         self.sfx_controller = sfx_controller
+        
+        self.event_bus = event_bus
 
         self.menu_index = 0
         self.menu_active = True
@@ -53,37 +56,37 @@ class KeyboardInterface:
             'w': {
                 'description': "Conectar / Desconectar Gemini Audio",
                 'callback': self.audio_live_connect,
-                'on_select': lambda: self.menu_controller.play_menu_websocket_audio(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_AUDIO_LIVE),
                 'block': True
             },
             'v': {
                 'description': "Conectar / Desconectar Gemini Video",
                 'callback': self.video_live_connect,
-                'on_select': lambda: self.menu_controller.play_menu_websocket_video(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_VIDEO_LIVE),
                 'block': True
             },
             'd': {
                 'description': "Descrever Ambiente",
                 'callback': self.on_key_d,
-                'on_select': lambda: self.menu_controller.play_menu_describe(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_DESCRIBE),
                 'block': True
             },
             'r': {
                 'description': "Ler / Transcrever",
                 'callback': self.on_key_r,
-                'on_select': lambda: self.menu_controller.play_menu_transcribe(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_TRANSCRIBE),
                 'block': True
             },
             'q': {
                 'description': "Sair do Sistema",
                 'callback': self.on_key_q,
-                'on_select': lambda: self.menu_controller.play_menu_exit(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_EXIT),
                 'block': False
             },
             'p': {
                 'description': "Mudar idioma",
                 'callback': self.change_language,
-                'on_select': lambda: self.menu_controller.play_menu_change_language(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_CHANGE_LANGUAGE),
                 'block': False
             }
         }

@@ -1,8 +1,9 @@
 import asyncio
+from event import EventBus
 
 class AudioSFXController:
 
-    def __init__(self, audio_app, audio_in_queue, state_provider, msg_app, sfx_app):
+    def __init__(self, audio_app, audio_in_queue, state_provider, msg_app, sfx_app, event_bus: EventBus):
         self.audio_app = audio_app
         self.audio_in_queue = audio_in_queue
         self.state_provider = state_provider
