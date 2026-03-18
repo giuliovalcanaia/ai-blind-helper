@@ -87,6 +87,7 @@ setup_system() {
     fi
 
     echo "🐍 Configurando ambiente Python (venv) e instalando dependências..."
+    (
         cd ai-blind-helper
         echo "Entrando na pasta ai-blind-helper"
         
