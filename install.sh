@@ -87,8 +87,8 @@ setup_system() {
     fi
 
     echo "🐍 Configurando ambiente Python (venv) e instalando dependências..."
-    (
         cd ai-blind-helper
+        echo "Entrando na pasta ai-blind-helper"
         
         PYTHON_CMD="python3"
         if ! command -v $PYTHON_CMD &> /dev/null; then
@@ -104,6 +104,9 @@ setup_system() {
 
         source venv/bin/activate
         
+        cd ai_blind_helper
+        echo "Entrando na pasta ai_blind_helper..."
+
         if [ -f "requirements.txt" ]; then
             echo "📦 Instalando pacotes do requirements.txt..."
             pip install --upgrade pip
