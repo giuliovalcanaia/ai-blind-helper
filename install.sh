@@ -10,13 +10,15 @@ REBOOT_REQUIRED=false
 
 # Verifica se o usuário é root; se não, define o uso do sudo
 SUDO=''
-if (( $EUID != 0 )); then
+# CORREÇÃO 1: Trocado (( $EUID != 0 )) por uma verificação universal
+if [ "$(id -u)" -ne 0 ]; then
     SUDO='sudo'
 fi
 
 # Função para detectar o SO, atualizar e instalar dependências
 setup_system() {
-    if command -v apt &> /dev/null; then
+    # CORREÇÃO 2: Trocado &> /dev/null por > /dev/null 2>&1 para evitar falhas se rodar via 'sh'
+    if command -v apt > /dev/null 2>&1; then
         echo "📦 Sistema baseado em Debian/Ubuntu/Raspberry Pi detectado."
         $SUDO apt update
         $SUDO apt upgrade -y
@@ -25,11 +27,12 @@ setup_system() {
         $SUDO apt install -y git kitty python3 python3-venv python3-pip
         
         # --- Seção Específica para Raspberry Pi ---
-        if [[ -f /sys/firmware/devicetree/base/model ]] && grep -qi "Raspberry Pi" /sys/firmware/devicetree/base/model; then
+        # CORREÇÃO 3: Trocado [[ ]] por [ ] para maior compatibilidade
+        if [ -f /sys/firmware/devicetree/base/model ] && grep -qi "Raspberry Pi" /sys/firmware/devicetree/base/model; then
             echo "🍓 Raspberry Pi detectado! Verificando drivers WM8960-Audio-HAT..."
             
             # TRAVA DE SEGURANÇA: Verifica se o driver já está no DKMS ou no config.txt do boot
-            if grep -qi "wm8960" /boot/config.txt /boot/firmware/config.txt 2>/dev/null || (command -v dkms &> /dev/null && dkms status | grep -qi "wm8960"); then
+            if grep -qi "wm8960" /boot/config.txt /boot/firmware/config.txt 2>/dev/null || (command -v dkms > /dev/null 2>&1 && dkms status | grep -qi "wm8960"); then
                 echo "✅ O driver WM8960-Audio-HAT já está instalado no sistema. Pulando instalação."
             else
                 echo "⚙️ Driver não encontrado. Iniciando instalação do WM8960-Audio-HAT..."
@@ -50,19 +53,19 @@ setup_system() {
         fi
         # ------------------------------------------
 
-    elif command -v pacman &> /dev/null; then
+    elif command -v pacman > /dev/null 2>&1; then
         echo "📦 Sistema baseado em Arch Linux detectado."
         $SUDO pacman -Syu --noconfirm
         echo "⚙️ Instalando dependências base (Git, Kitty, Python)..."
         $SUDO pacman -S --noconfirm git kitty python python-pip
         
-    elif command -v dnf &> /dev/null; then
+    elif command -v dnf > /dev/null 2>&1; then
         echo "📦 Sistema baseado em Fedora/RHEL detectado."
         $SUDO dnf upgrade -y
         echo "⚙️ Instalando dependências base (Git, Kitty, Python)..."
         $SUDO dnf install -y git kitty python3 python3-pip
         
-    elif command -v zypper &> /dev/null; then
+    elif command -v zypper > /dev/null 2>&1; then
         echo "📦 Sistema baseado em openSUSE detectado."
         $SUDO zypper update -y
         echo "⚙️ Instalando dependências base (Git, Kitty, Python)..."
@@ -92,7 +95,7 @@ setup_system() {
         echo "Entrando na pasta ai-blind-helper"
         
         PYTHON_CMD="python3"
-        if ! command -v $PYTHON_CMD &> /dev/null; then
+        if ! command -v $PYTHON_CMD > /dev/null 2>&1; then
             PYTHON_CMD="python"
         fi
 
@@ -103,10 +106,14 @@ setup_system() {
             echo "ℹ️ Ambiente virtual já existente."
         fi
 
-        source venv/bin/activate
+        # CORREÇÃO 4: Usando '.' em vez de 'source' (source pode dar erro em alguns sistemas)
+        . venv/bin/activate
         
-        cd ai_blind_helper
-        echo "Entrando na pasta ai_blind_helper..."
+        # para evitar que o "set -e" aborte o script caso a estrutura mude.
+        if [ -d "ai_blind_helper" ]; then
+            cd ai_blind_helper
+            echo "Entrando na pasta ai_blind_helper..."
+        fi
 
         if [ -f "requirements.txt" ]; then
             echo "📦 Instalando pacotes do requirements.txt..."
