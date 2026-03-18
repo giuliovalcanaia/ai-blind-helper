@@ -5,11 +5,11 @@ from logger import *
 from event import EventBus
 
 def main():    
-    # INICIO DA GRAVAÇÃO: Deve ser a primeira coisa a rodar
+    # START LOGGING: This should be the first thing to run
     logger = TerminalLogger()
     logger.start()
 
-    # Seu código original começa aqui
+    # Your original code starts here
     state_provider = StateProvider()
     manager_provider = ManagerProvider()
     reader_provider = ReaderProvider()
@@ -34,15 +34,15 @@ def main():
     )
     
     try:
-        print("[Main main] Chamando interface_provider.keyboard_interface.run()")
+        print("[Main main] Calling interface_provider.keyboard_interface.run()")
         interface_provider.keyboard_interface.run()
     except KeyboardInterrupt:
-        print("\n[Main main] Interrupção forçada via Terminal (SIGINT).")
+        print("\n[Main main] Forced interruption via Terminal (SIGINT).")
         sys.exit(0)
     except Exception as e:
-        # Esse bloco extra garante que erros inesperados também vão pro log
-        print(f"\n[Main main] Erro fatal não tratado: {e}")
-        raise # Relança o erro para aparecer o traceback completo no log 
+        # This extra block ensures unexpected errors also go to the log
+        print(f"\n[Main main] Unhandled fatal error: {e}")
+        raise # Re-raise the error so the full traceback appears in the log
 
 if __name__ == "__main__":
     main()

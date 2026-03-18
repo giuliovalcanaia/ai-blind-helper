@@ -3,39 +3,37 @@ import pyaudio
 import json
 from google.genai import types
 
-# Define o nome do ficheiro de persistência
 SETTINGS_FILE = "settings.json"
 
 
 def load_persistent_settings():
-    """Carrega as definições do ficheiro JSON."""
+    """Loads settings from the JSON file."""
     if os.path.exists(SETTINGS_FILE):
         try:
             with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"[Config] Erro ao ler settings: {e}")
+            print(f"[Config] Error reading settings: {e}")
     return {}
 
 
 def save_persistent_setting(key, value):
-    """Guarda uma definição específica no JSON."""
+    """Saves a specific setting to the JSON file."""
     settings = load_persistent_settings()
     settings[key] = value
     try:
         with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
             json.dump(settings, f, indent=4)
     except Exception as e:
-        print(f"[Config] Erro ao guardar settings: {e}")
+        print(f"[Config] Error saving settings: {e}")
 
 
-# Carrega as definições antes de criar a classe
 _initial_settings = load_persistent_settings()
 
 
 class Config:
-    """Configurações globais."""
-    # Defina sua API KEY aqui ou garanta que está nas variáveis de ambiente
+    """Global configuration."""
+    # Set your API KEY here or ensure it is available in environment variables
     API_KEY = os.getenv("GOOGLE_API_KEY")
 
     API_VERSION_TEXT_API_GEMINI_3 = 'v1alpha'
@@ -45,9 +43,6 @@ class Config:
 
     MODEL_TEXT_GENERATOR = "gemini-3-pro-preview"
 
-    # LINGUAGEM
-
-    # Define o nome do ficheiro de persistência
     SETTINGS_FILE = "settings.json"
 
     LANGUAGES = ['pt', 'en']
@@ -55,11 +50,11 @@ class Config:
 
     @staticmethod
     def set_language(new_lang):
-        """Atualiza a variável em memória e persiste no ficheiro."""
+        """Updates the in-memory variable and persists it to the file."""
         Config.LANGUAGE = new_lang
         save_persistent_setting("language", new_lang)
 
-    # Config do Noise Gate
+    # Noise Gate config
     NOISE_GATE_THRESHOLD = 150
     NOISE_GATE_RELEASE_TIME = 0.5
 
@@ -75,17 +70,11 @@ class Config:
     LOCK_THRESHOLD_MS_VIDEO = 500
     LOCK_THRESHOLD_MS_DATE = 500
 
-    # Keyboard Settings (ls -l /dev/input/by-id/)
-    # For arch: sudo evtest
-    # Adicionar entradas e saidas ao usuário comum: sudo usermod -a -G input,audio,video giulio
-    # KEYBOARD_PATH = '/dev/input/event4'
-    # Keyboard Settings (ls -l /dev/input/by-path/)
-    KEYBOARD_PATH = '/dev/input/by-path/platform-i8042-serio-0-event-kbd'
+    KEYBOARD_PATH = '/dev/input/event8'
 
 
 
-
-    # TTS CONFIGS
+    # TTS Config
 
     TTS_CONFIG =types.GenerateContentConfig(
         response_modalities=["AUDIO"],
@@ -105,7 +94,6 @@ class Config:
 
 
 
-    # Gemini Config
     LIVE_CONFIG = types.LiveConnectConfig(
         response_modalities=["AUDIO"],
         media_resolution="MEDIA_RESOLUTION_MEDIUM",

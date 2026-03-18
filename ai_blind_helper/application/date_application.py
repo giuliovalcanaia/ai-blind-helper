@@ -3,12 +3,12 @@ from datetime import datetime
 
 class DateApplication:
     def __init__(self, language, base_dir="audio"):
-        print(f"[DateApplication __init__] Inicializando serviço de data (Idioma: {language})")
+        print(f"[DateApplication __init__] Initializing date service (Language: {language})")
         self.language = language
         self.base_dir = base_dir
 
     def get_current_date_audio_paths(self):
-        print("[DateApplication get_current_date_audio_paths] Calculando data atual para busca de áudios")
+        print("[DateApplication get_current_date_audio_paths] Calculating current date for audio lookup")
         now = datetime.now()
         paths_to_play = []
 
@@ -28,10 +28,10 @@ class DateApplication:
         path_week = os.path.join(self.base_dir, self.language, "date", filename_week)
 
         if os.path.exists(path_week):
-            print(f"[DateApplication get_current_date_audio_paths] Áudio da semana encontrado: {path_week}")
+            print(f"[DateApplication get_current_date_audio_paths] Week audio found: {path_week}")
             paths_to_play.append(path_week)
         else:
-            print(f"[DateApplication get_current_date_audio_paths] Erro: Arquivo de semana não encontrado em {path_week}")
+            print(f"[DateApplication get_current_date_audio_paths] Error: Week file not found at {path_week}")
 
         day = now.strftime("%d")
         month = now.strftime("%m")
@@ -40,13 +40,13 @@ class DateApplication:
         path_date = os.path.join(self.base_dir, self.language, "date", filename_date)
 
         if os.path.exists(path_date):
-            print(f"[DateApplication get_current_date_audio_paths] Áudio do dia encontrado: {path_date}")
+            print(f"[DateApplication get_current_date_audio_paths] Date audio found: {path_date}")
             paths_to_play.append(path_date)
         else:
-            print(f"[DateApplication get_current_date_audio_paths] Erro: Arquivo de data não encontrado em {path_date}")
+            print(f"[DateApplication get_current_date_audio_paths] Error: Date file not found at {path_date}")
 
         return paths_to_play
 
     def set_language(self, language):
-        print(f"[DateApplication set_language] Alterando idioma da data para: {language}")
+        print(f"[DateApplication set_language] Changing date language to: {language}")
         self.language = language

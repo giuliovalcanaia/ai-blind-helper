@@ -3,12 +3,12 @@ from config import Config
 
 class OutputAudioManager:
     def __init__(self):
-        print("[OutputAudioManager __init__] Inicializando gerenciador de saída de áudio (Hardware)")
+        print("[OutputAudioManager __init__] Initializing output audio manager (Hardware)")
         self.pya = pyaudio.PyAudio()
         self.output_stream = None
 
     def start_output_stream(self):
-        print("[OutputAudioManager start_output_stream] Abrindo stream de reprodução para alto-falantes")
+        print("[OutputAudioManager start_output_stream] Opening output stream for speakers")
         try:
             self.output_stream = self.pya.open(
                 format=Config.AUDIO_FORMAT,
@@ -16,25 +16,25 @@ class OutputAudioManager:
                 rate=Config.RECEIVE_SAMPLE_RATE,
                 output=True,
             )
-            print(f"[OutputAudioManager start_output_stream] Saída de áudio ativada ({Config.RECEIVE_SAMPLE_RATE} Hz)")
+            print(f"[OutputAudioManager start_output_stream] Audio output enabled ({Config.RECEIVE_SAMPLE_RATE} Hz)")
         except Exception as e:
-            print(f"[OutputAudioManager start_output_stream] Erro ao abrir stream de saída: {e}")
+            print(f"[OutputAudioManager start_output_stream] Error opening output stream: {e}")
 
     def write_chunk(self, data):
         if self.output_stream:
             try:
                 self.output_stream.write(data)
             except Exception as e:
-                print(f"[OutputAudioManager write_chunk] Erro ao escrever no hardware de áudio: {e}")
+                print(f"[OutputAudioManager write_chunk] Error writing to audio hardware: {e}")
 
     def close(self):
-        print("[OutputAudioManager close] Finalizando hardware de saída")
+        print("[OutputAudioManager close] Closing output audio hardware")
         if self.output_stream:
             try:
                 self.output_stream.stop_stream()
                 self.output_stream.close()
-                print("[OutputAudioManager close] Stream de saída fechado")
+                print("[OutputAudioManager close] Output stream closed")
             except Exception as e:
-                print(f"[OutputAudioManager close] Erro ao fechar stream: {e}")
+                print(f"[OutputAudioManager close] Error closing stream: {e}")
         self.pya.terminate()
-        print("[OutputAudioManager close] PyAudio finalizado")
+        print("[OutputAudioManager close] PyAudio terminated")

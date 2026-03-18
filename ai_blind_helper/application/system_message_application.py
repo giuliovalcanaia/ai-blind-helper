@@ -3,12 +3,12 @@ import os
 
 class SystemMessageApplication:
     def __init__(self, language, base_dir="audio"):
-        print(f"[SystemMessageApplication __init__] Inicializando serviço de mensagens do sistema (Idioma: {language})")
+        print(f"[SystemMessageApplication __init__] Initializing system message service (Language: {language})")
         self.language = language
         self.base_dir = base_dir
 
     def get_current_welcome_message_path(self):
-        print("[SystemMessageApplication get_current_welcome_message_path] Determinando saudação baseada no horário atual")
+        print("[SystemMessageApplication get_current_welcome_message_path] Determining greeting based on current time")
         now = datetime.now()
         hour = now.hour
 
@@ -27,14 +27,14 @@ class SystemMessageApplication:
         )
 
         if os.path.exists(full_path):
-            print(f"[SystemMessageApplication get_current_welcome_message_path] Arquivo de saudação encontrado: {full_path}")
+            print(f"[SystemMessageApplication get_current_welcome_message_path] Greeting file found: {full_path}")
             return full_path
         else:
-            print(f"[SystemMessageApplication get_current_welcome_message_path] Erro: Arquivo não encontrado em {full_path}")
+            print(f"[SystemMessageApplication get_current_welcome_message_path] Error: File not found at {full_path}")
             return None
 
     def set_language(self, language):
-        """Permite trocar o idioma dinamicamente"""
+        """Allows changing the language dynamically"""
         self.language = language
 
         
@@ -60,10 +60,10 @@ class SystemMessageApplication:
             path
         )
 
-        # Verifica se o arquivo realmente existe antes de retornar
+        # Check that the file actually exists before returning
         if os.path.exists(full_path):
             print(full_path)
             return full_path
         else:
-            print(f"[SystemMessageApp] Arquivo não encontrado: {full_path}")
+            print(f"[SystemMessageApp] File not found: {full_path}")
             return None

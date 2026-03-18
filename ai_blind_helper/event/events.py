@@ -1,8 +1,3 @@
-
-# =========================
-# MENU EVENTS
-# =========================
-
 MENU_NAVIGATE_FORWARD = "menu_navigate_forward"
 MENU_NAVIGATE_BACK = "menu_navigate_back"
 MENU_CONFIRM = "menu_confirm"
@@ -14,11 +9,6 @@ MENU_SELECT_TRANSCRIBE = "menu_select_transcribe"
 MENU_SELECT_CHANGE_LANGUAGE = "menu_select_change_language"
 MENU_SELECT_EXIT = "menu_select_exit"
 
-
-# =========================
-# SESSION / CONNECTION
-# =========================
-
 SESSION_AUDIO_LIVE_CONNECT_TOGGLE = "session_audio_live_connect_toggle"
 SESSION_VIDEO_LIVE_CONNECT_TOGGLE = "session_video_live_connect_toggle"
 
@@ -27,68 +17,29 @@ SESSION_STOP_AUDIO_STREAM = "session_stop_audio_stream"
 
 SESSION_STOP = "session_stop"
 
-
-# =========================
-# AUDIO CONTROL
-# =========================
-
 AUDIO_REWIND = "audio_rewind"
 AUDIO_FORWARD = "audio_forward"
 AUDIO_PAUSE_TOGGLE = "audio_pause_toggle"
 
-
-# =========================
-# AI / PERCEPTION
-# =========================
-
 DESCRIPTION_REQUEST = "description_request"
 TRANSCRIPTION_REQUEST = "transcription_request"
-
-
-# =========================
-# TIME / DATE
-# =========================
 
 TIME_REQUEST = "time_request"
 DATE_REQUEST = "date_request"
 
-
-# =========================
-# LANGUAGE
-# =========================
-
 LANGUAGE_CYCLE = "language_cycle"
 
-
-# =========================
-# SYSTEM
-# =========================
-
 SYSTEM_QUIT = "system_quit"
-
-
-# =========================
-# INPUT / DEVICE EVENTS
-# =========================
 
 INPUT_AUDIO_PRESS = "input_audio_press"
 INPUT_AUDIO_RELEASE = "input_audio_release"
 INPUT_AUDIO_LOCK = "input_audio_lock"
 INPUT_AUDIO_UNLOCK = "input_audio_unlock"
 
-
-# =========================
-# SFX / FEEDBACK
-# =========================
-
 SFX_HOLD_BUTTON_PRESS = "sfx_hold_button_press"
 SFX_AUDIO_BUTTON_PRESS = "sfx_audio_button_press"
 SFX_AUDIO_BUTTON_RELEASE = "sfx_audio_button_release"
 
-
-# =========================
-# KEYBOARD 
-# =========================
 KB_START = "kb_start"
 KB_STOP = "kb_stop"
 KB_REGISTER = "kb_register"

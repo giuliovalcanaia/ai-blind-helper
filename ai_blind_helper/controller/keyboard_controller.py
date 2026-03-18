@@ -2,7 +2,7 @@ from event import (EventBus, KB_START, KB_STOP, KB_REGISTER)
 
 class KeyboardController:
     def __init__(self, keyboard_application, event_bus: EventBus):
-        print(f"[KeyboardController __init__] Inicializando controlador com keyboard_application: {keyboard_application}")
+        print(f"[KeyboardController __init__] Initializing controller with keyboard_application: {keyboard_application}")
         self.keyboard_application = keyboard_application
         
         event_bus.subscribe(
@@ -16,16 +16,16 @@ class KeyboardController:
         )
         
     def start(self):
-        print("[KeyboardController start] Iniciando o serviço de monitoramento do teclado")
+        print("[KeyboardController start] Starting keyboard monitoring service")
         self.keyboard_application.start()
-        print("[KeyboardController start] Serviço de teclado iniciado com sucesso")
+        print("[KeyboardController start] Keyboard service started successfully")
         
     def stop(self):
-        print("[KeyboardController stop] Solicitando parada do serviço de teclado")
+        print("[KeyboardController stop] Requesting keyboard service stop")
         self.keyboard_application.stop()
-        print("[KeyboardController stop] Serviço de teclado interrompido")
+        print("[KeyboardController stop] Keyboard service stopped")
 
     def register_key(self, key_code, callback):
-        print(f"[KeyboardController register_key] Registrando callback para a tecla: {key_code}")
+        print(f"[KeyboardController register_key] Registering callback for key: {key_code}")
         self.keyboard_application.register_key(key_code, callback)
-        print(f"[KeyboardController register_key] Tecla {key_code} registrada com sucesso")
+        print(f"[KeyboardController register_key] Key {key_code} registered successfully")

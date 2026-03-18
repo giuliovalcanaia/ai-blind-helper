@@ -27,10 +27,7 @@ class KeyboardInterface:
         
         self.is_blocked = False
         
-        # Dicionário literal para rastrear os timers: { código_da_tecla: objeto_timer }
         self._hold_timers = {}
-        
-        # Flags para controle do menu em cada aplicação
         self.live_connected = False
         
     def run(self):
@@ -97,9 +94,6 @@ class KeyboardInterface:
         self.keyboard_controller.register_key(KEY_TIME_REQUEST, self.on_time_request)
         self.keyboard_controller.register_key(KEY_AUDIO_REQUEST, self.on_audio_request)
 
-        # self.keyboard_controller.register_key(KEY_REWIND, self.handle_rewind)
-        # self.keyboard_controller.register_key(KEY_PAUSE_TOGGLE, self.handle_pause_toggle)
-        # self.keyboard_controller.register_key(KEY_FORWARD, self.handle_forward)
 
     def _get_current_menu_item(self):
         key_char = self.menu_order[self.menu_index]
@@ -184,7 +178,7 @@ class KeyboardInterface:
             self._start_hold_timer(key_code, Config.LOCK_THRESHOLD_MS_AUDIO)
             if not self.audio_pressed:
                 print(
-                    "[KeyboardInterface on_key_a] Iniciando envio de áudio (Hold/Lock)")
+                    "[KeyboardInterface on_key_a] Starting audio send (Hold/Lock)")
                 self.event_bus.emit(SFX_AUDIO_BUTTON_PRESS)
                 self.audio_pressed = True
                 self.audio_is_locked = False
@@ -192,82 +186,72 @@ class KeyboardInterface:
         elif event_type == 'RELEASE':
             self._cancel_hold_timer(key_code)
             if (self.audio_is_locked):
-                print("[KeyboardInterface on_key_a] Destravando áudio fixo")
+                print("[KeyboardInterface on_key_a] Unlocking fixed audio")
                 self.event_bus.emit(SESSION_STOP_AUDIO_STREAM)
                 self.event_bus.emit(SFX_AUDIO_BUTTON_RELEASE)
                 self.audio_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
                 print(
-                    "[KeyboardInterface on_key_a] Curto toque detectado: Travando áudio (Lock)")
+                    "[KeyboardInterface on_key_a] Short press detected: Locking audio (Lock)")
                 self.audio_is_locked = True
             else:
                 print(
-                    "[KeyboardInterface on_key_a] Soltura de tecla detectada: Finalizando Hold de áudio")
+                    "[KeyboardInterface on_key_a] Key release detected: Ending audio hold")
                 self.event_bus.emit(SESSION_STOP_AUDIO_STREAM)
                 self.event_bus.emit(SFX_AUDIO_BUTTON_RELEASE)
                 self.audio_pressed = False
 
     def handle_describe_surroundings(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface handle_describe_surroundings] Solicitando descrição de ambiente")
+            print("[KeyboardInterface handle_describe_surroundings] Requesting environment description")
             self.event_bus.emit(DESCRIPTION_REQUEST)
 
     def handle_transcript_text(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface handle_transcript_text] Solicitando transcrição de texto")
+            print("[KeyboardInterface handle_transcript_text] Requesting text transcription")
             self.event_bus.emit(TRANSCRIPTION_REQUEST)
 
     def handle_rewind(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface handle_rewind] Comando rewind disparado")
+            print("[KeyboardInterface handle_rewind] Rewind command triggered")
             self.event_bus.emit(AUDIO_REWIND)
 
     def handle_pause_toggle(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface handle_pause_toggle] Comando pause toggle disparado")
+            print("[KeyboardInterface handle_pause_toggle] Pause toggle command triggered")
             self.event_bus.emit(AUDIO_PAUSE_TOGGLE)
 
     def handle_forward(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface handle_forward] Comando forward disparado")
+            print("[KeyboardInterface handle_forward] Forward command triggered")
             self.event_bus.emit(AUDIO_FORWARD)
 
     def handle_change_language(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface handle_change_language] Solicitando rotação de idioma")
+            print("[KeyboardInterface handle_change_language] Requesting language rotation")
             self.event_bus.emit(LANGUAGE_CYCLE)
             self.language_controller.handle_cycle_language()
 
     def handle_quit(self):
-        print("[KeyboardInterface handle_quit] Iniciando encerramento do sistema")
+        print("[KeyboardInterface handle_quit] Initiating system shutdown")
         self.loop_controller.stop_running()
         self.event_bus.emit(SESSION_STOP)
         
-        
-        
-        
-    # Lógica dos botões de hold
-        
+
+
     def _trigger_hold_sound(self):
-        """Função que será chamada quando o tempo de hold expirar."""
-        print("[KeyboardInterface] Tempo de HOLD atingido! Disparando som.")
+        """Function called when the hold timer expires."""
+        print("[KeyboardInterface] HOLD time reached! Playing sound.")
         self.event_bus.emit(SFX_HOLD_BUTTON_PRESS)
 
     def _start_hold_timer(self, key_code, threshold_ms):
-        # 1. Se já existir um timer para essa tecla, cancela (segurança)
         self._cancel_hold_timer(key_code)
-        
-        # 2. Cria um novo timer
-        # threading.Timer recebe (tempo_em_segundos, função_para_rodar)
         timer = threading.Timer(threshold_ms / 1000.0, self._trigger_hold_sound)
-        
-        # 3. Guarda e inicia
         self._hold_timers[key_code] = timer
         timer.start()
 
     def _cancel_hold_timer(self, key_code):
-        # Busca o timer no dicionário e o remove ao mesmo tempo
         timer = self._hold_timers.pop(key_code, None)
         if timer:
             timer.cancel()
-            print(f"[KeyboardInterface] Timer da tecla {key_code} cancelado.")
+            print(f"[KeyboardInterface] Timer for key {key_code} cancelled.")

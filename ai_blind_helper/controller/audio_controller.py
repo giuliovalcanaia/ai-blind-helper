@@ -35,7 +35,7 @@ class AudioController:
             print("[AudioController handle_audio_rewind] Rewind of 5 seconds completed")
 
     def handle_audio_forward(self):
-        print("[AudioController handle_audio_forward] Solicitando avanço de 5 segundos")
+        print("[AudioController handle_audio_forward] Requesting 5 second forward")
         if hasattr(self.audio_app, 'forward'):
             self.audio_app.forward(seconds=5)
-            print("[AudioController handle_audio_forward] Avanço de 5 segundos concluído")
+            print("[AudioController handle_audio_forward] 5 second forward completed")

@@ -3,7 +3,6 @@ from google.genai import types
 import wave
 from config import Config
 
-# Set up the wave file to save the output:
 def wave_file(filename, pcm, channels=1, rate=24000, sample_width=2):
    with wave.open(filename, "wb") as wf:
       wf.setnchannels(channels)
@@ -14,8 +13,7 @@ def wave_file(filename, pcm, channels=1, rate=24000, sample_width=2):
 client = genai.Client(api_key=Config.API_KEY)
 
 response = client.models.generate_content(
-   model=Config.TTS_MODEL,
-   contents="Say cheerfully: Idioma alterado para portugues",
+   model=Config.TTS_MODEL,   contents="Say cheerfully: Language changed to Portuguese",
    config=Config.TTS_CONFIG
 )
 

@@ -8,13 +8,13 @@ from event import (EventBus, SESSION_AUDIO_LIVE_CONNECT_TOGGLE, SESSION_STOP_AUD
 class SessionController:
     
     def __init__(self, gemini_client, video_app, audio_app, session_task, out_queue, audio_in_queue, start_audio_event, start_video_event, state_provider, sfx_controller, event_bus: EventBus):
-        print(f"[SessionController __init__] Inicializando controlador de sessão")
+        print(f"[SessionController __init__] Initializing session controller")
         self.session_task = session_task
         self.out_queue = out_queue
         self.audio_in_queue = audio_in_queue
         self.gemini_client = gemini_client
         self.video_app = video_app
-        self.audio_app = audio_app # Agora usamos métodos deste app
+        self.audio_app = audio_app # Now we use methods from this app
         self.start_audio_event = start_audio_event
         self.start_video_event = start_video_event
         self.state_provider = state_provider
@@ -64,14 +64,14 @@ class SessionController:
         await self._start_video_connection_manager()
     
     async def _audio_capture_wrapper(self):
-        print(f"[SessionController] Wrapper de áudio iniciado")
+        print(f"[SessionController] Audio wrapper started")
         await self.audio_app.task_capture_audio(self.out_queue, self.start_audio_event)
         
     async def _start_audio_connection_manager(self):
         self.session_task = asyncio.create_task(self._run_audio_session_lifecycle())
 
     async def _run_audio_session_lifecycle(self):
-        print("[SessionController] Iniciando ciclo de vida de Áudio")
+        print("[SessionController] Starting audio lifecycle")
         try:
             self._fire_and_forget_sfx(self.sfx_controller.initiating_gemini_audio_sfx())
             
@@ -83,12 +83,12 @@ class SessionController:
                 tg.create_task(self._audio_capture_wrapper())
 
         except asyncio.CancelledError:
-            print("[SessionController] Sessão de áudio cancelada")
+            print("[SessionController] Audio session cancelled")
         except Exception as e:
-            print(f"[SessionController] Erro na sessão: {e}")
+            print(f"[SessionController] Error in session: {e}")
         finally:
-            # LIMPEZA CRÍTICA PARA TEMPO REAL
-            print("[SessionController] Finalizando sessão e limpando áudios pendentes...")
+            # CRITICAL REAL-TIME CLEANUP
+            print("[SessionController] Finalizing session and clearing pending audio...")
             
             # 1. Cala a boca da IA imediatamente (Drain)
             if hasattr(self.audio_app, 'drain_audio_queue'):
@@ -101,14 +101,14 @@ class SessionController:
                 except: pass
                 
     async def _video_capture_wrapper(self):
-        print("[SessionController] Wrapper de vídeo iniciado")
+        print("[SessionController] Video wrapper started")
         await self.video_app.task_capture_video(self.out_queue, self.start_video_event)
         
     async def _start_video_connection_manager(self):
         self.session_task = asyncio.create_task(self._run_video_session_lifecycle())
 
     async def _run_video_session_lifecycle(self):
-        print("[SessionController] Iniciando ciclo de vida de Vídeo")
+        print("[SessionController] Starting video lifecycle")
         try:
             self._fire_and_forget_sfx(self.sfx_controller.initiating_gemini_audio_sfx())
             
@@ -122,12 +122,12 @@ class SessionController:
 
                 self.start_sending_video()
         except asyncio.CancelledError:
-            print("[SessionController] Sessão de vídeo cancelada")
+            print("[SessionController] Video session cancelled")
         except Exception as e:
-            print(f"[SessionController] Erro na sessão: {e}")
+            print(f"[SessionController] Error in session: {e}")
         finally:
-            # LIMPEZA CRÍTICA
-            print("[SessionController] Finalizando sessão de vídeo...")
+            # CRITICAL CLEANUP
+            print("[SessionController] Finalizing video session...")
             
             # 1. Drain Audio
             if hasattr(self.audio_app, 'drain_audio_queue'):
@@ -151,14 +151,14 @@ class SessionController:
         return self.gemini_client.is_connected()
     
     def stop_session(self):
-        print("[SessionController stop_session] Solicitando parada imediata")
+        print("[SessionController stop_session] Requesting immediate stop")
         if self.loop is None: return
 
         # Para captura de input imediatamente
         self.loop.call_soon_threadsafe(self.start_audio_event.clear)
         self.loop.call_soon_threadsafe(self.start_video_event.clear)
 
-        # INTERRUPÇÃO (BARGE-IN): Limpa o áudio que a IA enviou mas ainda não tocou
+        # INTERRUPTION (BARGE-IN): Clears any audio the AI sent but hasn't played yet
         if hasattr(self.audio_app, 'drain_audio_queue'):
              self.loop.call_soon_threadsafe(
                  self.audio_app.drain_audio_queue, self.audio_in_queue
@@ -176,11 +176,11 @@ class SessionController:
             except asyncio.CancelledError:
                 pass
             except Exception as e:
-                print(f"[SessionController] Erro ao cancelar: {e}")
+                print(f"[SessionController] Error cancelling: {e}")
             finally:
                 self.session_task = None
         
-        # Redundância: Garante fila limpa ao final
+        # Redundancy: Ensure queue is empty at the end
         if hasattr(self.audio_app, 'drain_audio_queue'):
              self.audio_app.drain_audio_queue(self.audio_in_queue)
         

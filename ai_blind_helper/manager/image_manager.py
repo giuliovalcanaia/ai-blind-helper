@@ -8,7 +8,7 @@ from typing import Optional, Dict
 
 
 class IVideoSource(ABC):
-    """Interface abstrata para fontes de vídeo."""
+    """Abstract interface for video sources."""
     @abstractmethod
     def get_frame(self) -> Optional[Dict[str, str]]:
         pass
@@ -25,15 +25,15 @@ class CameraSource(IVideoSource):
 
     def open(self):
         if self.cap is None or not self.cap.isOpened():
-            print("[CameraSource open] Inicializando cv2.VideoCapture(0)...")
+            print("[CameraSource open] Initializing cv2.VideoCapture(0)...")
             self.cap = cv2.VideoCapture(self.camera_index)
         else:
-            print("[CameraSource open] Câmera já estava aberta.")
+            print("[CameraSource open] Camera was already open.")
 
     def get_frame(self) -> Optional[Dict[str, str]]:
 
         if self.cap is None or not self.cap.isOpened():
-            print("[CameraSource get_frame] Câmera fechada detectada. Tentando abrir...")
+            print("[CameraSource get_frame] Closed camera detected. Trying to open...")
             self.open()
             
              
@@ -44,16 +44,11 @@ class CameraSource(IVideoSource):
         if not ret:
             return None
 
-        # Reduzir resolução (640px é suficiente para a IA entender o contexto)
-        # O thumbnail anterior de 1024 era muito pesado
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = PIL.Image.fromarray(frame_rgb)
-        # img.thumbnail([640, 640])  É USADO PARA DEIFINIR O TAMANHO DA CAPTURA, DO FRAME
 
         image_io = io.BytesIO()
         
-        # OTIMIZAÇÃO CRÍTICA: quality=50 (padrão é 75-95)
-        # optimize=True remove metadados inúteis
         img.save(image_io, format="jpeg", quality=50, optimize=True)
         image_io.seek(0)
 

@@ -12,6 +12,7 @@ class EventBus:
             return self.state_provider.loop
 
     def subscribe(self, event_name, handler):
+        print(f"[EventBus subscribe] Subscribing handler {handler} to event '{event_name}'")
         self.listeners[event_name].append(handler)
 
     def emit(self, event_name):
@@ -22,10 +23,11 @@ class EventBus:
         for handler in self.listeners[event_name]:
             if inspect.iscoroutinefunction(handler):
                 if self.loop and self.loop.is_running():
+                    print(f"[EventBus emit] Emitting async event '{event_name}' to handler {handler} using loop {self.loop}")
                     asyncio.run_coroutine_threadsafe(handler(), self.loop)
                 else:
-                    print(f"Erro: Tentativa de rodar handler async {handler} sem loop ativo.")
+                    print(f"[EventBus emit] Error: Event loop not available for async handler {handler} of event '{event_name}'")
             else:
-                # Chamada síncrona normal
+                print(f"[EventBus emit] Emitting event '{event_name}' to handler {handler}")
                 handler()
                 

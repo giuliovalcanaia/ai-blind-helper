@@ -4,7 +4,7 @@ import time
 
 class VideoRecorderApplication:
     def __init__(self, mode: str, camera_source, screen_source):
-        print(f"[VideoRecorderApplication __init__] Inicializando aplicação de vídeo no modo: {mode}")
+        print(f"[VideoRecorderApplication __init__] Initializing video application in mode: {mode}")
         self.video_source: Optional[any] = None
         
         if mode == "camera":
@@ -12,17 +12,17 @@ class VideoRecorderApplication:
         elif mode == "screen":
             self.video_source = screen_source
         else:
-            print(f"[VideoRecorderApplication __init__] Erro: Modo desconhecido '{mode}'")
+            print(f"[VideoRecorderApplication __init__] Error: Unknown mode '{mode}'")
 
     async def task_capture_video(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
-        print("[VideoRecorderApplication task_capture_video] Iniciando tarefa de captura contínua")
+        print("[VideoRecorderApplication task_capture_video] Starting continuous capture task")
         
         if not self.video_source:
-            print("[VideoRecorderApplication task_capture_video] Erro crítico: Fonte de vídeo não detectada")
+            print("[VideoRecorderApplication task_capture_video] Critical error: Video source not detected")
             return
 
         if hasattr(self.video_source, 'open'):
-            print("[VideoRecorderApplication task_capture_video] Solicitando abertura do hardware de vídeo...")
+            print("[VideoRecorderApplication task_capture_video] Requesting video hardware open...")
             await asyncio.to_thread(self.video_source.open)
         
         
@@ -32,16 +32,16 @@ class VideoRecorderApplication:
         try:
             while True:
                 if not control_event.is_set():
-                    print("[VideoRecorderApplication task_capture_video] Captura em espera (control_event bloqueado)")
+                    print("[VideoRecorderApplication task_capture_video] Capture on hold (control_event locked)")
                     await control_event.wait()
-                    print("[VideoRecorderApplication task_capture_video] Retomando captura de vídeo")
+                    print("[VideoRecorderApplication task_capture_video] Resuming video capture")
 
                 start_time = time.time()
 
                 frame_data = await asyncio.to_thread(self.video_source.get_frame)
 
                 if frame_data is None:
-                    print("[VideoRecorderApplication task_capture_video] Aviso: Frame vazio recebido (verificar conexão)")
+                    print("[VideoRecorderApplication task_capture_video] Warning: Empty frame received (check connection)")
                     break
 
                 while not out_queue.empty():
@@ -58,27 +58,27 @@ class VideoRecorderApplication:
                 await asyncio.sleep(sleep_time)
 
         except asyncio.CancelledError:
-            print("[VideoRecorderApplication task_capture_video] Tarefa de vídeo cancelada pelo sistema")
+            print("[VideoRecorderApplication task_capture_video] Video task cancelled by system")
         except Exception as e:
-            print(f"[VideoRecorderApplication task_capture_video] Erro imprevisto: {e}")
+            print(f"[VideoRecorderApplication task_capture_video] Unexpected error: {e}")
 
     async def get_snapshot(self) -> Optional[dict]:
-        print("[VideoRecorderApplication get_snapshot] Solicitando captura de frame único (Snapshot)")
+        print("[VideoRecorderApplication get_snapshot] Requesting single frame capture (Snapshot)")
         if not self.video_source:
-            print("[VideoRecorderApplication get_snapshot] Erro: Nenhuma fonte de vídeo configurada para snapshot")
+            print("[VideoRecorderApplication get_snapshot] Error: No video source configured for snapshot")
             return None
 
         try:
             frame = await asyncio.to_thread(self.video_source.get_frame)
             if frame:
-                print("[VideoRecorderApplication get_snapshot] Snapshot capturado com sucesso")
+                print("[VideoRecorderApplication get_snapshot] Snapshot captured successfully")
             return frame
         except Exception as e:
-            print(f"[VideoRecorderApplication get_snapshot] Falha ao capturar snapshot: {e}")
+            print(f"[VideoRecorderApplication get_snapshot] Failed to capture snapshot: {e}")
             return None
 
     def release(self):
-        print("[VideoRecorderApplication release] Liberando recursos de hardware de vídeo")
+        print("[VideoRecorderApplication release] Releasing video hardware resources")
         if self.video_source:
             self.video_source.release()
             print("[VideoRecorderApplication release] Hardware liberado com sucesso")
