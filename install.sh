@@ -23,8 +23,8 @@ setup_system() {
         $SUDO apt update
         $SUDO apt upgrade -y
         
-        echo "⚙️ Instalando dependências base (Git, Kitty, Python)..."
-        $SUDO apt install -y git kitty python3 python3-venv python3-pip
+        echo "⚙️ Instalando dependências base (Git, Kitty, Python, PortAudio, Xvfb)..."
+        $SUDO apt install -y git kitty python3 python3-venv python3-pip portaudio19-dev xvfb
         
         # --- Seção Específica para Raspberry Pi ---
         # CORREÇÃO 3: Trocado [[ ]] por [ ] para maior compatibilidade
@@ -56,20 +56,20 @@ setup_system() {
     elif command -v pacman > /dev/null 2>&1; then
         echo "📦 Sistema baseado em Arch Linux detectado."
         $SUDO pacman -Syu --noconfirm
-        echo "⚙️ Instalando dependências base (Git, Kitty, Python)..."
-        $SUDO pacman -S --noconfirm git kitty python python-pip
+        echo "⚙️ Instalando dependências base (Git, Kitty, Python, PortAudio, Xvfb)..."
+        $SUDO pacman -S --noconfirm git kitty python python-pip portaudio xorg-server-xvfb
         
     elif command -v dnf > /dev/null 2>&1; then
         echo "📦 Sistema baseado em Fedora/RHEL detectado."
         $SUDO dnf upgrade -y
-        echo "⚙️ Instalando dependências base (Git, Kitty, Python)..."
-        $SUDO dnf install -y git kitty python3 python3-pip
+        echo "⚙️ Instalando dependências base (Git, Kitty, Python, PortAudio, Xvfb)..."
+        $SUDO dnf install -y git kitty python3 python3-pip portaudio-devel xorg-x11-server-Xvfb
         
     elif command -v zypper > /dev/null 2>&1; then
         echo "📦 Sistema baseado em openSUSE detectado."
         $SUDO zypper update -y
-        echo "⚙️ Instalando dependências base (Git, Kitty, Python)..."
-        $SUDO zypper install -y git kitty python3 python3-pip
+        echo "⚙️ Instalando dependências base (Git, Kitty, Python, PortAudio, Xvfb)..."
+        $SUDO zypper install -y git kitty python3 python3-pip portaudio-devel xorg-x11-server-extra
         
     else
         echo "⚠️ Gerenciador de pacotes não reconhecido."
