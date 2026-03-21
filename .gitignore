@@ -1,4 +1,6 @@
 __pycache__
 gravacoes_debug
 capturas
+logs
+.env
 ai_blind_helper/logs/

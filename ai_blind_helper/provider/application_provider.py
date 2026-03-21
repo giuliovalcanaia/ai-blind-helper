@@ -17,3 +17,4 @@ class ApplicationProvider:
         self.volume = VolumeControlApplication()
         self.menu = MenuApplication()
         self.sfx = AudioSFXApplication()
+        self.tts = TextToSpeechApplication(state_provider.audio_in_queue)

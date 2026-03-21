@@ -5,13 +5,13 @@ from config import Config
 class TextClientApplication:
     
     def generate_text_by_imagem_text(self, prompt: str, image_part_data: dict):
-        print("[TextClientApplication generate_text_by_imagem_text] Inicializando cliente para geração de texto multimodal")
+        print("[TextClientApplication generate_text_by_imagem_text] Initializing client for multimodal text generation")
         
         client = genai.Client(
             api_key = Config.API_KEY,
             http_options={'api_version': Config.API_VERSION_TEXT_API_GEMINI_3})
 
-        print(f"[TextClientApplication generate_text_by_imagem_text] Enviando prompt e imagem para o modelo: {Config.MODEL_TEXT_GENERATOR}")
+        print(f"[TextClientApplication generate_text_by_imagem_text] Sending prompt and image to model: {Config.MODEL_TEXT_GENERATOR}")
         
         try:
             response = client.models.generate_content(
@@ -28,9 +28,9 @@ class TextClientApplication:
                 ]
             )
             
-            print("[TextClientApplication generate_text_by_imagem_text] Resposta recebida com sucesso da API de Texto")
+            print("[TextClientApplication generate_text_by_imagem_text] Successfully received response from Text API")
             return response.text
 
         except Exception as e:
-            print(f"[TextClientApplication generate_text_by_imagem_text] Erro ao gerar conteúdo: {e}")
+            print(f"[TextClientApplication generate_text_by_imagem_text] Error generating content: {e}")
             raise e

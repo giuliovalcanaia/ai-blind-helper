@@ -6,37 +6,37 @@ from provider import *
 
 class TerminalLogger:
     """
-    Captura todos os prints e erros do terminal e salva em arquivo,
-    além de mostrar na tela.
+    Captures all terminal prints and errors and saves them to a file,
+    while also showing them on screen.
     """
     def __init__(self, log_folder="logs"):
-        # Cria a pasta de logs se não existir
+        # Create the log folder if it doesn't exist
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
 
-        # Cria nome do arquivo: logs/log_2025-12-19_10-30-00.txt
+        # Create filename: logs/log_2025-12-19_10-30-00.txt
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         self.filename = os.path.join(log_folder, f"log_{timestamp}.txt")
         
-        # Abre o arquivo em modo append e guarda referência
+        # Open the file in append mode and keep a reference
         self.log_file = open(self.filename, "a", encoding="utf-8")
-        self.terminal = sys.stdout # Guarda o terminal original
+        self.terminal = sys.stdout # Keep the original terminal
         
     def write(self, message):
-        # Escreve na tela (terminal original)
+        # Write to the screen (original terminal)
         self.terminal.write(message)
-        # Escreve no arquivo
+        # Write to the file
         self.log_file.write(message)
-        # Força salvar no disco imediatamente (útil se o programa travar)
+        # Force flush to disk immediately (useful if the program crashes)
         self.log_file.flush() 
 
     def flush(self):
-        # Necessário para compatibilidade com o sistema
+        # Required for compatibility with the system
         self.terminal.flush()
         self.log_file.flush()
 
     def start(self):
         """Redireciona stdout e stderr para esta classe"""
         sys.stdout = self
-        sys.stderr = self # Captura também erros (exceptions/tracebacks)
-        print(f"--- [Logger] Gravando sessão em: {self.filename} ---")
+        sys.stderr = self # Also capture errors (exceptions/tracebacks)
+        print(f"--- [Logger] Logging session at: {self.filename} ---")

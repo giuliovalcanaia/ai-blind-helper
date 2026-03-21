@@ -1,26 +1,17 @@
-import evdev
 from config import Config
 import threading
+from event import *
+from keymap import *
 
 
 class KeyboardInterface:
 
-    KEY_MENU_BACK = evdev.ecodes.KEY_LEFT
-    KEY_MENU_FORWARD = evdev.ecodes.KEY_RIGHT
-    KEY_MENU_CONFIRM = evdev.ecodes.KEY_ENTER
-
-    def __init__(self, loop_controller, keyboard_controller, session_controller, language_controller, time_controller, transcription_controller, description_controller, audio_controller, menu_controller, sfx_controller):
-        print("[KeyboardInterface __init__] Inicializando interface de teclado e mapeando dependências")
-        self.keyboard_controller = keyboard_controller
-        self.language_controller = language_controller
-        self.session_controller = session_controller
+    def __init__(self, event_bus: EventBus, loop_controller, keyboard_controller):
+        print("[KeyboardInterface __init__] Initializing keyboard interface and mapping dependencies")
         self.loop_controller = loop_controller
-        self.time_controller = time_controller
-        self.transcription_controller = transcription_controller
-        self.description_controller = description_controller
-        self.audio_controller = audio_controller
-        self.menu_controller = menu_controller
-        self.sfx_controller = sfx_controller
+        self.keyboard_controller = keyboard_controller
+        
+        self.event_bus = event_bus
 
         self.menu_index = 0
         self.menu_active = True
@@ -34,268 +25,233 @@ class KeyboardInterface:
 
         self._setup_bindings()
         
-        self.blocked = False
+        self.is_blocked = False
         
-        # Dicionário literal para rastrear os timers: { código_da_tecla: objeto_timer }
         self._hold_timers = {}
-        
-        # Flags para controle do menu em cada aplicação
         self.live_connected = False
         
     def run(self):
-        print("[KeyboardInterface run] Repassando execução para o LoopController")
+        print("[KeyboardInterface run] Running loop_controller")
         self.loop_controller.run()
 
     def _setup_menu_structure(self):
-        print(
-            "[KeyboardInterface _setup_menu_structure] Configurando estrutura do menu rolável")
+        print("[KeyboardInterface _setup_menu_structure] Setting up scrollable menu structure")
         self.menu_actions = {
             'w': {
-                'description': "Conectar / Desconectar Gemini Audio",
+                'description': "Connect / Disconnect Gemini Audio",
                 'callback': self.audio_live_connect,
-                'on_select': lambda: self.menu_controller.play_menu_websocket_audio(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_AUDIO_LIVE),
                 'block': True
             },
             'v': {
-                'description': "Conectar / Desconectar Gemini Video",
+                'description': "Connect / Disconnect Gemini Video",
                 'callback': self.video_live_connect,
-                'on_select': lambda: self.menu_controller.play_menu_websocket_video(),
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_VIDEO_LIVE),
                 'block': True
             },
             'd': {
-                'description': "Descrever Ambiente",
-                'callback': self.on_key_d,
-                'on_select': lambda: self.menu_controller.play_menu_describe(),
+                'description': "Describe Surroundings",
+                'callback': self.handle_describe_surroundings,
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_DESCRIBE),
                 'block': True
             },
             'r': {
-                'description': "Ler / Transcrever",
-                'callback': self.on_key_r,
-                'on_select': lambda: self.menu_controller.play_menu_transcribe(),
+                'description': "Transcribe Text",
+                'callback': self.handle_transcript_text,
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_TRANSCRIBE),
                 'block': True
             },
             'q': {
-                'description': "Sair do Sistema",
-                'callback': self.on_key_q,
-                'on_select': lambda: self.menu_controller.play_menu_exit(),
+                'description': "Log out",
+                'callback': self.handle_quit_request,
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_EXIT),
                 'block': False
             },
             'p': {
-                'description': "Mudar idioma",
-                'callback': self.change_language,
-                'on_select': lambda: self.menu_controller.play_menu_change_language(),
+                'description': "Change Language",
+                'callback': self.handle_change_language,
+                'on_select': lambda: self.event_bus.emit(MENU_SELECT_CHANGE_LANGUAGE),
                 'block': False
             }
         }
-        self.menu_order = ['w', 'v', 'p']
+        self.menu_order = ['w', 'v', 'd', 'r', 'p']
 
     def start(self):
-        print("[KeyboardInterface start] Iniciando KeyboardController")
-        self.keyboard_controller.start()
+        print("[KeyboardInterface start] Starting KeyboardController")
+        self.event_bus.emit(KB_START)
 
     def stop(self):
-        print("[KeyboardInterface stop] Parando KeyboardController")
-        self.keyboard_controller.stop()
+        print("[KeyboardInterface stop] Stoping KeyboardController")
+        self.event_bus.emit(KB_STOP)
 
     def _setup_bindings(self):
-        print(
-            "[KeyboardInterface _setup_bindings] Registrando atalhos de teclado físicos")
-        self.keyboard_controller.register_key(
-            self.KEY_MENU_BACK, self.on_menu_back)
-        self.keyboard_controller.register_key(
-            self.KEY_MENU_FORWARD, self.on_menu_forward)
-        self.keyboard_controller.register_key(
-            self.KEY_MENU_CONFIRM, self.on_menu_confirm)
+        print("[KeyboardInterface _setup_bindings] Binding key bindings")
+        self.keyboard_controller.register_key(self.KEY_MENU_BACK, self.on_menu_back)
+        self.keyboard_controller.register_key(self.KEY_MENU_FORWARD, self.on_menu_forward)
+        self.keyboard_controller.register_key(self.KEY_MENU_CONFIRM, self.on_menu_confirm)
 
-        self.keyboard_controller.register_key(
-            evdev.ecodes.KEY_Q, self.on_key_q)
-        self.keyboard_controller.register_key(
-            evdev.ecodes.KEY_T, self.on_key_t)
-        self.keyboard_controller.register_key(
-            evdev.ecodes.KEY_A, self.on_key_a)
+        self.keyboard_controller.register_key(KEY_QUIT, self.handle_quit_request)
+        self.keyboard_controller.register_key(KEY_TIME_REQUEST, self.on_time_request)
+        self.keyboard_controller.register_key(KEY_AUDIO_REQUEST, self.on_audio_request)
 
-        # self.keyboard_controller.register_key(evdev.ecodes.KEY_J, self.on_key_j)
-        # self.keyboard_controller.register_key(evdev.ecodes.KEY_K, self.on_key_k)
-        # self.keyboard_controller.register_key(evdev.ecodes.KEY_L, self.on_key_l)
 
     def _get_current_menu_item(self):
         key_char = self.menu_order[self.menu_index]
         return self.menu_actions[key_char]
 
-    def _announce_current_selection(self):
-        """
-        Feedback visual/auditivo ao navegar.
-        Puxa o runnable de audio do dicionário e executa.
-        """
-        # 1. Pega o item atual baseando-se no index
+    def _display_current_selected(self):
+        
         item = self._get_current_menu_item()
-        # 2. Feedback Visual (Log)
-        msg = f">> [MENU] Selecionado: {item['description']} (Tecla virtual: {
-            self.menu_order[self.menu_index].upper()})"
-        print(msg)
-        # 3. Feedback Auditivo (Executa o runnable configurado)
+        print(f">> [MENU] Selected: {item['description']} (VirtualKey: {self.menu_order[self.menu_index].upper()})")
         if 'on_select' in item and callable(item['on_select']):
             try:
-                # Aqui ele "puxa o runnable e roda"
                 item['on_select']()
             except Exception as e:
-                print(f"Erro ao executar audio do menu: {e}")
+                print(f"Error playing audio from the menu: {e}")
 
     def on_menu_forward(self, event_type, duration):
-        if not self.blocked:
+        if not self.is_blocked:
             if event_type == 'PRESS':
-                print("[KeyboardInterface on_menu_forward] Navegando para frente no menu")
+                print("[KeyboardInterface on_menu_forward] Navigating forward in the menu")
                 self.menu_index = (self.menu_index + 1) % len(self.menu_order)
-                self._announce_current_selection()
+                self._display_current_selected()
                 
         else:
-            print("[KeyboardInterface on_menu_forward] Menu bloqueado")
+            print("[KeyboardInterface on_menu_forward] Menu blocked")
 
     def on_menu_back(self, event_type, duration):
-        if not self.blocked:
+        if not self.is_blocked:
             if event_type == 'PRESS':
-                print("[KeyboardInterface on_menu_back] Navegando para trás no menu")
+                print("[KeyboardInterface on_menu_back] Navigating rewind in the menu")
                 self.menu_index = (self.menu_index - 1) % len(self.menu_order)
-                self._announce_current_selection()
+                self._display_current_selected()
         else:
-            print("[KeyboardInterface on_menu_forward] Menu bloqueado")
+            print("[KeyboardInterface on_menu_forward] Menu blocked")
 
     def on_menu_confirm(self, event_type, duration):
         if event_type == 'PRESS':
             item = self._get_current_menu_item()
-            # Lógica de bloqueio: verifica se o item selecionado exige bloqueio
             if item.get('block', False):
-                print(f"[KeyboardInterface] Item '{item['description']}' ativou o bloqueio de navegação.")
+                print(f"[KeyboardInterface] Item '{item['description']}' activated navigation lock.")
                 self.is_blocked = True
-            print(f"[KeyboardInterface on_menu_confirm] Confirmando ação: {item['description']}")
+            print(f"[KeyboardInterface on_menu_confirm] Confirming action: {item['description']}")
             item['callback'](event_type='PRESS', duration=0.0)
 
     def audio_live_connect(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface audio_live_connect] Acionando alternância de conexão de áudio")
-            self.session_controller.handle_audio_live_connect()
+            print("[KeyboardInterface audio_live_connect] Toggling audio connection")
+            self.event_bus.emit(SESSION_AUDIO_LIVE_CONNECT_TOGGLE)
             self.live_connected = not self.live_connected
-            self.blocked = not self.blocked
+            self.is_blocked = not self.is_blocked
 
     def video_live_connect(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface video_live_connect] Acionando alternância de conexão de vídeo")
-            self.session_controller.handle_video_live_connect()
+            print("[KeyboardInterface video_live_connect] Toggling video connection")
+            self.event_bus.emit(SESSION_VIDEO_LIVE_CONNECT_TOGGLE)
             self.live_connected = not self.live_connected
-            self.blocked = not self.blocked
+            self.is_blocked = not self.is_blocked
             
 
 
 
-    def on_key_t(self, event_type, duration):
-        key_code = evdev.ecodes.KEY_T
+    def on_time_request(self, event_type, duration):
+        key_code = KEY_TIME_REQUEST
         if event_type == 'PRESS':
             self._start_hold_timer(key_code, Config.LOCK_THRESHOLD_MS_AUDIO)
         if event_type == 'RELEASE':
             self._cancel_hold_timer(key_code)
             if (duration > Config.LOCK_THRESHOLD_MS_DATE):
-                print(f"[KeyboardInterface on_key_t] Long press detectado ({
-                      duration:.2f}ms). Solicitando data")
-                self.time_controller.handle_date_request()
+                print(f"[KeyboardInterface on_key_t] Long press detected ({duration:.2f}ms). Requesting date")
+                self.event_bus.emit(DATE_REQUEST)
             else:
-                print(f"[KeyboardInterface on_key_t] Short press detectado ({
-                      duration:.2f}ms). Solicitando horas")
-                self.time_controller.handle_time_request()
+                print(f"[KeyboardInterface on_key_t] Short press detected ({duration:.2f}ms). Requesting time")
+                self.event_bus.emit(TIME_REQUEST)
 
-    def on_key_q(self, event_type, duration):
+    def handle_quit_request(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface on_key_q] Comando de saída disparado")
+            print("[KeyboardInterface on_key_q] Quit command triggered")
             self.handle_quit()
 
-    def on_key_a(self, event_type, duration):
-        key_code = evdev.ecodes.KEY_1
+    def on_audio_request(self, event_type, duration):
+        key_code = KEY_AUDIO_REQUEST
         if event_type == 'PRESS':
             self._start_hold_timer(key_code, Config.LOCK_THRESHOLD_MS_AUDIO)
             if not self.audio_pressed:
                 print(
-                    "[KeyboardInterface on_key_a] Iniciando envio de áudio (Hold/Lock)")
-                self.sfx_controller.audio_button_press()
+                    "[KeyboardInterface on_key_a] Starting audio send (Hold/Lock)")
+                self.event_bus.emit(SFX_AUDIO_BUTTON_PRESS)
                 self.audio_pressed = True
                 self.audio_is_locked = False
-                self.session_controller.start_sending_audio_only()
+                self.event_bus.emit(SESSION_START_AUDIO_STREAM)
         elif event_type == 'RELEASE':
             self._cancel_hold_timer(key_code)
             if (self.audio_is_locked):
-                print("[KeyboardInterface on_key_a] Destravando áudio fixo")
-                self.session_controller.stop_sending_audio()
-                self.sfx_controller.audio_button_release()
+                print("[KeyboardInterface on_key_a] Unlocking fixed audio")
+                self.event_bus.emit(SESSION_STOP_AUDIO_STREAM)
+                self.event_bus.emit(SFX_AUDIO_BUTTON_RELEASE)
                 self.audio_pressed = False
             elif duration < Config.LOCK_THRESHOLD_MS_AUDIO:
                 print(
-                    "[KeyboardInterface on_key_a] Curto toque detectado: Travando áudio (Lock)")
+                    "[KeyboardInterface on_key_a] Short press detected: Locking audio (Lock)")
                 self.audio_is_locked = True
             else:
                 print(
-                    "[KeyboardInterface on_key_a] Soltura de tecla detectada: Finalizando Hold de áudio")
-                self.session_controller.stop_sending_audio()
-                self.sfx_controller.audio_button_release()
+                    "[KeyboardInterface on_key_a] Key release detected: Ending audio hold")
+                self.event_bus.emit(SESSION_STOP_AUDIO_STREAM)
+                self.event_bus.emit(SFX_AUDIO_BUTTON_RELEASE)
                 self.audio_pressed = False
 
-    def on_key_d(self, event_type, duration):
+    def handle_describe_surroundings(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface on_key_d] Solicitando descrição de ambiente")
-            self.session_controller.handle_description_request()
+            print("[KeyboardInterface handle_describe_surroundings] Requesting environment description")
+            self.event_bus.emit(DESCRIPTION_REQUEST)
 
-    def on_key_r(self, event_type, duration):
+    def handle_transcript_text(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface on_key_r] Solicitando transcrição de texto")
-            self.transcription_controller.handle_transcription_request()
+            print("[KeyboardInterface handle_transcript_text] Requesting text transcription")
+            self.event_bus.emit(TRANSCRIPTION_REQUEST)
 
-    def on_key_j(self, event_type, duration):
+    def handle_rewind(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface on_key_j] Comando rewind disparado")
-            self.audio_controller.handle_audio_rewind()
+            print("[KeyboardInterface handle_rewind] Rewind command triggered")
+            self.event_bus.emit(AUDIO_REWIND)
 
-    def on_key_k(self, event_type, duration):
+    def handle_pause_toggle(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface on_key_k] Comando pause toggle disparado")
-            self.audio_controller.handle_audio_pause_toggle()
+            print("[KeyboardInterface handle_pause_toggle] Pause toggle command triggered")
+            self.event_bus.emit(AUDIO_PAUSE_TOGGLE)
 
-    def on_key_l(self, event_type, duration):
+    def handle_forward(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface on_key_l] Comando forward disparado")
-            self.audio_controller.handle_audio_forward()
+            print("[KeyboardInterface handle_forward] Forward command triggered")
+            self.event_bus.emit(AUDIO_FORWARD)
 
-    def change_language(self, event_type, duration):
+    def handle_change_language(self, event_type, duration):
         if event_type == 'PRESS':
-            print("[KeyboardInterface change_language] Solicitando rotação de idioma")
+            print("[KeyboardInterface handle_change_language] Requesting language rotation")
+            self.event_bus.emit(LANGUAGE_CYCLE)
             self.language_controller.handle_cycle_language()
 
     def handle_quit(self):
-        print("[KeyboardInterface handle_quit] Iniciando encerramento do sistema")
+        print("[KeyboardInterface handle_quit] Initiating system shutdown")
         self.loop_controller.stop_running()
-        self.session_controller.stop_session()
+        self.event_bus.emit(SESSION_STOP)
         
-        
-        
-        
-    # Lógica dos botões de hold
-        
+
+
     def _trigger_hold_sound(self):
-        """Função que será chamada quando o tempo de hold expirar."""
-        print("[KeyboardInterface] Tempo de HOLD atingido! Disparando som.")
-        self.sfx_controller.hold_button_press_sfx() 
+        """Function called when the hold timer expires."""
+        print("[KeyboardInterface] HOLD time reached! Playing sound.")
+        self.event_bus.emit(SFX_HOLD_BUTTON_PRESS)
 
     def _start_hold_timer(self, key_code, threshold_ms):
-        # 1. Se já existir um timer para essa tecla, cancela (segurança)
         self._cancel_hold_timer(key_code)
-        
-        # 2. Cria um novo timer
-        # threading.Timer recebe (tempo_em_segundos, função_para_rodar)
         timer = threading.Timer(threshold_ms / 1000.0, self._trigger_hold_sound)
-        
-        # 3. Guarda e inicia
         self._hold_timers[key_code] = timer
         timer.start()
 
     def _cancel_hold_timer(self, key_code):
-        # Busca o timer no dicionário e o remove ao mesmo tempo
         timer = self._hold_timers.pop(key_code, None)
         if timer:
             timer.cancel()
-            print(f"[KeyboardInterface] Timer da tecla {key_code} cancelado.")
+            print(f"[KeyboardInterface] Timer for key {key_code} cancelled.")

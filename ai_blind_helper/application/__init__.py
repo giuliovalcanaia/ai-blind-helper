@@ -12,3 +12,4 @@ from .system_message_application import SystemMessageApplication
 from .audio_sfx_application import AudioSFXApplication
 from .menu_application import MenuApplication
 from .keyboard_application import KeyboardApplication
+from .text_to_speech_application import TextToSpeechApplication

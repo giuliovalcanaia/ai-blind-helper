@@ -2,11 +2,6 @@ import os
 
 class AudioSFXApplication:
     def __init__(self, language="pt", base_dir="audio"):
-        """
-        Inicializa o serviço de relógio.
-        :param language: 'pt' ou 'en'
-        :param base_dir: Diretório raiz onde os áudios estão (padrão: 'audio')
-        """
         self.language = language
         self.base_dir = base_dir
         
@@ -17,12 +12,11 @@ class AudioSFXApplication:
             path
         )
 
-        # Verifica se o arquivo realmente existe antes de retornar
         if os.path.exists(full_path):
             print(full_path)
             return full_path
         else:
-            print(f"[SystemMessageApp] Arquivo não encontrado: {full_path}")
+            print(f"[SystemMessageApp] File not found: {full_path}")
             return None
         
     def get_audio_button_press(self):
