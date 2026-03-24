@@ -1,7 +1,7 @@
 from config import Config
 import threading
 from event import *
-from keymap import *
+from ai_blind_helper.keyboard.keymap_evdev import *
 
 
 class KeyboardInterface:
