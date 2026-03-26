@@ -1,4 +1,4 @@
-from interface import *
+from keyboard import *
 from event import EventBus
 
 class InterfaceProvider:

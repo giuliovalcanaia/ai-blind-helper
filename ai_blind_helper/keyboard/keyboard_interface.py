@@ -1,7 +1,9 @@
 from config import Config
 import threading
 from event import *
-from keymap import *
+from keymap_gpio import *
+# To change to evdev, just replace the above line with:
+# from keymap.evdev import *
 
 
 class KeyboardInterface:

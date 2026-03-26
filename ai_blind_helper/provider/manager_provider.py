@@ -6,6 +6,8 @@ class ManagerProvider:
         self.camera = CameraSource()
         self.screen = ScreenSource()
         self.audio_input = InputAudioManager()
-        self.keyboard = KeyboardManager(Config.KEYBOARD_PATH)
         self.audio_output = OutputAudioManager()
+        # self.keyboard = KeyboardManager(Config.KEYBOARD_PATH)
+        # To change to evdev, just replace the above line with:
+        self.keyboard = GPIOKeyboardManager()
         
