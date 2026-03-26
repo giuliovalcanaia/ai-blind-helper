@@ -8,4 +8,3 @@ from .description_controller import DescritpionController
 from .transcription_controller import TranscriptionController
 from .audio_menu_controller import AudioMenuController
 from .audio_sfx_controller import AudioSFXController
-from .gpio_keyboard_controller import GPIOKeyboardController
