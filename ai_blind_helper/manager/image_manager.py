@@ -2,7 +2,7 @@ import io
 import base64
 import cv2
 import PIL.Image
-import mss
+# import mss
 from abc import ABC, abstractmethod
 from typing import Optional, Dict
 
@@ -61,25 +61,25 @@ class CameraSource(IVideoSource):
         self.cap.release()
 
 
-class ScreenSource(IVideoSource):
-    def __init__(self, monitor_index=0):
-        self.sct = mss.mss()
-        self.monitor = self.sct.monitors[monitor_index]
+# class ScreenSource(IVideoSource):
+#     def __init__(self, monitor_index=0):
+#         self.sct = mss.mss()
+#         self.monitor = self.sct.monitors[monitor_index]
 
-    def get_frame(self) -> Optional[Dict[str, str]]:
-        sct_img = self.sct.grab(self.monitor)
-        img = PIL.Image.frombytes(
-            "RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+#     def get_frame(self) -> Optional[Dict[str, str]]:
+#         sct_img = self.sct.grab(self.monitor)
+#         img = PIL.Image.frombytes(
+#             "RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
 
-        image_io = io.BytesIO()
-        img.save(image_io, format="jpeg")
-        image_io.seek(0)
+#         image_io = io.BytesIO()
+#         img.save(image_io, format="jpeg")
+#         image_io.seek(0)
 
-        return {
-            "mime_type": "image/jpeg",
-            "data": base64.b64encode(image_io.read()).decode()
-        }
+#         return {
+#             "mime_type": "image/jpeg",
+#             "data": base64.b64encode(image_io.read()).decode()
+#         }
 
-    def release(self):
-        self.sct.close()
-        self.cap = None
+#     def release(self):
+#         self.sct.close()
+#         self.cap = None
