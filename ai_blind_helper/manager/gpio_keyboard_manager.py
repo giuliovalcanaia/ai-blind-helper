@@ -7,6 +7,7 @@ DEFAULT_DEBOUNCE_TIME = 50
 class GPIOKeyboardManager:
 
     def __init__(self, pins: list[int]):
+        print(f"[GPIOKeyboardManager __init__] Managed pins: {self._pins}")
         self._pins = pins
         self._callbacks = {}
         self._active_keys = {}
@@ -29,7 +30,8 @@ class GPIOKeyboardManager:
             GPIO.add_event_detect(
                 pin,
                 GPIO.BOTH,
-                callback=self._on_event
+                callback=self._on_event,
+                bouncetime=DEFAULT_DEBOUNCE_TIME
             )
 
         print(f"[GPIOKeyboardManager start] Listening on pins: {self._pins}")
