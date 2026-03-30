@@ -5,10 +5,9 @@ import RPi.GPIO as GPIO
 DEFAULT_DEBOUNCE_TIME = 50
 
 class GPIOKeyboardManager:
-
     def __init__(self, pins: list[int]):
-        print(f"[GPIOKeyboardManager __init__] Managed pins: {self._pins}")
         self._pins = pins
+        print(f"[GPIOKeyboardManager __init__] Managed pins: {pins}")
         self._callbacks = {}
         self._active_keys = {}
         self._lock = threading.Lock()
@@ -20,19 +19,27 @@ class GPIOKeyboardManager:
         print(f"[GPIOKeyboardManager register_key] Pin {pin} registered.")
 
     def start(self):
-        GPIO.cleanup()
+        try:
+            GPIO.cleanup()
+        except Exception as e:
+            print(f"[GPIOKeyboardManager start] GPIO.cleanup() warning (can be ignored): {e}")
 
         GPIO.setmode(GPIO.BOARD)
 
         for pin in self._pins:
             print(f"[GPIOKeyboardManager start]: Setup for key {pin}")
-            GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(
-                pin,
-                GPIO.BOTH,
-                callback=self._on_event,
-                bouncetime=DEFAULT_DEBOUNCE_TIME
-            )
+            try:
+                GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+                GPIO.add_event_detect(
+                    pin,
+                    GPIO.BOTH,
+                    callback=self._on_event,
+                    bouncetime=DEFAULT_DEBOUNCE_TIME
+                )
+            except Exception as e:
+                print(f"[GPIOKeyboardManager start] Failed to configure pin {pin}: {e}")
+                GPIO.cleanup()
+                raise
 
         print(f"[GPIOKeyboardManager start] Listening on pins: {self._pins}")
 
@@ -53,7 +60,6 @@ class GPIOKeyboardManager:
             if state == GPIO.LOW:
                 self._active_keys[pin] = time.time()
                 callback(event_type="PRESS", duration=0.0)
-
             elif state == GPIO.HIGH:
                 start_time = self._active_keys.pop(pin, None)
                 duration = 0.0
