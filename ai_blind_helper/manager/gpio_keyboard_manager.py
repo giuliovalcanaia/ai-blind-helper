@@ -19,15 +19,17 @@ class GPIOKeyboardManager:
         print(f"[GPIOKeyboardManager register_key] Pin {pin} registered.")
 
     def start(self):
+        GPIO.cleanup()
+
         GPIO.setmode(GPIO.BOARD)
 
         for pin in self._pins:
+            print(f"[GPIOKeyboardManager start]: Setup for key {pin}")
             GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
             GPIO.add_event_detect(
                 pin,
                 GPIO.BOTH,
-                callback=self._on_event,
-                bouncetime=DEFAULT_DEBOUNCE_TIME,
+                callback=self._on_event
             )
 
         print(f"[GPIOKeyboardManager start] Listening on pins: {self._pins}")

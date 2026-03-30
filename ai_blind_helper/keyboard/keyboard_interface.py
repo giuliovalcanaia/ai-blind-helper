@@ -88,9 +88,10 @@ class KeyboardInterface:
 
     def _setup_bindings(self):
         print("[KeyboardInterface _setup_bindings] Binding key bindings")
-        self.keyboard_controller.register_key(self.KEY_MENU_BACK, self.on_menu_back)
-        self.keyboard_controller.register_key(self.KEY_MENU_FORWARD, self.on_menu_forward)
-        self.keyboard_controller.register_key(self.KEY_MENU_CONFIRM, self.on_menu_confirm)
+
+        self.keyboard_controller.register_key(KEY_MENU_BACK, self.on_menu_back)
+        self.keyboard_controller.register_key(KEY_MENU_FORWARD, self.on_menu_forward)
+        self.keyboard_controller.register_key(KEY_MENU_CONFIRM, self.on_menu_confirm)
 
         self.keyboard_controller.register_key(KEY_QUIT, self.handle_quit_request)
         self.keyboard_controller.register_key(KEY_TIME_REQUEST, self.on_time_request)

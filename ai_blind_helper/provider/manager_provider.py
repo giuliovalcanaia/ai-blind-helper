@@ -1,5 +1,14 @@
 from manager import *
 from config import Config
+from keyboard import *
+
+BINDS = {PIN_1_1}
+
+# BINDS = {
+#     PIN_1_1, PIN_1_2, PIN_1_3,
+#     PIN_2_1, PIN_2_2, PIN_2_3,
+#     PIN_3_1, PIN_3_2, PIN_3_3,
+# }
 
 class ManagerProvider:
     def __init__(self):
@@ -9,5 +18,5 @@ class ManagerProvider:
         self.audio_output = OutputAudioManager()
         # self.keyboard = KeyboardManager(Config.KEYBOARD_PATH)
         # To change to evdev, just replace the above line with:
-        self.keyboard = GPIOKeyboardManager()
+        self.keyboard = GPIOKeyboardManager(BINDS)
         

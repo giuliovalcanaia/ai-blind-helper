@@ -3,16 +3,10 @@ from typing import Optional
 import time
 
 class VideoRecorderApplication:
-    def __init__(self, mode: str, camera_source, screen_source):
-        print(f"[VideoRecorderApplication __init__] Initializing video application in mode: {mode}")
+    def __init__(self, camera_source):
         self.video_source: Optional[any] = None
         
-        if mode == "camera":
-            self.video_source = camera_source
-        elif mode == "screen":
-            self.video_source = screen_source
-        else:
-            print(f"[VideoRecorderApplication __init__] Error: Unknown mode '{mode}'")
+        self.video_source = camera_source
 
     async def task_capture_video(self, out_queue: asyncio.Queue, control_event: asyncio.Event):
         print("[VideoRecorderApplication task_capture_video] Starting continuous capture task")

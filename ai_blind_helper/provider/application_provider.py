@@ -13,7 +13,7 @@ class ApplicationProvider:
         self.text_client = TextClientApplication()
         self.keyboard = KeyboardApplication(keyboard_manager=manager_provider.keyboard)
         self.transcription = TranscriptionApplication()
-        self.video = VideoRecorderApplication(Config.VIDEO_MODE, manager_provider.camera, manager_provider.screen)
+        self.video = VideoRecorderApplication(manager_provider.camera)
         self.volume = VolumeControlApplication()
         self.menu = MenuApplication()
         self.sfx = AudioSFXApplication()
